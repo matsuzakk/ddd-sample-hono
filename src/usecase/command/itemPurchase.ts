@@ -17,6 +17,7 @@ import type {
   AppDatabase,
   DbClient,
 } from "../../infrastructure/database/db.js";
+import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
 
 export type Deps = {
   readonly db: AppDatabase;
@@ -35,7 +36,10 @@ export type Input = {
 /**
  * 商品を購入する
  */
-export const purchaseItem = async (deps: Deps, input: Input) => {
+export const purchaseItem = async (
+  deps: Deps,
+  input: Input,
+): Promise<OrderDto> => {
   return deps.db.transaction(async (tx) => {
     const itemRepository = deps.createItemRepository(tx);
     const orderRepository = deps.createOrderRepository(tx);
@@ -60,6 +64,14 @@ export const purchaseItem = async (deps: Deps, input: Input) => {
     await orderRepository.create(order);
     await orderHistoryRepository.create(history);
 
-    return order;
+    const result = orderDtoSchema.parse({
+      id: order.id,
+      userId: order.userId,
+      itemId: order.itemId,
+      status: order.status.toValue(),
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+    });
+    return result;
   });
 };

@@ -5,6 +5,7 @@ import type {
   AppDatabase,
   DbClient,
 } from "../../infrastructure/database/db.js";
+import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
 
 export type Deps = {
   readonly db: AppDatabase;
@@ -18,7 +19,7 @@ export type Input = {
   readonly price: number;
 };
 
-export const itemSell = async (deps: Deps, input: Input) => {
+export const itemSell = async (deps: Deps, input: Input): Promise<ItemDto> => {
   const item = Item.create(
     crypto.randomUUID(),
     input.name,
@@ -27,5 +28,16 @@ export const itemSell = async (deps: Deps, input: Input) => {
     input.sellerId,
   );
   await deps.createItemRepository(deps.db).create(item);
-  return item;
+
+  const result = itemDtoSchema.parse({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    price: item.price.toValue(),
+    status: item.status.toValue(),
+    sellerId: item.sellerId,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  });
+  return result;
 };

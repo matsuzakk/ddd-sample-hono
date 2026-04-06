@@ -11,6 +11,7 @@ import type {
   AppDatabase,
   DbClient,
 } from "../../infrastructure/database/db.js";
+import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
 
 export type Deps = {
   readonly db: AppDatabase;
@@ -24,7 +25,10 @@ export type Input = {
   readonly orderId: string;
 };
 
-export const orderDelivered = async (deps: Deps, input: Input) => {
+export const orderDelivered = async (
+  deps: Deps,
+  input: Input,
+): Promise<OrderDto> => {
   return deps.db.transaction(async (tx) => {
     const orderRepository = deps.createOrderRepository(tx);
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
@@ -51,6 +55,14 @@ export const orderDelivered = async (deps: Deps, input: Input) => {
     await orderRepository.update(updatedOrder);
     await orderHistoryRepository.create(history);
 
-    return updatedOrder;
+    const result = orderDtoSchema.parse({
+      id: updatedOrder.id,
+      userId: updatedOrder.userId,
+      itemId: updatedOrder.itemId,
+      status: updatedOrder.status.toValue(),
+      createdAt: updatedOrder.createdAt,
+      updatedAt: updatedOrder.updatedAt,
+    });
+    return result;
   });
 };

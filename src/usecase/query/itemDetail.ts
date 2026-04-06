@@ -3,6 +3,7 @@ import type {
   AppDatabase,
   DbClient,
 } from "../../infrastructure/database/db.js";
+import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
 
 export type Deps = {
   readonly db: AppDatabase;
@@ -13,6 +14,23 @@ export type Input = {
   readonly itemId: string;
 };
 
-export const itemDetail = async (deps: Deps, input: Input) => {
-  return deps.createItemRepository(deps.db).findById(input.itemId);
+export const itemDetail = async (
+  deps: Deps,
+  input: Input,
+): Promise<ItemDto | null> => {
+  const item = await deps.createItemRepository(deps.db).findById(input.itemId);
+  if (!item) {
+    return null;
+  }
+  const result = itemDtoSchema.parse({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    price: item.price.toValue(),
+    status: item.status.toValue(),
+    sellerId: item.sellerId,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  });
+  return result;
 };
