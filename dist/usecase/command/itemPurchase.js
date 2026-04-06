@@ -2,6 +2,7 @@ import { ItemStatus, ItemStatusMap, } from "../../domain/model/item/ItemStatus.j
 import { Order } from "../../domain/model/order/Order.js";
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
 import { OrderStatus, OrderStatusMap, } from "../../domain/model/order/OrderStatus.js";
+import { orderDtoSchema } from "../dto/orderDto.js";
 /**
  * 商品を購入する
  */
@@ -20,6 +21,14 @@ export const purchaseItem = async (deps, input) => {
         await itemRepository.update(updatedItem);
         await orderRepository.create(order);
         await orderHistoryRepository.create(history);
-        return order;
+        const result = orderDtoSchema.parse({
+            id: order.id,
+            userId: order.userId,
+            itemId: order.itemId,
+            status: order.status.toValue(),
+            createdAt: order.createdAt,
+            updatedAt: order.updatedAt,
+        });
+        return result;
     });
 };

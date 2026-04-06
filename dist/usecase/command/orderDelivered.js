@@ -1,5 +1,6 @@
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
 import { OrderStatus, OrderStatusMap, } from "../../domain/model/order/OrderStatus.js";
+import { orderDtoSchema } from "../dto/orderDto.js";
 export const orderDelivered = async (deps, input) => {
     return deps.db.transaction(async (tx) => {
         const orderRepository = deps.createOrderRepository(tx);
@@ -15,6 +16,14 @@ export const orderDelivered = async (deps, input) => {
         const history = OrderHistory.create(crypto.randomUUID(), order.id, order.status, OrderStatus.create(OrderStatusMap.DELIVERED));
         await orderRepository.update(updatedOrder);
         await orderHistoryRepository.create(history);
-        return updatedOrder;
+        const result = orderDtoSchema.parse({
+            id: updatedOrder.id,
+            userId: updatedOrder.userId,
+            itemId: updatedOrder.itemId,
+            status: updatedOrder.status.toValue(),
+            createdAt: updatedOrder.createdAt,
+            updatedAt: updatedOrder.updatedAt,
+        });
+        return result;
     });
 };
