@@ -19,7 +19,7 @@ import type {
 } from "../../infrastructure/database/db.js";
 import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
 
-export type Deps = {
+type Deps = {
   readonly db: AppDatabase;
   readonly createItemRepository: (client: DbClient) => IItemRepository;
   readonly createOrderRepository: (client: DbClient) => IOrderRepository;
@@ -28,7 +28,7 @@ export type Deps = {
   ) => IOrderHistoryRepository;
 };
 
-export type Input = {
+type Input = {
   readonly userId: string;
   readonly itemId: string;
 };

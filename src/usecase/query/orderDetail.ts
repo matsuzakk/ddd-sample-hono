@@ -12,7 +12,7 @@ import {
   type OrderHistoryDto,
 } from "../dto/orderHistoryDto.js";
 
-export type Deps = {
+type Deps = {
   readonly db: AppDatabase;
   readonly createOrderRepository: (client: DbClient) => IOrderRepository;
   readonly createOrderHistoryRepository: (
@@ -20,7 +20,7 @@ export type Deps = {
   ) => IOrderHistoryRepository;
 };
 
-export type Input = {
+type Input = {
   readonly orderId: string;
 };
 

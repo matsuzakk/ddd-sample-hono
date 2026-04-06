@@ -5,11 +5,11 @@ import type {
 } from "../../infrastructure/database/db.js";
 import { orderDtoSchema } from "../dto/orderDto.js";
 
-export type Input = {
+type Input = {
   readonly userId: string;
 };
 
-export type Deps = {
+type Deps = {
   readonly db: AppDatabase;
   readonly createOrderRepository: (client: DbClient) => IOrderRepository;
 };

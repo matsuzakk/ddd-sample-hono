@@ -5,7 +5,7 @@ import type {
 } from "../../infrastructure/database/db.js";
 import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
 
-export type Deps = {
+type Deps = {
   readonly db: AppDatabase;
   readonly createItemRepository: (client: DbClient) => IItemRepository;
 };

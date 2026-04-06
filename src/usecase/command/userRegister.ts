@@ -6,12 +6,12 @@ import type {
 } from "../../infrastructure/database/db.js";
 import { userDtoSchema, type UserDto } from "../dto/userDto.js";
 
-export type Deps = {
+type Deps = {
   readonly db: AppDatabase;
   readonly createUserRepository: (client: DbClient) => IUserRepository;
 };
 
-export type Input = {
+type Input = {
   readonly name: string;
   readonly email: string;
 };
