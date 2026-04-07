@@ -3,10 +3,6 @@ import type {
   IOrderRepository,
 } from "../../domain/model/order/IOrderRepository.js";
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
-import {
-  OrderStatus,
-  OrderStatusMap,
-} from "../../domain/model/order/OrderStatus.js";
 import type {
   AppDatabase,
   DbClient,
@@ -38,18 +34,11 @@ export const orderShip = async (
       throw new Error("Order not found");
     }
 
-    if (!order.status.isPurchased()) {
-      throw new Error("Order cannot be shipped");
-    }
-
-    const updatedOrder = order.changeStatus(
-      OrderStatus.create(OrderStatusMap.SHIPPED),
-    );
-    const history = OrderHistory.create(
+    const updatedOrder = order.markShipped();
+    const history = OrderHistory.recordOrderTransition(
       crypto.randomUUID(),
-      order.id,
-      order.status,
-      OrderStatus.create(OrderStatusMap.SHIPPED),
+      order,
+      updatedOrder,
     );
 
     await orderRepository.update(updatedOrder);

@@ -8,10 +8,6 @@ import type {
   IOrderRepository,
 } from "../../domain/model/order/IOrderRepository.js";
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
-import {
-  OrderStatus,
-  OrderStatusMap,
-} from "../../domain/model/order/OrderStatus.js";
 import type {
   AppDatabase,
   DbClient,
@@ -45,18 +41,11 @@ export const orderCancel = async (
       throw new Error("Order not found");
     }
 
-    if (!order.status.isPurchased()) {
-      throw new Error("Order cannot be canceled");
-    }
-
-    const updatedOrder = order.changeStatus(
-      OrderStatus.create(OrderStatusMap.CANCELED),
-    );
-    const history = OrderHistory.create(
+    const updatedOrder = order.cancel();
+    const history = OrderHistory.recordOrderTransition(
       crypto.randomUUID(),
-      order.id,
-      order.status,
-      OrderStatus.create(OrderStatusMap.CANCELED),
+      order,
+      updatedOrder,
     );
 
     const updatedItem = await itemRepository.findById(order.itemId);

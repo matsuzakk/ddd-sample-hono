@@ -1,5 +1,4 @@
 import type { Item } from "../item/Item.js";
-import type { OrderHistory } from "./OrderHistory.js";
 import { OrderStatus, OrderStatusMap } from "./OrderStatus.js";
 
 export class Order {
@@ -46,11 +45,9 @@ export class Order {
   }
 
   /**
-   * 注文の状態を変更する
-   * @param status 注文の状態
-   * @returns 注文
+   * 注文ステータスを変更する
    */
-  public changeStatus(status: OrderStatus): Order {
+  private withStatus(status: OrderStatus): Order {
     return new Order(
       this.id,
       this.userId,
@@ -59,5 +56,35 @@ export class Order {
       this.createdAt,
       new Date(),
     );
+  }
+
+  /**
+   * 購入済みの注文を発送済みにする（購入済以外は不可）
+   */
+  public markShipped(): Order {
+    if (!this.status.isPurchased()) {
+      throw new Error("Order cannot be shipped");
+    }
+    return this.withStatus(OrderStatus.create(OrderStatusMap.SHIPPED));
+  }
+
+  /**
+   * 発送済みの注文を到着済みにする（発送済以外は不可）
+   */
+  public markDelivered(): Order {
+    if (!this.status.isShipped()) {
+      throw new Error("Order cannot be delivered");
+    }
+    return this.withStatus(OrderStatus.create(OrderStatusMap.DELIVERED));
+  }
+
+  /**
+   * 購入直後の注文をキャンセルする（購入済以外は不可）
+   */
+  public cancel(): Order {
+    if (!this.status.isPurchased()) {
+      throw new Error("Order cannot be canceled");
+    }
+    return this.withStatus(OrderStatus.create(OrderStatusMap.CANCELED));
   }
 }
