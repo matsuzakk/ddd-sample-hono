@@ -3,7 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import { createItemRepository } from "../../infrastructure/database/itemRepository.js";
 import { createOrderHistoryRepository } from "../../infrastructure/database/orderHistoryRepository.js";
 import { createOrderRepository } from "../../infrastructure/database/orderRepository.js";
-import { purchaseItem } from "../../usecase/command/itemPurchase.js";
+import { orderPurchase } from "../../usecase/command/orderPurchase.js";
 import { orderCancel } from "../../usecase/command/orderCancel.js";
 import { orderDelivered } from "../../usecase/command/orderDelivered.js";
 import { orderShip } from "../../usecase/command/orderShip.js";
@@ -16,7 +16,7 @@ ordersRoute.post("/", async (c) => {
   const db = c.get("db");
   const body = await c.req.json<{ userId: string; itemId: string }>();
   try {
-    const result = await purchaseItem(
+    const result = await orderPurchase(
       {
         db,
         createItemRepository,

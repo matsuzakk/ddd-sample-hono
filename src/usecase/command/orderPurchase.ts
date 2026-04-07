@@ -32,7 +32,7 @@ type Input = {
 /**
  * 商品を購入する
  */
-export const purchaseItem = (deps: Deps, input: Input): OrderDto => {
+export const orderPurchase = (deps: Deps, input: Input): OrderDto => {
   return deps.db.transaction((tx) => {
     const itemRepository = deps.createItemRepository(tx);
     const orderRepository = deps.createOrderRepository(tx);

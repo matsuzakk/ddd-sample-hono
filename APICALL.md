@@ -2,6 +2,8 @@
 
 Base URL: `http://localhost:3000`
 
+JSON のレスポンスはすべて `| jq` で整形しています。[jq](https://jqlang.org/) が未インストールの場合は `brew install jq` などで入れてください（`GET /` はプレーンテキストのため `jq` なし）。
+
 ## Users (`/users`)
 
 ### Register user
@@ -11,7 +13,7 @@ Base URL: `http://localhost:3000`
 ```bash
 curl -sS -X POST "http://localhost:3000/users" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Bob","email":"bob@example.com"}'
+  -d '{"name":"Bob","email":"bob@example.com"}' | jq
 ```
 
 ### List items sold by user (my listings)
@@ -19,7 +21,7 @@ curl -sS -X POST "http://localhost:3000/users" \
 `GET /users/:userId/items`
 
 ```bash
-curl -sS "http://localhost:3000/users/USER_ID_HERE/items"
+curl -sS "http://localhost:3000/users/USER_ID_HERE/items" | jq
 ```
 
 ### List orders for user (purchases as buyer)
@@ -27,7 +29,7 @@ curl -sS "http://localhost:3000/users/USER_ID_HERE/items"
 `GET /users/:userId/orders`
 
 ```bash
-curl -sS "http://localhost:3000/users/USER_ID_HERE/orders"
+curl -sS "http://localhost:3000/users/USER_ID_HERE/orders" | jq
 ```
 
 ## Items (`/items`)
@@ -39,7 +41,7 @@ curl -sS "http://localhost:3000/users/USER_ID_HERE/orders"
 ```bash
 curl -sS -X POST "http://localhost:3000/items" \
   -H "Content-Type: application/json" \
-  -d '{"sellerId":"SELLER_USER_ID","name":"Used book","description":"Good condition","price":1200}'
+  -d '{"sellerId":"SELLER_USER_ID","name":"Used book","description":"Good condition","price":1200}' | jq
 ```
 
 ### List all items
@@ -47,7 +49,7 @@ curl -sS -X POST "http://localhost:3000/items" \
 `GET /items`
 
 ```bash
-curl -sS "http://localhost:3000/items"
+curl -sS "http://localhost:3000/items" | jq
 ```
 
 ### Get item detail
@@ -55,7 +57,7 @@ curl -sS "http://localhost:3000/items"
 `GET /items/:itemId`
 
 ```bash
-curl -sS "http://localhost:3000/items/ITEM_ID_HERE"
+curl -sS "http://localhost:3000/items/ITEM_ID_HERE" | jq
 ```
 
 ## Orders (`/orders`)
@@ -67,7 +69,7 @@ curl -sS "http://localhost:3000/items/ITEM_ID_HERE"
 ```bash
 curl -sS -X POST "http://localhost:3000/orders" \
   -H "Content-Type: application/json" \
-  -d '{"userId":"BUYER_USER_ID","itemId":"ITEM_ID_HERE"}'
+  -d '{"userId":"BUYER_USER_ID","itemId":"ITEM_ID_HERE"}' | jq
 ```
 
 ### Cancel order (purchased only)
@@ -75,7 +77,7 @@ curl -sS -X POST "http://localhost:3000/orders" \
 `PUT /orders/:orderId/cancel`
 
 ```bash
-curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/cancel"
+curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/cancel" | jq
 ```
 
 ### Mark shipped
@@ -83,7 +85,7 @@ curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/cancel"
 `PUT /orders/:orderId/ship`
 
 ```bash
-curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/ship"
+curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/ship" | jq
 ```
 
 ### Mark delivered
@@ -91,7 +93,7 @@ curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/ship"
 `PUT /orders/:orderId/deliver`
 
 ```bash
-curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/deliver"
+curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/deliver" | jq
 ```
 
 ### Order detail + status histories
@@ -99,12 +101,12 @@ curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/deliver"
 `GET /orders/:orderId`
 
 ```bash
-curl -sS "http://localhost:3000/orders/ORDER_ID_HERE"
+curl -sS "http://localhost:3000/orders/ORDER_ID_HERE" | jq
 ```
 
 ## Root
 
-`GET /`
+`GET /`（JSON ではないため `jq` なし）
 
 ```bash
 curl -sS "http://localhost:3000/"
