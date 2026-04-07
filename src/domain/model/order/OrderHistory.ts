@@ -5,7 +5,7 @@ export class OrderHistory {
   private constructor(
     public readonly id: string,
     public readonly orderId: string,
-    public readonly fromStatus: OrderStatus,
+    public readonly fromStatus: OrderStatus | null,
     public readonly toStatus: OrderStatus,
     public readonly createdAt: Date,
   ) {}
@@ -13,7 +13,7 @@ export class OrderHistory {
   public static create(
     id: string,
     orderId: string,
-    fromStatus: OrderStatus,
+    fromStatus: OrderStatus | null,
     toStatus: OrderStatus,
   ): OrderHistory {
     return new OrderHistory(id, orderId, fromStatus, toStatus, new Date());
@@ -22,7 +22,7 @@ export class OrderHistory {
   public static reconstitute(
     id: string,
     orderId: string,
-    fromStatus: OrderStatus,
+    fromStatus: OrderStatus | null,
     toStatus: OrderStatus,
     createdAt: Date,
   ): OrderHistory {

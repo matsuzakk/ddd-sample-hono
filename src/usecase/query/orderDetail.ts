@@ -50,7 +50,7 @@ export const orderDetail = async (
     orderHistoryDtoSchema.parse({
       id: history.id,
       orderId: history.orderId,
-      fromStatus: history.fromStatus.toValue(),
+      fromStatus: history.fromStatus?.toValue() ?? null,
       toStatus: history.toStatus.toValue(),
       createdAt: history.createdAt,
     }),

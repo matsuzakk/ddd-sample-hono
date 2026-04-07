@@ -29,7 +29,7 @@ export const orders = sqliteTable("orders", {
 export const orderHistories = sqliteTable("order_histories", {
   id: text("id").primaryKey(),
   orderId: text("order_id").notNull(),
-  fromStatus: integer("from_status").notNull(),
+  fromStatus: integer("from_status"),
   toStatus: integer("to_status").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });

@@ -10,7 +10,7 @@ export const orderStatusValueSchema = z.union([
 export const orderHistoryDtoSchema = z.object({
   id: z.string().min(1),
   orderId: z.string().min(1),
-  fromStatus: orderStatusValueSchema,
+  fromStatus: orderStatusValueSchema.nullable(),
   toStatus: orderStatusValueSchema,
   createdAt: z.coerce.date(),
 });

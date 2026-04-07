@@ -12,7 +12,10 @@ export const createOrderHistoryRepository = (
     await db.insert(orderHistories).values({
       id: orderHistory.id,
       orderId: orderHistory.orderId,
-      fromStatus: orderHistory.fromStatus.toValue(),
+      fromStatus:
+        orderHistory.fromStatus !== null
+          ? orderHistory.fromStatus.toValue()
+          : null,
       toStatus: orderHistory.toStatus.toValue(),
       createdAt: orderHistory.createdAt,
     });
@@ -26,7 +29,9 @@ export const createOrderHistoryRepository = (
       OrderHistory.reconstitute(
         row.id,
         row.orderId,
-        OrderStatus.reconstitute(row.fromStatus),
+        row.fromStatus == null
+          ? null
+          : OrderStatus.reconstitute(row.fromStatus),
         OrderStatus.reconstitute(row.toStatus),
         row.createdAt,
       ),

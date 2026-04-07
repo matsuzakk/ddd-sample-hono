@@ -9,10 +9,6 @@ import type {
 } from "../../domain/model/order/IOrderRepository.js";
 import { Order } from "../../domain/model/order/Order.js";
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
-import {
-  OrderStatus,
-  OrderStatusMap,
-} from "../../domain/model/order/OrderStatus.js";
 import type {
   AppDatabase,
   DbClient,
@@ -56,8 +52,8 @@ export const purchaseItem = async (
     const history = OrderHistory.create(
       crypto.randomUUID(),
       order.id,
+      null,
       order.status,
-      OrderStatus.create(OrderStatusMap.PURCHASED),
     );
 
     await itemRepository.update(updatedItem);
