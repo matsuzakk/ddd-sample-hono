@@ -8,23 +8,26 @@ import { orderHistories } from "./schema.js";
 export const createOrderHistoryRepository = (
   db: DbClient,
 ): IOrderHistoryRepository => ({
-  create: async (orderHistory: OrderHistory) => {
-    await db.insert(orderHistories).values({
-      id: orderHistory.id,
-      orderId: orderHistory.orderId,
-      fromStatus:
-        orderHistory.fromStatus !== null
-          ? orderHistory.fromStatus.toValue()
-          : null,
-      toStatus: orderHistory.toStatus.toValue(),
-      createdAt: orderHistory.createdAt,
-    });
+  create: (orderHistory: OrderHistory) => {
+    db.insert(orderHistories)
+      .values({
+        id: orderHistory.id,
+        orderId: orderHistory.orderId,
+        fromStatus:
+          orderHistory.fromStatus !== null
+            ? orderHistory.fromStatus.toValue()
+            : null,
+        toStatus: orderHistory.toStatus.toValue(),
+        createdAt: orderHistory.createdAt,
+      })
+      .run();
   },
-  findByOrderId: async (orderId: string) => {
-    const rows = await db
+  findByOrderId: (orderId: string) => {
+    const rows = db
       .select()
       .from(orderHistories)
-      .where(eq(orderHistories.orderId, orderId));
+      .where(eq(orderHistories.orderId, orderId))
+      .all();
     return rows.map((row) =>
       OrderHistory.reconstitute(
         row.id,

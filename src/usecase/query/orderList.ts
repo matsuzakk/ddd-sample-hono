@@ -14,8 +14,8 @@ type Deps = {
   readonly createOrderRepository: (client: DbClient) => IOrderRepository;
 };
 
-export const orderList = async (deps: Deps, input: Input) => {
-  const orders = await deps
+export const orderList = (deps: Deps, input: Input) => {
+  const orders = deps
     .createOrderRepository(deps.db)
     .findByUserId(input.userId);
 

@@ -8,20 +8,22 @@ import type { DbClient } from "./db.js";
 import { items } from "./schema.js";
 
 export const createItemRepository = (db: DbClient): IItemRepository => ({
-  create: async (item: Item) => {
-    await db.insert(items).values({
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      price: item.price.toValue(),
-      status: item.status.toValue(),
-      sellerId: item.sellerId,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
-    });
+  create: (item: Item) => {
+    db.insert(items)
+      .values({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price.toValue(),
+        status: item.status.toValue(),
+        sellerId: item.sellerId,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      })
+      .run();
   },
-  findAll: async () => {
-    const rows = await db.select().from(items);
+  findAll: () => {
+    const rows = db.select().from(items).all();
     return rows.map((row) =>
       Item.reconstitute(
         row.id,
@@ -35,8 +37,8 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
       ),
     );
   },
-  findById: async (id: string) => {
-    const rows = await db.select().from(items).where(eq(items.id, id)).limit(1);
+  findById: (id: string) => {
+    const rows = db.select().from(items).where(eq(items.id, id)).limit(1).all();
     const row = rows[0];
 
     if (!row) {
@@ -53,11 +55,12 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
       row.updatedAt,
     );
   },
-  findBySellerId: async (sellerId: string) => {
-    const rows = await db
+  findBySellerId: (sellerId: string) => {
+    const rows = db
       .select()
       .from(items)
-      .where(eq(items.sellerId, sellerId));
+      .where(eq(items.sellerId, sellerId))
+      .all();
     return rows.map((row) =>
       Item.reconstitute(
         row.id,
@@ -71,9 +74,8 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
       ),
     );
   },
-  update: async (item: Item) => {
-    await db
-      .update(items)
+  update: (item: Item) => {
+    db.update(items)
       .set({
         name: item.name,
         description: item.description,
@@ -82,7 +84,8 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
         sellerId: item.sellerId,
         updatedAt: item.updatedAt,
       })
-      .where(eq(items.id, item.id));
+      .where(eq(items.id, item.id))
+      .run();
   },
 });
 

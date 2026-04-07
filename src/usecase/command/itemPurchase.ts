@@ -32,16 +32,13 @@ type Input = {
 /**
  * 商品を購入する
  */
-export const purchaseItem = async (
-  deps: Deps,
-  input: Input,
-): Promise<OrderDto> => {
-  return deps.db.transaction(async (tx) => {
+export const purchaseItem = (deps: Deps, input: Input): OrderDto => {
+  return deps.db.transaction((tx) => {
     const itemRepository = deps.createItemRepository(tx);
     const orderRepository = deps.createOrderRepository(tx);
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
 
-    const item = await itemRepository.findById(input.itemId);
+    const item = itemRepository.findById(input.itemId);
     if (!item || !item.isSellable()) {
       throw new Error("Item not found");
     }
@@ -56,11 +53,11 @@ export const purchaseItem = async (
       order.status,
     );
 
-    await itemRepository.update(updatedItem);
-    await orderRepository.create(order);
-    await orderHistoryRepository.create(history);
+    itemRepository.update(updatedItem);
+    orderRepository.create(order);
+    orderHistoryRepository.create(history);
 
-    const result = orderDtoSchema.parse({
+    return orderDtoSchema.parse({
       id: order.id,
       userId: order.userId,
       itemId: order.itemId,
@@ -68,6 +65,5 @@ export const purchaseItem = async (
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
     });
-    return result;
   });
 };

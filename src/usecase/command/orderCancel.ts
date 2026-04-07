@@ -27,16 +27,13 @@ type Input = {
   readonly orderId: string;
 };
 
-export const orderCancel = async (
-  deps: Deps,
-  input: Input,
-): Promise<OrderDto> => {
-  return deps.db.transaction(async (tx) => {
+export const orderCancel = (deps: Deps, input: Input): OrderDto => {
+  return deps.db.transaction((tx) => {
     const itemRepository = deps.createItemRepository(tx);
     const orderRepository = deps.createOrderRepository(tx);
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
 
-    const order = await orderRepository.findById(input.orderId);
+    const order = orderRepository.findById(input.orderId);
     if (!order) {
       throw new Error("Order not found");
     }
@@ -48,7 +45,7 @@ export const orderCancel = async (
       updatedOrder,
     );
 
-    const updatedItem = await itemRepository.findById(order.itemId);
+    const updatedItem = itemRepository.findById(order.itemId);
     if (!updatedItem) {
       throw new Error("Item not found");
     }
@@ -56,11 +53,11 @@ export const orderCancel = async (
       ItemStatus.create(ItemStatusMap.SELLABLE),
     );
 
-    await orderRepository.update(updatedOrder);
-    await orderHistoryRepository.create(history);
-    await itemRepository.update(updatedUpdatedItem);
+    orderRepository.update(updatedOrder);
+    orderHistoryRepository.create(history);
+    itemRepository.update(updatedUpdatedItem);
 
-    const result = orderDtoSchema.parse({
+    return orderDtoSchema.parse({
       id: updatedOrder.id,
       userId: updatedOrder.userId,
       itemId: updatedOrder.itemId,
@@ -68,6 +65,5 @@ export const orderCancel = async (
       createdAt: updatedOrder.createdAt,
       updatedAt: updatedOrder.updatedAt,
     });
-    return result;
   });
 };

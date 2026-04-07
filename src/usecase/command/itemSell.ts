@@ -19,7 +19,7 @@ type Input = {
   readonly price: number;
 };
 
-export const itemSell = async (deps: Deps, input: Input): Promise<ItemDto> => {
+export const itemSell = (deps: Deps, input: Input): ItemDto => {
   const item = Item.create(
     crypto.randomUUID(),
     input.name,
@@ -27,7 +27,7 @@ export const itemSell = async (deps: Deps, input: Input): Promise<ItemDto> => {
     ItemPrice.create(input.price),
     input.sellerId,
   );
-  await deps.createItemRepository(deps.db).create(item);
+  deps.createItemRepository(deps.db).create(item);
 
   const result = itemDtoSchema.parse({
     id: item.id,

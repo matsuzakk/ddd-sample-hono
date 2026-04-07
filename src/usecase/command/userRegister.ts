@@ -19,12 +19,9 @@ type Input = {
 /**
  * ユーザーを登録
  */
-export const registerUser = async (
-  deps: Deps,
-  input: Input,
-): Promise<UserDto> => {
+export const registerUser = (deps: Deps, input: Input): UserDto => {
   const user = User.create(crypto.randomUUID(), input.name, input.email);
-  await deps.createUserRepository(deps.db).create(user);
+  deps.createUserRepository(deps.db).create(user);
 
   const result = userDtoSchema.parse({
     id: user.id,

@@ -6,21 +6,20 @@ import type { DbClient } from "./db.js";
 import { orders } from "./schema.js";
 
 export const createOrderRepository = (db: DbClient): IOrderRepository => ({
-  create: async (order: Order) => {
-    await db.insert(orders).values({
-      id: order.id,
-      userId: order.userId,
-      itemId: order.itemId,
-      status: order.status.toValue(),
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt,
-    });
+  create: (order: Order) => {
+    db.insert(orders)
+      .values({
+        id: order.id,
+        userId: order.userId,
+        itemId: order.itemId,
+        status: order.status.toValue(),
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+      })
+      .run();
   },
-  findByUserId: async (userId: string) => {
-    const rows = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.userId, userId));
+  findByUserId: (userId: string) => {
+    const rows = db.select().from(orders).where(eq(orders.userId, userId)).all();
     return rows.map((row) =>
       Order.reconstitute(
         row.id,
@@ -32,12 +31,13 @@ export const createOrderRepository = (db: DbClient): IOrderRepository => ({
       ),
     );
   },
-  findById: async (id: string) => {
-    const rows = await db
+  findById: (id: string) => {
+    const rows = db
       .select()
       .from(orders)
       .where(eq(orders.id, id))
-      .limit(1);
+      .limit(1)
+      .all();
     const row = rows[0];
     if (!row) {
       return null;
@@ -51,13 +51,13 @@ export const createOrderRepository = (db: DbClient): IOrderRepository => ({
       row.updatedAt,
     );
   },
-  update: async (order: Order) => {
-    await db
-      .update(orders)
+  update: (order: Order) => {
+    db.update(orders)
       .set({
         status: order.status.toValue(),
         updatedAt: order.updatedAt,
       })
-      .where(eq(orders.id, order.id));
+      .where(eq(orders.id, order.id))
+      .run();
   },
 });

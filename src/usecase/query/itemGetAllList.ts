@@ -10,8 +10,8 @@ type Deps = {
   readonly createItemRepository: (client: DbClient) => IItemRepository;
 };
 
-export const itemGetAllList = async (deps: Deps): Promise<ItemDto[]> => {
-  const items = await deps.createItemRepository(deps.db).findAll();
+export const itemGetAllList = (deps: Deps): ItemDto[] => {
+  const items = deps.createItemRepository(deps.db).findAll();
 
   const result = items.map((item) =>
     itemDtoSchema.parse({

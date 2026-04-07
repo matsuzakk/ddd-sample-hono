@@ -5,17 +5,19 @@ import type { DbClient } from "./db.js";
 import { users } from "./schema.js";
 
 export const createUserRepository = (db: DbClient): IUserRepository => ({
-  create: async (user: User) => {
-    await db.insert(users).values({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    });
+  create: (user: User) => {
+    db.insert(users)
+      .values({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      })
+      .run();
   },
-  update: async (user: User) => {
-    await db
-      .update(users)
+  update: (user: User) => {
+    db.update(users)
       .set({ name: user.name, email: user.email })
-      .where(eq(users.id, user.id));
+      .where(eq(users.id, user.id))
+      .run();
   },
 });

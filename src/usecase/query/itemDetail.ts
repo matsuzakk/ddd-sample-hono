@@ -14,11 +14,8 @@ type Input = {
   readonly itemId: string;
 };
 
-export const itemDetail = async (
-  deps: Deps,
-  input: Input,
-): Promise<ItemDto | null> => {
-  const item = await deps.createItemRepository(deps.db).findById(input.itemId);
+export const itemDetail = (deps: Deps, input: Input): ItemDto | null => {
+  const item = deps.createItemRepository(deps.db).findById(input.itemId);
   if (!item) {
     return null;
   }

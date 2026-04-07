@@ -29,3 +29,6 @@ lerna-debug.log*
 
 # sqlite (local)
 data/
+
+# dist
+dist/

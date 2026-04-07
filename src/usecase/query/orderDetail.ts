@@ -24,13 +24,11 @@ export type Input = {
   readonly orderId: string;
 };
 
-export const orderDetail = async (
+export const orderDetail = (
   deps: Deps,
   input: Input,
-): Promise<{ order: OrderDto | null; histories: OrderHistoryDto[] }> => {
-  const order = await deps
-    .createOrderRepository(deps.db)
-    .findById(input.orderId);
+): { order: OrderDto | null; histories: OrderHistoryDto[] } => {
+  const order = deps.createOrderRepository(deps.db).findById(input.orderId);
   if (!order) {
     return { order: null, histories: [] };
   }
@@ -43,7 +41,7 @@ export const orderDetail = async (
     updatedAt: order.updatedAt,
   });
 
-  const histories = await deps
+  const histories = deps
     .createOrderHistoryRepository(deps.db)
     .findByOrderId(input.orderId);
   const historiesResult = histories.map((history) =>

@@ -14,11 +14,8 @@ type Input = {
   readonly sellerId: string;
 };
 
-export const itemSellList = async (
-  deps: Deps,
-  input: Input,
-): Promise<ItemDto[]> => {
-  const items = await deps
+export const itemSellList = (deps: Deps, input: Input): ItemDto[] => {
+  const items = deps
     .createItemRepository(deps.db)
     .findBySellerId(input.sellerId);
 

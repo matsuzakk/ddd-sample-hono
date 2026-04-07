@@ -21,15 +21,12 @@ type Input = {
   readonly orderId: string;
 };
 
-export const orderShip = async (
-  deps: Deps,
-  input: Input,
-): Promise<OrderDto> => {
-  return deps.db.transaction(async (tx) => {
+export const orderShip = (deps: Deps, input: Input): OrderDto => {
+  return deps.db.transaction((tx) => {
     const orderRepository = deps.createOrderRepository(tx);
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
 
-    const order = await orderRepository.findById(input.orderId);
+    const order = orderRepository.findById(input.orderId);
     if (!order) {
       throw new Error("Order not found");
     }
@@ -41,10 +38,10 @@ export const orderShip = async (
       updatedOrder,
     );
 
-    await orderRepository.update(updatedOrder);
-    await orderHistoryRepository.create(history);
+    orderRepository.update(updatedOrder);
+    orderHistoryRepository.create(history);
 
-    const result = orderDtoSchema.parse({
+    return orderDtoSchema.parse({
       id: updatedOrder.id,
       userId: updatedOrder.userId,
       itemId: updatedOrder.itemId,
@@ -52,6 +49,5 @@ export const orderShip = async (
       createdAt: updatedOrder.createdAt,
       updatedAt: updatedOrder.updatedAt,
     });
-    return result;
   });
 };
