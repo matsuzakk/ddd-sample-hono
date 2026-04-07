@@ -1,74 +1,60 @@
+import type { Brand } from "../shared/brand.js";
+
 export const OrderStatusMap = {
   PURCHASED: 0,
   SHIPPED: 1,
   DELIVERED: 2,
   CANCELED: 3,
 } as const;
+
 export type OrderStatusType =
   (typeof OrderStatusMap)[keyof typeof OrderStatusMap];
 
-export class OrderStatus {
-  private constructor(public readonly status: OrderStatusType) {}
+export type OrderStatus = Brand<OrderStatusType, "OrderStatus">;
 
+const ORDER_STATUS_VALUES: ReadonlySet<number> = new Set([
+  OrderStatusMap.PURCHASED,
+  OrderStatusMap.SHIPPED,
+  OrderStatusMap.DELIVERED,
+  OrderStatusMap.CANCELED,
+]);
+
+export const OrderStatus = {
   /**
-   *
-   * @param status 0: 購入済,　1: 発送済, 2: 到着済, 3: キャンセル
-   * @returns
+   * 0: 購入済, 1: 発送済, 2: 到着済, 3: キャンセル
    */
-  public static create(status: OrderStatusType): OrderStatus {
-    return new OrderStatus(status);
-  }
+  create(value: OrderStatusType): OrderStatus {
+    return value as OrderStatus;
+  },
 
-  /** DB 等の保存値（整数）から復元する */
-  public static reconstitute(value: number): OrderStatus {
-    if (
-      value !== OrderStatusMap.PURCHASED &&
-      value !== OrderStatusMap.SHIPPED &&
-      value !== OrderStatusMap.DELIVERED &&
-      value !== OrderStatusMap.CANCELED
-    ) {
+  reconstitute(value: number): OrderStatus {
+    if (!ORDER_STATUS_VALUES.has(value)) {
       throw new Error(`Invalid order status: ${value}`);
     }
-    return new OrderStatus(value);
-  }
+    return value as OrderStatus;
+  },
 
-  /**
-   * 注文の状態を数値に変換する
-   * @returns 注文の状態を数値に変換する
-   */
-  public toValue(): number {
-    return this.status;
-  }
+  toValue(status: OrderStatus): number {
+    return status as number;
+  },
 
-  /**
-   * 注文が購入済みかどうかを返す
-   * @returns 注文が購入済みかどうか
-   */
-  public isPurchased(): boolean {
-    return this.status === OrderStatusMap.PURCHASED;
-  }
+  equals(a: OrderStatus, b: OrderStatus): boolean {
+    return a === b;
+  },
 
-  /**
-   * 注文が発送済みかどうかを返す
-   * @returns 注文が発送済みかどうか
-   */
-  public isShipped(): boolean {
-    return this.status === OrderStatusMap.SHIPPED;
-  }
+  isPurchased(status: OrderStatus): boolean {
+    return (status as OrderStatusType) === OrderStatusMap.PURCHASED;
+  },
 
-  /**
-   * 注文が到着済みかどうかを返す
-   * @returns 注文が到着済みかどうか
-   */
-  public isDelivered(): boolean {
-    return this.status === OrderStatusMap.DELIVERED;
-  }
+  isShipped(status: OrderStatus): boolean {
+    return (status as OrderStatusType) === OrderStatusMap.SHIPPED;
+  },
 
-  /**
-   * 注文がキャンセルされているかどうかを返す
-   * @returns 注文がキャンセルされているかどうか
-   */
-  public isCanceled(): boolean {
-    return this.status === OrderStatusMap.CANCELED;
-  }
-}
+  isDelivered(status: OrderStatus): boolean {
+    return (status as OrderStatusType) === OrderStatusMap.DELIVERED;
+  },
+
+  isCanceled(status: OrderStatus): boolean {
+    return (status as OrderStatusType) === OrderStatusMap.CANCELED;
+  },
+} as const;

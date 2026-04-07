@@ -15,9 +15,9 @@ export const createOrderHistoryRepository = (
         orderId: orderHistory.orderId,
         fromStatus:
           orderHistory.fromStatus !== null
-            ? orderHistory.fromStatus.toValue()
+            ? OrderStatus.toValue(orderHistory.fromStatus)
             : null,
-        toStatus: orderHistory.toStatus.toValue(),
+        toStatus: OrderStatus.toValue(orderHistory.toStatus),
         createdAt: orderHistory.createdAt,
       })
       .run();

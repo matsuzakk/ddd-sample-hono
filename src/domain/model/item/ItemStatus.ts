@@ -1,52 +1,46 @@
+import type { Brand } from "../shared/brand.js";
+
 export const ItemStatusMap = {
   SELLABLE: 0,
   PURCHASED: 1,
 } as const;
-type ItemStatusType = (typeof ItemStatusMap)[keyof typeof ItemStatusMap];
-/**
- * 商品の状態
- *
- * 0: 出品中
- * 1: 購入済
- */
-export class ItemStatus {
-  private constructor(public readonly status: ItemStatusType) {}
 
-  public static create(status: ItemStatusType): ItemStatus {
-    return new ItemStatus(status);
-  }
+export type ItemStatusType =
+  (typeof ItemStatusMap)[keyof typeof ItemStatusMap];
 
-  /**
-   * DBモデルから復元する
-   */
-  public static reconstitute(value: number): ItemStatus {
-    if (value !== ItemStatusMap.SELLABLE && value !== ItemStatusMap.PURCHASED) {
+/** 商品の状態（0: 出品中, 1: 購入済） */
+export type ItemStatus = Brand<ItemStatusType, "ItemStatus">;
+
+const ITEM_STATUS_VALUES: ReadonlySet<number> = new Set([
+  ItemStatusMap.SELLABLE,
+  ItemStatusMap.PURCHASED,
+]);
+
+export const ItemStatus = {
+  create(value: ItemStatusType): ItemStatus {
+    return value as ItemStatus;
+  },
+
+  reconstitute(value: number): ItemStatus {
+    if (!ITEM_STATUS_VALUES.has(value)) {
       throw new Error(`Invalid item status: ${value}`);
     }
-    return new ItemStatus(value);
-  }
+    return value as ItemStatus;
+  },
 
-  /**
-   * 商品の状態を数値に変換する
-   * @returns 商品の状態を数値に変換する
-   */
-  public toValue(): number {
-    return this.status;
-  }
+  toValue(status: ItemStatus): number {
+    return status as number;
+  },
 
-  /**
-   * 商品が購入済みかどうかを返す
-   * @returns 商品が購入済みかどうか
-   */
-  public isPurchased(): boolean {
-    return this.status === ItemStatusMap.PURCHASED;
-  }
+  equals(a: ItemStatus, b: ItemStatus): boolean {
+    return a === b;
+  },
 
-  /**
-   * 商品が出品中かどうかを返す
-   * @returns 商品が出品中かどうか
-   */
-  public isSellable(): boolean {
-    return this.status === ItemStatusMap.SELLABLE;
-  }
-}
+  isPurchased(status: ItemStatus): boolean {
+    return (status as ItemStatusType) === ItemStatusMap.PURCHASED;
+  },
+
+  isSellable(status: ItemStatus): boolean {
+    return (status as ItemStatusType) === ItemStatusMap.SELLABLE;
+  },
+} as const;

@@ -2,7 +2,9 @@ import type {
   IOrderHistoryRepository,
   IOrderRepository,
 } from "../../domain/model/order/IOrderRepository.js";
+import { Order } from "../../domain/model/order/Order.js";
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
+import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
 import type {
   AppDatabase,
   DbClient,
@@ -31,8 +33,8 @@ export const orderDelivered = (deps: Deps, input: Input): OrderDto => {
       throw new Error("Order not found");
     }
 
-    const updatedOrder = order.markDelivered();
-    const history = OrderHistory.recordOrderTransition(
+    const updatedOrder = Order.markDelivered(order);
+    const history = OrderHistory.recordTransition(
       crypto.randomUUID(),
       order,
       updatedOrder,
@@ -45,7 +47,7 @@ export const orderDelivered = (deps: Deps, input: Input): OrderDto => {
       id: updatedOrder.id,
       userId: updatedOrder.userId,
       itemId: updatedOrder.itemId,
-      status: updatedOrder.status.toValue(),
+      status: OrderStatus.toValue(updatedOrder.status),
       createdAt: updatedOrder.createdAt,
       updatedAt: updatedOrder.updatedAt,
     });

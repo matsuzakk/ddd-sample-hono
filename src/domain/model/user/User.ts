@@ -1,59 +1,67 @@
-export class User {
-  private constructor(
-    public readonly id: string,
-    public readonly name: string,
-    public readonly email: string,
-  ) {}
+import type { Brand } from "../shared/brand.js";
 
-  public static create(id: string, name: string, email: string): User {
-    if (!User.isValidName(name)) {
-      throw new Error("名前は1文字以上20文字以下でなければなりません");
-    }
-    if (!User.isValidEmail(email)) {
+export type Email = Brand<string, "Email">;
+
+export const Email = {
+  create(value: string): Email {
+    if (!Email.isValid(value)) {
       throw new Error("メールアドレスは有効でなければなりません");
     }
-    return new User(id, name, email);
-  }
+    return value as Email;
+  },
 
-  /**
-   * ユーザーの名前を変更する
-   * @param name ユーザーの名前
-   * @returns ユーザー
-   */
-  public changeName(name: string): User {
-    if (!User.isValidName(name)) {
-      throw new Error("名前は1文字以上20文字以下でなければなりません");
-    }
-    return new User(this.id, name, this.email);
-  }
+  isValid(value: string): boolean {
+    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
+  },
 
-  /**
-   * ユーザーのメールアドレスを変更する
-   * @param email ユーザーのメールアドレス
-   * @returns ユーザー
-   */
-  public changeEmail(email: string): User {
-    if (!User.isValidEmail(email)) {
-      throw new Error("メールアドレスは有効でなければなりません");
-    }
-    return new User(this.id, this.name, email);
-  }
+  toValue(email: Email): string {
+    return email as string;
+  },
 
-  /**
-   * ユーザーの名前が有効かどうかを返す
-   * @param name ユーザーの名前
-   * @returns ユーザーの名前が有効かどうか
-   */
-  private static isValidName(name: string): boolean {
-    return name.length >= 1 && name.length <= 20;
-  }
+  equals(a: Email, b: Email): boolean {
+    return a === b;
+  },
+} as const;
 
-  /**
-   * ユーザーのメールアドレスが有効かどうかを返す
-   * @param email ユーザーのメールアドレス
-   * @returns ユーザーのメールアドレスが有効かどうか
-   */
-  private static isValidEmail(email: string): boolean {
-    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-  }
+export type User = {
+  readonly id: string;
+  readonly name: string;
+  readonly email: Email;
+};
+
+function isValidName(name: string): boolean {
+  return name.length >= 1 && name.length <= 20;
 }
+
+export const User = {
+  create(id: string, name: string, email: string): User {
+    if (!isValidName(name)) {
+      throw new Error("名前は1文字以上20文字以下でなければなりません");
+    }
+    return {
+      id,
+      name,
+      email: Email.create(email),
+    };
+  },
+
+  /** DB から復元（不整合なら Email で検証エラー） */
+  reconstitute(id: string, name: string, email: string): User {
+    return {
+      id,
+      name,
+      email: Email.create(email),
+    };
+  },
+
+  changeName(user: User, name: string): User {
+    if (!isValidName(name)) {
+      throw new Error("名前は1文字以上20文字以下でなければなりません");
+    }
+    return { ...user, name };
+  },
+
+  changeEmail(user: User, email: string): User {
+    return { ...user, email: Email.create(email) };
+  },
+} as const;

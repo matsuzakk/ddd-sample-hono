@@ -1,5 +1,5 @@
 import type { IUserRepository } from "../../domain/model/user/IUserRepository.js";
-import { User } from "../../domain/model/user/User.js";
+import { Email, User } from "../../domain/model/user/User.js";
 import type {
   AppDatabase,
   DbClient,
@@ -26,7 +26,7 @@ export const registerUser = (deps: Deps, input: Input): UserDto => {
   const result = userDtoSchema.parse({
     id: user.id,
     name: user.name,
-    email: user.email,
+    email: Email.toValue(user.email),
   });
   return result;
 };

@@ -12,7 +12,7 @@ export const createOrderRepository = (db: DbClient): IOrderRepository => ({
         id: order.id,
         userId: order.userId,
         itemId: order.itemId,
-        status: order.status.toValue(),
+        status: OrderStatus.toValue(order.status),
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
       })
@@ -54,7 +54,7 @@ export const createOrderRepository = (db: DbClient): IOrderRepository => ({
   update: (order: Order) => {
     db.update(orders)
       .set({
-        status: order.status.toValue(),
+        status: OrderStatus.toValue(order.status),
         updatedAt: order.updatedAt,
       })
       .where(eq(orders.id, order.id))

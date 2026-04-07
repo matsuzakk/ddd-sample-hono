@@ -1,4 +1,5 @@
 import type { IOrderRepository } from "../../domain/model/order/IOrderRepository.js";
+import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
 import type {
   AppDatabase,
   DbClient,
@@ -24,7 +25,7 @@ export const orderList = (deps: Deps, input: Input) => {
       id: order.id,
       userId: order.userId,
       itemId: order.itemId,
-      status: order.status.toValue(),
+      status: OrderStatus.toValue(order.status),
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
     }),

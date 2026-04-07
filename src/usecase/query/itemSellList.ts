@@ -1,4 +1,6 @@
 import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
+import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
+import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
 import type {
   AppDatabase,
   DbClient,
@@ -24,8 +26,8 @@ export const itemSellList = (deps: Deps, input: Input): ItemDto[] => {
       id: item.id,
       name: item.name,
       description: item.description,
-      price: item.price.toValue(),
-      status: item.status.toValue(),
+      price: ItemPrice.toValue(item.price),
+      status: ItemStatus.toValue(item.status),
       sellerId: item.sellerId,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,

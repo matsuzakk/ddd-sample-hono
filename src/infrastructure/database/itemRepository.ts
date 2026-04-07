@@ -14,8 +14,8 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
         id: item.id,
         name: item.name,
         description: item.description,
-        price: item.price.toValue(),
-        status: item.status.toValue(),
+        price: ItemPrice.toValue(item.price),
+        status: ItemStatus.toValue(item.status),
         sellerId: item.sellerId,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
@@ -79,8 +79,8 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
       .set({
         name: item.name,
         description: item.description,
-        price: item.price.toValue(),
-        status: item.status.toValue(),
+        price: ItemPrice.toValue(item.price),
+        status: ItemStatus.toValue(item.status),
         sellerId: item.sellerId,
         updatedAt: item.updatedAt,
       })

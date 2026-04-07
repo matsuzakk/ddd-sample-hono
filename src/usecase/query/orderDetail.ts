@@ -2,6 +2,7 @@ import type {
   IOrderHistoryRepository,
   IOrderRepository,
 } from "../../domain/model/order/IOrderRepository.js";
+import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
 import type {
   AppDatabase,
   DbClient,
@@ -36,7 +37,7 @@ export const orderDetail = (
     id: order.id,
     userId: order.userId,
     itemId: order.itemId,
-    status: order.status.toValue(),
+    status: OrderStatus.toValue(order.status),
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
   });
@@ -48,8 +49,11 @@ export const orderDetail = (
     orderHistoryDtoSchema.parse({
       id: history.id,
       orderId: history.orderId,
-      fromStatus: history.fromStatus?.toValue() ?? null,
-      toStatus: history.toStatus.toValue(),
+      fromStatus:
+        history.fromStatus !== null
+          ? OrderStatus.toValue(history.fromStatus)
+          : null,
+      toStatus: OrderStatus.toValue(history.toStatus),
       createdAt: history.createdAt,
     }),
   );

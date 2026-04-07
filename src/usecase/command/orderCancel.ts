@@ -1,4 +1,5 @@
 import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
+import { Item } from "../../domain/model/item/Item.js";
 import {
   ItemStatus,
   ItemStatusMap,
@@ -7,7 +8,9 @@ import type {
   IOrderHistoryRepository,
   IOrderRepository,
 } from "../../domain/model/order/IOrderRepository.js";
+import { Order } from "../../domain/model/order/Order.js";
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
+import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
 import type {
   AppDatabase,
   DbClient,
@@ -38,8 +41,8 @@ export const orderCancel = (deps: Deps, input: Input): OrderDto => {
       throw new Error("Order not found");
     }
 
-    const updatedOrder = order.cancel();
-    const history = OrderHistory.recordOrderTransition(
+    const updatedOrder = Order.cancel(order);
+    const history = OrderHistory.recordTransition(
       crypto.randomUUID(),
       order,
       updatedOrder,
@@ -49,7 +52,8 @@ export const orderCancel = (deps: Deps, input: Input): OrderDto => {
     if (!updatedItem) {
       throw new Error("Item not found");
     }
-    const updatedUpdatedItem = updatedItem.changeStatus(
+    const updatedUpdatedItem = Item.changeStatus(
+      updatedItem,
       ItemStatus.create(ItemStatusMap.SELLABLE),
     );
 
@@ -61,7 +65,7 @@ export const orderCancel = (deps: Deps, input: Input): OrderDto => {
       id: updatedOrder.id,
       userId: updatedOrder.userId,
       itemId: updatedOrder.itemId,
-      status: updatedOrder.status.toValue(),
+      status: OrderStatus.toValue(updatedOrder.status),
       createdAt: updatedOrder.createdAt,
       updatedAt: updatedOrder.updatedAt,
     });

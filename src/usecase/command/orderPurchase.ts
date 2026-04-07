@@ -1,4 +1,5 @@
 import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
+import { Item } from "../../domain/model/item/Item.js";
 import {
   ItemStatus,
   ItemStatusMap,
@@ -9,6 +10,7 @@ import type {
 } from "../../domain/model/order/IOrderRepository.js";
 import { Order } from "../../domain/model/order/Order.js";
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
+import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
 import type {
   AppDatabase,
   DbClient,
@@ -39,10 +41,11 @@ export const orderPurchase = (deps: Deps, input: Input): OrderDto => {
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
 
     const item = itemRepository.findById(input.itemId);
-    if (!item || !item.isSellable()) {
+    if (!item || !Item.isSellable(item)) {
       throw new Error("Item not found");
     }
-    const updatedItem = item.changeStatus(
+    const updatedItem = Item.changeStatus(
+      item,
       ItemStatus.create(ItemStatusMap.PURCHASED),
     );
     const order = Order.create(crypto.randomUUID(), input.userId, item);
@@ -61,7 +64,7 @@ export const orderPurchase = (deps: Deps, input: Input): OrderDto => {
       id: order.id,
       userId: order.userId,
       itemId: order.itemId,
-      status: order.status.toValue(),
+      status: OrderStatus.toValue(order.status),
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
     });
