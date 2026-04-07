@@ -40,7 +40,12 @@ ordersRoute.put("/:orderId/cancel", async (c) => {
   const orderId = c.req.param("orderId");
   try {
     const result = await orderCancel(
-      { db, createOrderRepository, createOrderHistoryRepository },
+      {
+        db,
+        createItemRepository,
+        createOrderRepository,
+        createOrderHistoryRepository,
+      },
       { orderId },
     );
     return c.json(result);

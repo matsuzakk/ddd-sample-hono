@@ -1,3 +1,8 @@
+import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
+import {
+  ItemStatus,
+  ItemStatusMap,
+} from "../../domain/model/item/ItemStatus.js";
 import type {
   IOrderHistoryRepository,
   IOrderRepository,
@@ -15,6 +20,7 @@ import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
 
 type Deps = {
   readonly db: AppDatabase;
+  readonly createItemRepository: (client: DbClient) => IItemRepository;
   readonly createOrderRepository: (client: DbClient) => IOrderRepository;
   readonly createOrderHistoryRepository: (
     client: DbClient,
@@ -30,6 +36,7 @@ export const orderCancel = async (
   input: Input,
 ): Promise<OrderDto> => {
   return deps.db.transaction(async (tx) => {
+    const itemRepository = deps.createItemRepository(tx);
     const orderRepository = deps.createOrderRepository(tx);
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
 
@@ -52,8 +59,17 @@ export const orderCancel = async (
       OrderStatus.create(OrderStatusMap.CANCELED),
     );
 
+    const updatedItem = await itemRepository.findById(order.itemId);
+    if (!updatedItem) {
+      throw new Error("Item not found");
+    }
+    const updatedUpdatedItem = updatedItem.changeStatus(
+      ItemStatus.create(ItemStatusMap.SELLABLE),
+    );
+
     await orderRepository.update(updatedOrder);
     await orderHistoryRepository.create(history);
+    await itemRepository.update(updatedUpdatedItem);
 
     const result = orderDtoSchema.parse({
       id: updatedOrder.id,
