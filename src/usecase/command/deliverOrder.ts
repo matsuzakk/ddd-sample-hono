@@ -24,7 +24,7 @@ type Input = {
   readonly orderId: string;
 };
 
-export const orderShip = (deps: Deps, input: Input): OrderDto => {
+export const deliverOrder = (deps: Deps, input: Input): OrderDto => {
   return deps.db.transaction((tx) => {
     const orderRepository = deps.createOrderRepository(tx);
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
@@ -34,7 +34,7 @@ export const orderShip = (deps: Deps, input: Input): OrderDto => {
       throw new NotFoundError("Order not found");
     }
 
-    const updatedOrder = Order.markShipped(order);
+    const updatedOrder = Order.markDelivered(order);
     const history = OrderHistory.recordTransition(
       crypto.randomUUID(),
       order,

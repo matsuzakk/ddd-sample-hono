@@ -16,7 +16,7 @@ type Input = {
   readonly sellerId: string;
 };
 
-export const itemSellList = (deps: Deps, input: Input): ItemDto[] => {
+export const getItemSellList = (deps: Deps, input: Input): ItemDto[] => {
   const items = deps
     .createItemRepository(deps.db)
     .findBySellerId(input.sellerId);

@@ -25,7 +25,7 @@ export type Input = {
   readonly orderId: string;
 };
 
-export const orderDetail = (
+export const getOrderDetail = (
   deps: Deps,
   input: Input,
 ): { order: OrderDto | null; histories: OrderHistoryDto[] } => {

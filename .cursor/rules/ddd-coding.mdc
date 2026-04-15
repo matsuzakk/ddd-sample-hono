@@ -133,7 +133,7 @@ type Input = {
   readonly price: number;
 };
 
-export const itemSell = (deps: Deps, input: Input): ItemDto => {
+export const sellItem = (deps: Deps, input: Input): ItemDto => {
   const repo = deps.createItemRepository(deps.db);
   /* domain を組み立て、repo に委譲 */
 };
@@ -177,7 +177,7 @@ export const itemController = {
       description: string;
       price: number;
     }>();
-    const result = await itemSell(
+    const result = await sellItem(
       { db, createItemRepository },
       {
         sellerId: body.sellerId,

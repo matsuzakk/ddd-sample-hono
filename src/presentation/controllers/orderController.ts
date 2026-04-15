@@ -2,11 +2,11 @@ import type { Context } from "hono";
 import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
 import { createOrderHistoryRepository } from "../../infrastructure/repository/orderHistoryRepository.js";
 import { createOrderRepository } from "../../infrastructure/repository/orderRepository.js";
-import { orderPurchase } from "../../usecase/command/orderPurchase.js";
-import { orderCancel } from "../../usecase/command/orderCancel.js";
-import { orderDelivered } from "../../usecase/command/orderDelivered.js";
-import { orderShip } from "../../usecase/command/orderShip.js";
-import { orderDetail } from "../../usecase/query/orderDetail.js";
+import { cancelOrder } from "../../usecase/command/cancelOrder.js";
+import { deliverOrder } from "../../usecase/command/deliverOrder.js";
+import { purchaseOrder } from "../../usecase/command/purchaseOrder.js";
+import { shipOrder } from "../../usecase/command/shipOrder.js";
+import { getOrderDetail } from "../../usecase/query/getOrderDetail.js";
 import type { DbVariables } from "../middleware/dbMiddleware.js";
 
 export const orderController = {
@@ -18,7 +18,7 @@ export const orderController = {
   purchase: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const body = await c.req.json<{ userId: string; itemId: string }>();
-    const result = await orderPurchase(
+    const result = await purchaseOrder(
       {
         db,
         createItemRepository,
@@ -38,7 +38,7 @@ export const orderController = {
   cancel: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const orderId = c.req.param("orderId")!;
-    const result = await orderCancel(
+    const result = await cancelOrder(
       {
         db,
         createItemRepository,
@@ -58,7 +58,7 @@ export const orderController = {
   deliver: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const orderId = c.req.param("orderId")!;
-    const result = await orderDelivered(
+    const result = await deliverOrder(
       { db, createOrderRepository, createOrderHistoryRepository },
       { orderId },
     );
@@ -73,7 +73,7 @@ export const orderController = {
   ship: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const orderId = c.req.param("orderId")!;
-    const result = await orderShip(
+    const result = await shipOrder(
       { db, createOrderRepository, createOrderHistoryRepository },
       { orderId },
     );
@@ -88,7 +88,7 @@ export const orderController = {
   getById: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const orderId = c.req.param("orderId")!;
-    const result = await orderDetail(
+    const result = await getOrderDetail(
       { db, createOrderRepository, createOrderHistoryRepository },
       { orderId },
     );

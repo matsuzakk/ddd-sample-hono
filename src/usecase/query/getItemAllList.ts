@@ -12,7 +12,7 @@ type Deps = {
   readonly createItemRepository: (client: DbClient) => IItemRepository;
 };
 
-export const itemGetAllList = (deps: Deps): ItemDto[] => {
+export const getItemAllList = (deps: Deps): ItemDto[] => {
   const items = deps.createItemRepository(deps.db).findAll();
 
   const result = items.map((item) =>

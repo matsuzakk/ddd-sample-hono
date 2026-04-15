@@ -31,7 +31,7 @@ type Input = {
   readonly orderId: string;
 };
 
-export const orderCancel = (deps: Deps, input: Input): OrderDto => {
+export const cancelOrder = (deps: Deps, input: Input): OrderDto => {
   return deps.db.transaction((tx) => {
     const itemRepository = deps.createItemRepository(tx);
     const orderRepository = deps.createOrderRepository(tx);

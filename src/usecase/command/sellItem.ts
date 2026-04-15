@@ -1,4 +1,5 @@
 import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
+import { Item } from "../../domain/model/item/Item.js";
 import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
 import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
 import type {
@@ -13,14 +14,22 @@ type Deps = {
 };
 
 type Input = {
-  readonly itemId: string;
+  readonly sellerId: string;
+  readonly name: string;
+  readonly description: string;
+  readonly price: number;
 };
 
-export const itemDetail = (deps: Deps, input: Input): ItemDto | null => {
-  const item = deps.createItemRepository(deps.db).findById(input.itemId);
-  if (!item) {
-    return null;
-  }
+export const sellItem = (deps: Deps, input: Input): ItemDto => {
+  const item = Item.create(
+    crypto.randomUUID(),
+    input.name,
+    input.description,
+    ItemPrice.create(input.price),
+    input.sellerId,
+  );
+  deps.createItemRepository(deps.db).create(item);
+
   const result = itemDtoSchema.parse({
     id: item.id,
     name: item.name,

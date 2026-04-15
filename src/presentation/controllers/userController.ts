@@ -2,9 +2,9 @@ import type { Context } from "hono";
 import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
 import { createOrderRepository } from "../../infrastructure/repository/orderRepository.js";
 import { createUserRepository } from "../../infrastructure/repository/userRepository.js";
-import { registerUser } from "../../usecase/command/userRegister.js";
-import { itemSellList } from "../../usecase/query/itemSellList.js";
-import { orderList } from "../../usecase/query/orderList.js";
+import { registerUser } from "../../usecase/command/registerUser.js";
+import { getItemSellList } from "../../usecase/query/getItemSellList.js";
+import { getOrderList } from "../../usecase/query/getOrderList.js";
 import type { DbVariables } from "../middleware/dbMiddleware.js";
 
 export const userController = {
@@ -31,7 +31,7 @@ export const userController = {
   listSellerItems: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const userId = c.req.param("userId")!;
-    const result = await itemSellList(
+    const result = await getItemSellList(
       { db, createItemRepository },
       { sellerId: userId },
     );
@@ -46,7 +46,7 @@ export const userController = {
   listOrders: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const userId = c.req.param("userId")!;
-    const result = await orderList({ db, createOrderRepository }, { userId });
+    const result = await getOrderList({ db, createOrderRepository }, { userId });
     return c.json(result);
   },
 } as const;

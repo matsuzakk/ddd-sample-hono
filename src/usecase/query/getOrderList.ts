@@ -15,7 +15,7 @@ type Deps = {
   readonly createOrderRepository: (client: DbClient) => IOrderRepository;
 };
 
-export const orderList = (deps: Deps, input: Input) => {
+export const getOrderList = (deps: Deps, input: Input) => {
   const orders = deps
     .createOrderRepository(deps.db)
     .findByUserId(input.userId);
