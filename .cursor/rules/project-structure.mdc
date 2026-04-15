@@ -1,5 +1,5 @@
 ---
-description: リポジトリのフォルダ構成と主要 npm パッケージの参照用
+description: リポジトリのフォルダ構成とパッケージ管理
 alwaysApply: true
 ---
 
@@ -12,16 +12,12 @@ DDD のレイヤを `src/` 配下にまとめた **Hono + TypeScript + SQLite（
 
 ```
 ./
-├── drizzle.config.ts          # Drizzle Kit（マイグレーション生成・push 等）の設定。スキーマと migrations 出力先を指定
-├── package.json / tsconfig.json
-├── data/                      # 実行時 DB ファイル（SQLite。SQLITE_PATH でパスを上書き可能）
-├── dist/                      # `tsc` の出力（`npm run start` で実行）
 ├── src/
-│   ├── index.ts               # ルート・HTTP サーバ起動
+│   ├── index.ts               # エントリポイント (HTTP サーバ起動)
 │   ├── domain/                # ドメイン層
-│   │   ├── model/             # 集約・エンティティ・値オブジェクト・列挙・リポジトリインターフェース
+│   │   ├── model/             # 集約・エンティティ・値オブジェクト・リポジトリインターフェース
 │   │   │   ├── shared/        # ドメイン横断の共通型
-│   │   │   └── (feature)/     # 機能ごとのモデル（例: ユーザー / 商品 / 注文）
+│   │   │   └── (feature)/     # 機能ごとのモデル（ex: ユーザー / 商品 / 注文）
 │   │   └── service/           # ドメインサービス用（複数集約にまたがるルールを置く）
 │   ├── usecase/               # アプリケーション層
 │   │   ├── command/           # 操作系（登録・購入・発送・キャンセル等）
@@ -34,6 +30,10 @@ DDD のレイヤを `src/` 配下にまとめた **Hono + TypeScript + SQLite（
 │   └── infrastructure/        # インフラ層
 │       ├── database/          # Drizzle スキーマ、DB 接続、マイグレーション
 │       └── repository/        # I*Repository の実装
+├── data/                      # 実行時 DB ファイル（SQLite。SQLITE_PATH でパスを上書き可能）
+├── drizzle.config.ts          # Drizzle Kitの設定ファイル
+├── dist/                      # `tsc` の出力（`npm run start` で実行）
+├── package.json / tsconfig.json
 └── README.md
 ```
 
