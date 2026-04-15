@@ -5,15 +5,13 @@ import type {
 import { Order } from "../../domain/model/order/Order.js";
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
 import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
-import type {
-  AppDatabase,
-  DbClient,
-} from "../../infrastructure/database/db.js";
+import type { ITransactionManager } from "../../domain/model/shared/ITransactionManager.js";
+import type { DbClient } from "../../infrastructure/database/db.js";
 import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
 import { NotFoundError } from "../../domain/model/shared/error.js";
 
 type Deps = {
-  readonly db: AppDatabase;
+  readonly txManager: ITransactionManager<DbClient>;
   readonly createOrderRepository: (client: DbClient) => IOrderRepository;
   readonly createOrderHistoryRepository: (
     client: DbClient,
@@ -25,7 +23,7 @@ type Input = {
 };
 
 export const deliverOrder = (deps: Deps, input: Input): OrderDto => {
-  return deps.db.transaction((tx) => {
+  return deps.txManager.run((tx) => {
     const orderRepository = deps.createOrderRepository(tx);
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
 

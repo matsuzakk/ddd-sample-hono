@@ -116,7 +116,7 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
 ## ユースケース(command / query)
 
 - 関数は **`(deps: Deps, input: Input) => Output`**。
-- **`Deps`**: 少なくとも **`db`（`AppDatabase`）** と、**`create*Repository: (client: DbClient) => I*Repository`** のような **リポジトリ取得手段**を含める（ルートから注入し、テストで差し替えやすくする）。型には **ドメインの `I*Repository`** を使う。
+- **`Deps`**: 読み取り・単一保存は **`db`（`AppDatabase`）** と **`create*Repository: (client: DbClient) => I*Repository`**。複数テーブルを同一トランザクションで更新するコマンドは **`txManager: ITransactionManager<DbClient>`**（`domain/model/shared/ITransactionManager.ts`）とリポジトリファクトリ。ユースケース内は **`deps.txManager.run((tx) => { ... })`** で囲み、**`deps.db.transaction` は直接呼ばない**（実装は `createTransactionManager(db)`）。
 - **`Input`**: HTTP のクエリ・ボディを想定した **プリミティブ／素のオブジェクト**（ルートでパースした値を渡す）。
 - 戻り値は **`DTO` 型**にし、必要なら **`dtoSchema.parse(...)`** で形を固定する。
 - １つのファイルに１つのユースケースを書く。
@@ -157,7 +157,7 @@ export type ItemDto = z.infer<typeof itemDtoSchema>;
 
 - **`src/presentation/controllers/`** に、機能（リソース）ごとに **`export const xxxController = { ... } as const`** でハンドラをまとめる。
 - **ユースケースは Hono を知らない**。コントローラだけが `Context`（`c.req.json()`、`c.req.param()`、`c.get("db")` 等）に触れ、**プリミティブや素のオブジェクト**を `Input` に渡す。
-- **`Deps`** はコントローラ内で組み立てる：`c.get("db")` と **`create*Repository` ファクトリ**（`infrastructure/repository`）をユースケースに渡す。リポジトリの具体型は **`I*Repository`** に依存したユースケースのままにする。
+- **`Deps`** はコントローラ内で組み立てる：`c.get("db")` と **`create*Repository` ファクトリ**（`infrastructure/repository`）。トランザクションが要る処理には **`createTransactionManager(db)`** で得た **`txManager`** も渡す。
 - **ビジネスルール・状態遷移は書かない**（`domain` の Entity / VO、または `usecase` の command / query に置く）。
 - **HTTP のステータス**は `c.json(body, status)` や、必要なら **`HTTPException`**。アプリ共通の例外→レスポンス変換は **`src/index.ts` の `app.onError`** に任せる（コントローラですべて `try/catch` する必要はない）。
 - **`routes/*.ts`** は薄く保ち、**メソッド・パス・ミドルウェア・コントローラメソッドの対応**だけを並べる。
@@ -201,6 +201,6 @@ export const itemController = {
 | Entity / VO      | DB 復元用に **`reconstitute`** を用意（`create` とは分ける）                                                                 |
 | ドメインサービス | **`domain/service/`**。**複数 model をまたぐドメインルール**。インフラは import せず、データは引数で渡す                     |
 | リポジトリ実装   | **`create~Repository(db)`** 形式のファクトリで `I*Repository` を返す                                                         |
-| ユースケース     | **`Deps` + `Input`**。`Deps` に **DB** と **リポジトリファクトリ（型は `I*Repository`）**、`Input` に **リクエスト由来の値** |
+| ユースケース     | **`Deps` + `Input`**。**DB + リポジトリファクトリ**、または **`ITransactionManager` + ファクトリ**（複数永続化を原子化）、`Input` に **リクエスト由来の値** |
 | ルート           | **`presentation/routes/`**。パス登録のみ。**`presentation/controllers/`** のメソッドへ委譲する                               |
 | コントローラ     | **`presentation/controllers/`**。`Context` ↔ ユースケースの橋。**ドメインロジックを持たない**                                |

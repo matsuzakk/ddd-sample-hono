@@ -1,4 +1,5 @@
 import type { Context } from "hono";
+import { createTransactionManager } from "../../infrastructure/database/transactionManager.js";
 import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
 import { createOrderHistoryRepository } from "../../infrastructure/repository/orderHistoryRepository.js";
 import { createOrderRepository } from "../../infrastructure/repository/orderRepository.js";
@@ -17,10 +18,11 @@ export const orderController = {
    */
   purchase: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
+    const txManager = createTransactionManager(db);
     const body = await c.req.json<{ userId: string; itemId: string }>();
     const result = await purchaseOrder(
       {
-        db,
+        txManager,
         createItemRepository,
         createOrderRepository,
         createOrderHistoryRepository,
@@ -37,10 +39,11 @@ export const orderController = {
    */
   cancel: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
+    const txManager = createTransactionManager(db);
     const orderId = c.req.param("orderId")!;
     const result = await cancelOrder(
       {
-        db,
+        txManager,
         createItemRepository,
         createOrderRepository,
         createOrderHistoryRepository,
@@ -57,9 +60,10 @@ export const orderController = {
    */
   deliver: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
+    const txManager = createTransactionManager(db);
     const orderId = c.req.param("orderId")!;
     const result = await deliverOrder(
-      { db, createOrderRepository, createOrderHistoryRepository },
+      { txManager, createOrderRepository, createOrderHistoryRepository },
       { orderId },
     );
     return c.json(result);
@@ -72,9 +76,10 @@ export const orderController = {
    */
   ship: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
+    const txManager = createTransactionManager(db);
     const orderId = c.req.param("orderId")!;
     const result = await shipOrder(
-      { db, createOrderRepository, createOrderHistoryRepository },
+      { txManager, createOrderRepository, createOrderHistoryRepository },
       { orderId },
     );
     return c.json(result);

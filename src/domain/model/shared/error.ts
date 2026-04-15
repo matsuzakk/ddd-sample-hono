@@ -20,7 +20,7 @@ export abstract class DomainError extends Error {
 
 export class NotFoundError extends DomainError {
   override readonly statusCode = 404;
-  override readonly code = "NOT_FOUND";
+  override readonly code = "NOT_FOUND_ENTITY";
 
   constructor(
     message: string,
@@ -32,7 +32,7 @@ export class NotFoundError extends DomainError {
 
 export class ValidationError extends DomainError {
   override readonly statusCode = 400;
-  override readonly code = "VALIDATION_ERROR";
+  override readonly code = "ENTITY_VALIDATION_ERROR";
 
   constructor(
     message: string,
