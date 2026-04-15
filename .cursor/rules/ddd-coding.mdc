@@ -74,7 +74,7 @@ export const TransferPolicy = {
 } as const;
 ```
 
-## リポジトリインターフェース
+## リポジトリインターフェース(I\*Repository)
 
 - **`domain/model/<feature>/I*Repository.ts`** に置く。実装クラス名ではなく **`I` プレフィックス + `interface`**。
 - ドメインの **`Entity` / `VO` 型**だけを入出力に使い、Drizzle の行型や `db` をここに出さない。
@@ -88,7 +88,7 @@ export interface IItemRepository {
 }
 ```
 
-## リポジトリ実装（インフラ）
+## リポジトリ(create\*Repository)
 
 - **`createItemRepository(db: DbClient): IItemRepository`** のように、**ファクトリ関数**で返す（本リポの約束）。
 - 保存時は `Xxx.toValue(...)`、読込時は `Xxx.reconstitute(...)` と **`Entity.reconstitute`** でドメインオブジェクトに戻す。
@@ -113,7 +113,7 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
 });
 ```
 
-## ユースケース（アプリケーション層）
+## ユースケース(command / query)
 
 - 関数は **`(deps: Deps, input: Input) => Output`**。
 - **`Deps`**: 少なくとも **`db`（`AppDatabase`）** と、**`create*Repository: (client: DbClient) => I*Repository`** のような **リポジトリ取得手段**を含める（ルートから注入し、テストで差し替えやすくする）。型には **ドメインの `I*Repository`** を使う。
@@ -152,7 +152,7 @@ export const itemDtoSchema = z.object({
 export type ItemDto = z.infer<typeof itemDtoSchema>;
 ```
 
-## 運用上の注意（要約）
+## 運用上の注意
 
 | 項目             | 約束                                                                                                                         |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
