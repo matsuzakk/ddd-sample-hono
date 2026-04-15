@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import type { User } from "../../domain/model/user/User.js";
 import type { IUserRepository } from "../../domain/model/user/IUserRepository.js";
-import type { DbClient } from "./db.js";
-import { users } from "./schema.js";
+import type { DbClient } from "../database/db.js";
+import { users } from "../database/schema.js";
 
 export const createUserRepository = (db: DbClient): IUserRepository => ({
   create: (user: User) => {

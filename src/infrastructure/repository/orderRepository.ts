@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm";
 import type { IOrderRepository } from "../../domain/model/order/IOrderRepository.js";
 import { Order } from "../../domain/model/order/Order.js";
 import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
-import type { DbClient } from "./db.js";
-import { orders } from "./schema.js";
+import type { DbClient } from "../database/db.js";
+import { orders } from "../database/schema.js";
 
 export const createOrderRepository = (db: DbClient): IOrderRepository => ({
   create: (order: Order) => {
@@ -19,7 +19,11 @@ export const createOrderRepository = (db: DbClient): IOrderRepository => ({
       .run();
   },
   findByUserId: (userId: string) => {
-    const rows = db.select().from(orders).where(eq(orders.userId, userId)).all();
+    const rows = db
+      .select()
+      .from(orders)
+      .where(eq(orders.userId, userId))
+      .all();
     return rows.map((row) =>
       Order.reconstitute(
         row.id,

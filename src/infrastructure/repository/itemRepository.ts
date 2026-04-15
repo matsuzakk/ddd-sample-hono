@@ -3,9 +3,9 @@ import type { IItemRepository } from "../../domain/model/item/IItemRepository.js
 import { Item } from "../../domain/model/item/Item.js";
 import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
 import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
-import { getDatabase } from "./db.js";
-import type { DbClient } from "./db.js";
-import { items } from "./schema.js";
+import { getDatabase } from "../database/db.js";
+import type { DbClient } from "../database/db.js";
+import { items } from "../database/schema.js";
 
 export const createItemRepository = (db: DbClient): IItemRepository => ({
   create: (item: Item) => {

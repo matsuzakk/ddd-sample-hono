@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { createItemRepository } from "../../infrastructure/database/itemRepository.js";
-import { createOrderRepository } from "../../infrastructure/database/orderRepository.js";
-import { createUserRepository } from "../../infrastructure/database/userRepository.js";
+import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
+import { createOrderRepository } from "../../infrastructure/repository/orderRepository.js";
+import { createUserRepository } from "../../infrastructure/repository/userRepository.js";
 import { registerUser } from "../../usecase/command/userRegister.js";
 import { itemSellList } from "../../usecase/query/itemSellList.js";
 import { orderList } from "../../usecase/query/orderList.js";
@@ -37,9 +37,6 @@ usersRoute.get("/:userId/items", async (c) => {
 usersRoute.get("/:userId/orders", async (c) => {
   const db = c.get("db");
   const userId = c.req.param("userId");
-  const result = await orderList(
-    { db, createOrderRepository },
-    { userId },
-  );
+  const result = await orderList({ db, createOrderRepository }, { userId });
   return c.json(result);
 });

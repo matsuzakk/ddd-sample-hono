@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { createItemRepository } from "../../infrastructure/database/itemRepository.js";
-import { createOrderHistoryRepository } from "../../infrastructure/database/orderHistoryRepository.js";
-import { createOrderRepository } from "../../infrastructure/database/orderRepository.js";
+import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
+import { createOrderHistoryRepository } from "../../infrastructure/repository/orderHistoryRepository.js";
+import { createOrderRepository } from "../../infrastructure/repository/orderRepository.js";
 import { orderPurchase } from "../../usecase/command/orderPurchase.js";
 import { orderCancel } from "../../usecase/command/orderCancel.js";
 import { orderDelivered } from "../../usecase/command/orderDelivered.js";

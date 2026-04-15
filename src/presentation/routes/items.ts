@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { createItemRepository } from "../../infrastructure/database/itemRepository.js";
+import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
 import { itemSell } from "../../usecase/command/itemSell.js";
 import { itemDetail } from "../../usecase/query/itemDetail.js";
 import { itemGetAllList } from "../../usecase/query/itemGetAllList.js";
@@ -41,10 +41,7 @@ itemsRoute.get("/", async (c) => {
 itemsRoute.get("/:itemId", async (c) => {
   const db = c.get("db");
   const itemId = c.req.param("itemId");
-  const result = await itemDetail(
-    { db, createItemRepository },
-    { itemId },
-  );
+  const result = await itemDetail({ db, createItemRepository }, { itemId });
   if (!result) {
     throw new HTTPException(404, { message: "Item not found" });
   }

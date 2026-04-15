@@ -1,0 +1,48 @@
+---
+description: リポジトリのフォルダ構成と主要 npm パッケージの参照用
+alwaysApply: true
+---
+
+# プロジェクト構成
+
+DDD のレイヤを `src/` 配下にまとめた **Hono + TypeScript + SQLite（Drizzle ORM）** の API サンプル。
+エントリは `src/index.ts`（`@hono/node-server` で Node 上に起動）。
+
+## ディレクトリ構成
+
+```
+./
+├── drizzle.config.ts          # Drizzle Kit（マイグレーション生成・push 等）の設定。スキーマと migrations 出力先を指定
+├── package.json / tsconfig.json
+├── data/                      # 実行時 DB ファイル（SQLite。SQLITE_PATH でパスを上書き可能）
+├── dist/                      # `tsc` の出力（`npm run start` で実行）
+├── src/
+│   ├── index.ts               # アプリ組み立て・ルート登録・HTTP サーバ起動
+│   ├── domain/                # ドメイン層（ビジネスルールの中心）
+│   │   ├── model/             # 集約・エンティティ・値オブジェクト・列挙・リポジトリインターフェース
+│   │   │   ├── shared/        # ドメイン横断の共通型
+│   │   │   └── (feature)/     # 機能ごとのモデル（例: ユーザー / 商品 / 注文）
+│   │   └── service/           # ドメインサービス用（現状プレースホルダ。複数集約にまたがるルールを置く想定）
+│   ├── usecase/               # アプリケーション層（ユースケース単位のオーケストレーション）
+│   │   ├── command/           # 状態を変える操作（登録・購入・発送・キャンセル等）
+│   │   ├── query/             # 参照系（一覧・詳細等）
+│   │   └── dto/               # ユースケース入出力用のデータ形式
+│   ├── presentation/          # インターフェース層（HTTP）
+│   │   ├── middleware/        # ミドルウェア
+│   │   └── routes/            # ユースケースを呼び出すパス別ルータ
+│   └── infrastructure/        # インフラ層（永続化の具体実装）
+│       ├── database/          # Drizzle スキーマ、DB 接続、migrations
+│       └── repository/        # I*Repository の実装
+└── README.md
+```
+
+## 主要パッケージ
+
+| パッケージ          | 用途                                                                              |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `hono`              | 軽量 Web フレームワーク。ルーティング・ミドルウェア・`fetch` 互換ハンドラ         |
+| `@hono/node-server` | Node.js 上で Hono を `serve` するアダプタ（本リポの HTTP サーバ起動）             |
+| `zod`               | スキーマバリデーション・型推論                                                    |
+| `drizzle-orm`       | 型安全な SQL ビルダ / ORM。スキーマ定義とクエリに使用                             |
+| `drizzle-kit`       | マイグレーション生成・`push`・Studio 等の CLI（`db:*` スクリプト）                |
+| `better-sqlite3`    | 同期 API の SQLite ネイティブバインディング。Drizzle の SQLite ドライバとして利用 |

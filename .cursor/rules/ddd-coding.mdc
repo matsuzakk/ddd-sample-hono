@@ -1,0 +1,164 @@
+---
+description: DDDの書き方とこのリポジトリの約束事
+alwaysApply: true
+---
+
+# DDD コーディングルール
+
+## 値オブジェクト（VO）
+
+- プリミティブをそのまま渡さず、**ブランド型**や列挙で意味を付ける。
+- **永続化・API 向けの素の値**は `toValue(vo)` で取り出す（必須）。
+- **DB から読み込んだ値**は不変条件を満たすか検証したうえで **`reconstitute`** で復元する。新規生成は **`create`**。
+
+```typescript
+export type Money = Brand<number, "Money">;
+
+export const Money = {
+  create(amount: number): Money {
+    if (amount < 0) throw new Error("...");
+    return amount as Money;
+  },
+  reconstitute(amount: number): Money {
+    if (amount < 0) throw new Error("...");
+    return amount as Money;
+  },
+  toValue(m: Money): number {
+    return m as number;
+  },
+} as const;
+```
+
+## エンティティ（Entity）
+
+- **`type X = { ... }`** で形状を宣言し、ファクトリ・振る舞いは **`export const X = { ... }`** にまとめる（本リポの `Item` などと同型）。
+- 新規は **`create`**。DB 行から組み立てるときだけ **`reconstitute`**（検証は VO 側や必要ならここでも）。
+
+```typescript
+export type Order = { readonly id: string /* ... */ };
+
+export const Order = {
+  create(/* ... */): Order {
+    /* 不変条件 */
+    return {
+      /* ... */
+    };
+  },
+  reconstitute(/* row の各列 + 既に VO 化した値 */): Order {
+    return {
+      /* ... */
+    };
+  },
+  cancel(order: Order): Order {
+    /* 状態遷移 */
+  },
+} as const;
+```
+
+## ドメインサービス（Domain Service）
+
+- **`src/domain/service/`** に置く（現状は未使用のディレクトリ）。**複数の Entity / VO をまたぐルール**（送金・割当・照合など）向け。DB や HTTP の手順は **ユースケース**。
+- **`domain/model` の型だけ** import。**DB・リポジトリ・インフラは import しない**。足りないデータはユースケースが取得して **引数で渡す**。
+- **`export const XxxService = { ... } as const`** でまとめる（Entity と同型の書き方）。
+
+```typescript
+// domain/service/transferPolicy.ts（例: User と金額 VO を横断する送金ルール）
+import type { ItemPrice } from "../model/item/ItemPrice.js";
+import type { User } from "../model/user/User.js";
+
+export const TransferPolicy = {
+  isPermitted(payer: User, payee: User, amount: ItemPrice): boolean {
+    if (payer.id === payee.id) return false;
+    return ItemPrice.toValue(amount) > 0;
+  },
+} as const;
+```
+
+## リポジトリインターフェース
+
+- **`domain/model/<feature>/I*Repository.ts`** に置く。実装クラス名ではなく **`I` プレフィックス + `interface`**。
+- ドメインの **`Entity` / `VO` 型**だけを入出力に使い、Drizzle の行型や `db` をここに出さない。
+
+```typescript
+import type { Item } from "./Item.js";
+
+export interface IItemRepository {
+  create(item: Item): void;
+  findById(id: string): Item | null;
+}
+```
+
+## リポジトリ実装（インフラ）
+
+- **`createItemRepository(db: DbClient): IItemRepository`** のように、**ファクトリ関数**で返す（本リポの約束）。
+- 保存時は `Xxx.toValue(...)`、読込時は `Xxx.reconstitute(...)` と **`Entity.reconstitute`** でドメインオブジェクトに戻す。
+
+```typescript
+export const createItemRepository = (db: DbClient): IItemRepository => ({
+  create: (item: Item) => {
+    db.insert(items).values({ price: ItemPrice.toValue(item.price) }).run();
+  },
+  findById: (id) => {
+    const row = /* select one */;
+    return row
+      ? Item.reconstitute(
+          row.id,
+          row.name,
+          row.description,
+          ItemPrice.reconstitute(row.price),
+          /* ... */
+        )
+      : null;
+  },
+});
+```
+
+## ユースケース（アプリケーション層）
+
+- 関数は **`(deps: Deps, input: Input) => Output`**。
+- **`Deps`**: 少なくとも **`db`（`AppDatabase`）** と、**`create*Repository: (client: DbClient) => I*Repository`** のような **リポジトリ取得手段**を含める（ルートから注入し、テストで差し替えやすくする）。型には **ドメインの `I*Repository`** を使う。
+- **`Input`**: HTTP のクエリ・ボディを想定した **プリミティブ／素のオブジェクト**（ルートでパースした値を渡す）。
+- 戻り値は **`DTO` 型**にし、必要なら **`dtoSchema.parse(...)`** で形を固定する。
+
+```typescript
+type Deps = {
+  readonly db: AppDatabase;
+  readonly createItemRepository: (client: DbClient) => IItemRepository;
+};
+
+type Input = {
+  readonly sellerId: string;
+  readonly name: string;
+  readonly price: number;
+};
+
+export const itemSell = (deps: Deps, input: Input): ItemDto => {
+  const repo = deps.createItemRepository(deps.db);
+  /* domain を組み立て、repo に委譲 */
+};
+```
+
+## DTO
+
+- **`usecase/dto/*.ts`** に **`zod` スキーマ**と **`z.infer` 型**を定義する。
+- レスポンス・リクエストの境界で **プリミティブ寄りの形**にそろえる（日時は `z.coerce.date()` など）。
+
+```typescript
+export const itemDtoSchema = z.object({
+  id: z.string().min(1),
+  price: z.number().int().min(0),
+});
+
+export type ItemDto = z.infer<typeof itemDtoSchema>;
+```
+
+## 運用上の注意（要約）
+
+| 項目             | 約束                                                                                                                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| リポジトリ IF    | **ドメイン**（`domain/model/<feature>/I*Repository.ts`）にのみ定義                                                           |
+| VO               | **`toValue`** を持たせ、永続化・DTO 組み立てで使う                                                                           |
+| Entity / VO      | DB 復元用に **`reconstitute`** を用意（`create` とは分ける）                                                                 |
+| ドメインサービス | **`domain/service/`**。**複数 model をまたぐドメインルール**。インフラは import せず、データは引数で渡す                     |
+| リポジトリ実装   | **`create~Repository(db)`** 形式のファクトリで `I*Repository` を返す                                                         |
+| ユースケース     | **`Deps` + `Input`**。`Deps` に **DB** と **リポジトリファクトリ（型は `I*Repository`）**、`Input` に **リクエスト由来の値** |
