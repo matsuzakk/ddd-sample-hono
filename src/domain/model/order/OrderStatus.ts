@@ -1,4 +1,5 @@
 import type { Brand } from "../shared/brand.js";
+import { ValidationError } from "../shared/error.js";
 
 export const OrderStatusMap = {
   PURCHASED: 0,
@@ -29,7 +30,7 @@ export const OrderStatus = {
 
   reconstitute(value: number): OrderStatus {
     if (!ORDER_STATUS_VALUES.has(value)) {
-      throw new Error(`Invalid order status: ${value}`);
+      throw new ValidationError(`Invalid order status: ${value}`);
     }
     return value as OrderStatus;
   },

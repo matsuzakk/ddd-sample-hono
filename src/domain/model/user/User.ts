@@ -1,11 +1,12 @@
 import type { Brand } from "../shared/brand.js";
+import { ValidationError } from "../shared/error.js";
 
 export type Email = Brand<string, "Email">;
 
 export const Email = {
   create(value: string): Email {
     if (!Email.isValid(value)) {
-      throw new Error("メールアドレスは有効でなければなりません");
+      throw new ValidationError("Email must be valid");
     }
     return value as Email;
   },
@@ -36,7 +37,7 @@ function isValidName(name: string): boolean {
 export const User = {
   create(id: string, name: string, email: string): User {
     if (!isValidName(name)) {
-      throw new Error("名前は1文字以上20文字以下でなければなりません");
+      throw new ValidationError("Name must be between 1 and 20 characters");
     }
     return {
       id,
@@ -56,7 +57,7 @@ export const User = {
 
   changeName(user: User, name: string): User {
     if (!isValidName(name)) {
-      throw new Error("名前は1文字以上20文字以下でなければなりません");
+      throw new ValidationError("Name must be between 1 and 20 characters");
     }
     return { ...user, name };
   },

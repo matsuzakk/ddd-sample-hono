@@ -1,3 +1,4 @@
+import { ValidationError } from "../shared/error.js";
 import type { Order } from "./Order.js";
 import type { OrderStatus } from "./OrderStatus.js";
 
@@ -38,7 +39,7 @@ export const OrderHistory = {
   /** 同一注文の状態遷移を記録する（集約の遷移と履歴を揃える） */
   recordTransition(id: string, before: Order, after: Order): OrderHistory {
     if (before.id !== after.id) {
-      throw new Error("Order history must reference a single order");
+      throw new ValidationError("Order history must reference a single order");
     }
     return OrderHistory.create(id, before.id, before.status, after.status);
   },

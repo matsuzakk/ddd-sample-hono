@@ -1,6 +1,8 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
+import { DomainError } from "./domain/model/shared/error.js";
 import {
   dbMiddleware,
   type DbVariables,
@@ -12,13 +14,23 @@ import { usersRoute } from "./presentation/routes/users.js";
 const app = new Hono<{ Variables: DbVariables }>();
 
 app.onError((err, c) => {
+  console.error(err);
+
   if (err instanceof HTTPException) {
     return err.getResponse();
   }
-  if (err instanceof Error) {
-    return c.json({ message: err.message }, 400);
+
+  if (err instanceof DomainError) {
+    return c.json(
+      {
+        code: err.code,
+        message: err.message,
+        description: err.description,
+      },
+      err.statusCode as ContentfulStatusCode,
+    );
   }
-  console.error(err);
+
   return c.json({ message: "Internal Server Error" }, 500);
 });
 

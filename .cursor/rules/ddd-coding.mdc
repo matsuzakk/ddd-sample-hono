@@ -16,11 +16,11 @@ export type Money = Brand<number, "Money">;
 
 export const Money = {
   create(amount: number): Money {
-    if (amount < 0) throw new Error("...");
+    if (amount < 0) throw new ValidationError("...");
     return amount as Money;
   },
   reconstitute(amount: number): Money {
-    if (amount < 0) throw new Error("...");
+    if (amount < 0) throw new ValidationError("...");
     return amount as Money;
   },
   toValue(m: Money): number {
@@ -163,11 +163,11 @@ export type ItemDto = z.infer<typeof itemDtoSchema>;
 - **`routes/*.ts`** は薄く保ち、**メソッド・パス・ミドルウェア・コントローラメソッドの対応**だけを並べる。
 
 ```typescript
-// routes/items.ts（登録のみ）
+// routes/items.ts
 itemsRoute.post("/", itemController.sell);
 itemsRoute.get("/:itemId", itemController.getById);
 
-// controllers/itemController.ts（HTTP とユースケースの境界）
+// controllers/itemController.ts
 export const itemController = {
   sell: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");

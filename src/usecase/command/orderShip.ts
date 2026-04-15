@@ -10,6 +10,7 @@ import type {
   DbClient,
 } from "../../infrastructure/database/db.js";
 import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
+import { NotFoundError } from "../../domain/model/shared/error.js";
 
 type Deps = {
   readonly db: AppDatabase;
@@ -30,7 +31,7 @@ export const orderShip = (deps: Deps, input: Input): OrderDto => {
 
     const order = orderRepository.findById(input.orderId);
     if (!order) {
-      throw new Error("Order not found");
+      throw new NotFoundError("Order not found");
     }
 
     const updatedOrder = Order.markShipped(order);

@@ -1,3 +1,4 @@
+import { ValidationError } from "../shared/error.js";
 import {
   ItemStatus,
   ItemStatusMap,
@@ -33,10 +34,14 @@ export const Item = {
     sellerId: string,
   ): Item {
     if (!isValidName(name)) {
-      throw new Error("商品名は1文字以上20文字以下でなければなりません");
+      throw new ValidationError(
+        "Product name must be between 1 and 20 characters",
+      );
     }
     if (!isValidDescription(description)) {
-      throw new Error("商品説明は1文字以上1000文字以下でなければなりません");
+      throw new ValidationError(
+        "Product description must be between 1 and 1000 characters",
+      );
     }
     const now = new Date();
     return {
@@ -95,7 +100,9 @@ export const Item = {
 
   changeName(item: Item, name: string): Item {
     if (!isValidName(name)) {
-      throw new Error("商品名は1文字以上20文字以下でなければなりません");
+      throw new ValidationError(
+        "Product name must be between 1 and 20 characters",
+      );
     }
     return {
       ...item,
@@ -106,7 +113,9 @@ export const Item = {
 
   changeDescription(item: Item, description: string): Item {
     if (!isValidDescription(description)) {
-      throw new Error("商品説明は1文字以上1000文字以下でなければなりません");
+      throw new ValidationError(
+        "Product description must be between 1 and 1000 characters",
+      );
     }
     return {
       ...item,

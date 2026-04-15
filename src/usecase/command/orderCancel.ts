@@ -16,6 +16,7 @@ import type {
   DbClient,
 } from "../../infrastructure/database/db.js";
 import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
+import { NotFoundError } from "../../domain/model/shared/error.js";
 
 type Deps = {
   readonly db: AppDatabase;
@@ -38,7 +39,7 @@ export const orderCancel = (deps: Deps, input: Input): OrderDto => {
 
     const order = orderRepository.findById(input.orderId);
     if (!order) {
-      throw new Error("Order not found");
+      throw new NotFoundError("Order not found");
     }
 
     const updatedOrder = Order.cancel(order);
@@ -50,7 +51,7 @@ export const orderCancel = (deps: Deps, input: Input): OrderDto => {
 
     const updatedItem = itemRepository.findById(order.itemId);
     if (!updatedItem) {
-      throw new Error("Item not found");
+      throw new NotFoundError("Item not found");
     }
     const updatedUpdatedItem = Item.changeStatus(
       updatedItem,

@@ -1,4 +1,5 @@
 import type { Brand } from "../shared/brand.js";
+import { ValidationError } from "../shared/error.js";
 
 export const ItemStatusMap = {
   SELLABLE: 0,
@@ -23,7 +24,7 @@ export const ItemStatus = {
 
   reconstitute(value: number): ItemStatus {
     if (!ITEM_STATUS_VALUES.has(value)) {
-      throw new Error(`Invalid item status: ${value}`);
+      throw new ValidationError(`Invalid item status: ${value}`);
     }
     return value as ItemStatus;
   },

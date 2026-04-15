@@ -16,6 +16,7 @@ import type {
   DbClient,
 } from "../../infrastructure/database/db.js";
 import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
+import { NotFoundError } from "../../domain/model/shared/error.js";
 
 type Deps = {
   readonly db: AppDatabase;
@@ -42,7 +43,7 @@ export const orderPurchase = (deps: Deps, input: Input): OrderDto => {
 
     const item = itemRepository.findById(input.itemId);
     if (!item || !Item.isSellable(item)) {
-      throw new Error("Item not found");
+      throw new NotFoundError("Item not found");
     }
     const updatedItem = Item.changeStatus(
       item,
