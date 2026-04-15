@@ -7,9 +7,10 @@ alwaysApply: true
 
 ## 値オブジェクト（VO）
 
-- プリミティブをそのまま渡さず、**ブランド型**や列挙で意味を付ける。
-- **永続化・API 向けの素の値**は `toValue(vo)` で取り出す（必須）。
-- **DB から読み込んだ値**は不変条件を満たすか検証したうえで **`reconstitute`** で復元する。新規生成は **`create`**。
+- プリミティブをそのまま渡さず、ブランド型や列挙で意味を付ける。
+- 永続化・API 向けの素の値は `toValue(vo)` メソッドで取り出す（必須）。
+- 新規生成は `create` メソッドを実装。
+- DB から読み込んだ値は不変条件を満たすか検証したうえで `reconstitute` メソッドを実装で復元する。
 
 ```typescript
 export type Money = Brand<number, "Money">;
@@ -31,8 +32,8 @@ export const Money = {
 
 ## エンティティ（Entity）
 
-- **`type X = { ... }`** で形状を宣言し、ファクトリ・振る舞いは **`export const X = { ... }`** にまとめる（本リポの `Item` などと同型）。
-- 新規は **`create`**。DB 行から組み立てるときだけ **`reconstitute`**（検証は VO 側や必要ならここでも）。
+- `type X = { ... }` で形状を宣言し、ファクトリ・振る舞いは `export const X = { ... }` にまとめる。
+- 新規は `create`。DB 行から組み立てるときだけ `reconstitute`（検証は VO 側や必要ならここでも）。
 
 ```typescript
 export type Order = { readonly id: string /* ... */ };
@@ -57,9 +58,9 @@ export const Order = {
 
 ## ドメインサービス（Domain Service）
 
-- **`src/domain/service/`** に置く（現状は未使用のディレクトリ）。**複数の Entity / VO をまたぐルール**（送金・割当・照合など）向け。DB や HTTP の手順は **ユースケース**。
-- **`domain/model` の型だけ** import。**DB・リポジトリ・インフラは import しない**。足りないデータはユースケースが取得して **引数で渡す**。
-- **`export const XxxService = { ... } as const`** でまとめる（Entity と同型の書き方）。
+- `src/domain/service/` に置く（現状は未使用のディレクトリ）。複数の Entity / VO をまたぐルール（送金・割当・照合など）向け。DB や HTTP の手順はユースケース。
+- `domain/model` の型だけ import。DB・リポジトリ・インフラは import しない。足りないデータはユースケースが取得して引数で渡す。
+- `export const XxxService = { ... } as const` でまとめる（Entity と同型の書き方）。
 
 ```typescript
 // domain/service/transferPolicy.ts（例: User と金額 VO を横断する送金ルール）
@@ -76,8 +77,9 @@ export const TransferPolicy = {
 
 ## リポジトリインターフェース(I\*Repository)
 
-- **`domain/model/<feature>/I*Repository.ts`** に置く。実装クラス名ではなく **`I` プレフィックス + `interface`**。
-- ドメインの **`Entity` / `VO` 型**だけを入出力に使い、Drizzle の行型や `db` をここに出さない。
+- `domain/model/<feature>/I*Repository.ts` に置く。
+- 実装クラス名ではなく `I` プレフィックス + `interface`。
+- ドメインの `Entity` / `VO` 型だけを入出力に使い、Drizzle の行型や `db` をここに出さない。
 
 ```typescript
 import type { Item } from "./Item.js";
@@ -90,8 +92,8 @@ export interface IItemRepository {
 
 ## リポジトリ(create\*Repository)
 
-- **`createItemRepository(db: DbClient): IItemRepository`** のように、**ファクトリ関数**で返す（本リポの約束）。
-- 保存時は `Xxx.toValue(...)`、読込時は `Xxx.reconstitute(...)` と **`Entity.reconstitute`** でドメインオブジェクトに戻す。
+- `createItemRepository(db: DbClient): IItemRepository` のように、ファクトリ関数で返す（本リポの約束）。
+- 保存時は `Xxx.toValue(...)`、読込時は `Xxx.reconstitute(...)` と `Entity.reconstitute` でドメインオブジェクトに戻す。
 
 ```typescript
 export const createItemRepository = (db: DbClient): IItemRepository => ({
@@ -115,10 +117,10 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
 
 ## ユースケース(command / query)
 
-- 関数は **`(deps: Deps, input: Input) => Output`**。
-- **`Deps`**: 読み取り・単一保存は **`db`（`AppDatabase`）** と **`create*Repository: (client: DbClient) => I*Repository`**。複数テーブルを同一トランザクションで更新するコマンドは **`txManager: ITransactionManager<DbClient>`**（`domain/model/shared/ITransactionManager.ts`）とリポジトリファクトリ。ユースケース内は **`deps.txManager.run((tx) => { ... })`** で囲み、**`deps.db.transaction` は直接呼ばない**（実装は `createTransactionManager(db)`）。
-- **`Input`**: HTTP のクエリ・ボディを想定した **プリミティブ／素のオブジェクト**（ルートでパースした値を渡す）。
-- 戻り値は **`DTO` 型**にし、必要なら **`dtoSchema.parse(...)`** で形を固定する。
+- 関数は `(deps: Deps, input: Input) => Output`。
+- `Deps`: 読み取り・単一保存は `db`（`AppDatabase`）と `create*Repository: (client: DbClient) => I*Repository`。複数テーブルを同一トランザクションで更新するコマンドは `txManager: ITransactionManager<DbClient>`（`domain/model/shared/ITransactionManager.ts`）とリポジトリファクトリ。ユースケース内は `deps.txManager.run((tx) => { ... })` で囲み、`deps.db.transaction` は直接呼ばない（実装は `createTransactionManager(db)`）。
+- `Input`: HTTP のクエリ・ボディを想定したプリミティブ／素のオブジェクト（ルートでパースした値を渡す）。
+- 戻り値は `DTO` 型にし、必要なら `dtoSchema.parse(...)` で形を固定する。
 - １つのファイルに１つのユースケースを書く。
 
 ```typescript
@@ -141,8 +143,8 @@ export const sellItem = (deps: Deps, input: Input): ItemDto => {
 
 ## DTO
 
-- **`usecase/dto/*.ts`** に **`zod` スキーマ**と **`z.infer` 型**を定義する。
-- レスポンス・リクエストの境界で **プリミティブ寄りの形**にそろえる（日時は `z.coerce.date()` など）。
+- `usecase/dto/*.ts` に `zod` スキーマと `z.infer` 型を定義する。
+- レスポンス・リクエストの境界でプリミティブ寄りの形にそろえる（日時は `z.coerce.date()` など）。
 
 ```typescript
 export const itemDtoSchema = z.object({
@@ -155,12 +157,12 @@ export type ItemDto = z.infer<typeof itemDtoSchema>;
 
 ## コントローラー（presentation/controllers）
 
-- **`src/presentation/controllers/`** に、機能（リソース）ごとに **`export const xxxController = { ... } as const`** でハンドラをまとめる。
-- **ユースケースは Hono を知らない**。コントローラだけが `Context`（`c.req.json()`、`c.req.param()`、`c.get("db")` 等）に触れ、**プリミティブや素のオブジェクト**を `Input` に渡す。
-- **`Deps`** はコントローラ内で組み立てる：`c.get("db")` と **`create*Repository` ファクトリ**（`infrastructure/repository`）。トランザクションが要る処理には **`createTransactionManager(db)`** で得た **`txManager`** も渡す。
-- **ビジネスルール・状態遷移は書かない**（`domain` の Entity / VO、または `usecase` の command / query に置く）。
-- **HTTP のステータス**は `c.json(body, status)` や、必要なら **`HTTPException`**。アプリ共通の例外→レスポンス変換は **`src/index.ts` の `app.onError`** に任せる（コントローラですべて `try/catch` する必要はない）。
-- **`routes/*.ts`** は薄く保ち、**メソッド・パス・ミドルウェア・コントローラメソッドの対応**だけを並べる。
+- `src/presentation/controllers/` に、機能（リソース）ごとに `export const xxxController = { ... } as const` でハンドラをまとめる。
+- ユースケースは Hono を知らない。コントローラだけが `Context`（`c.req.json()`、`c.req.param()`、`c.get("db")` 等）に触れ、プリミティブや素のオブジェクトを `Input` に渡す。
+- `Deps` はコントローラ内で組み立てる：`c.get("db")` と `create*Repository` ファクトリ（`infrastructure/repository`）。トランザクションが要る処理には `createTransactionManager(db)` で得た `txManager` も渡す。
+- ビジネスルール・状態遷移は書かない（`domain` の Entity / VO、または `usecase` の command / query に置く）。
+- HTTP のステータスは `c.json(body, status)` や、必要なら `HTTPException`。アプリ共通の例外→レスポンス変換は `src/index.ts` の `app.onError` に任せる（コントローラですべて `try/catch` する必要はない）。
+- `routes/*.ts` は薄く保ち、メソッド・パス・ミドルウェア・コントローラメソッドの対応だけを並べる。
 
 ```typescript
 // routes/items.ts
@@ -194,13 +196,13 @@ export const itemController = {
 
 ## 運用上の注意
 
-| 項目             | 約束                                                                                                                         |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| リポジトリ IF    | **ドメイン**（`domain/model/<feature>/I*Repository.ts`）にのみ定義                                                           |
-| VO               | **`toValue`** を持たせ、永続化・DTO 組み立てで使う                                                                           |
-| Entity / VO      | DB 復元用に **`reconstitute`** を用意（`create` とは分ける）                                                                 |
-| ドメインサービス | **`domain/service/`**。**複数 model をまたぐドメインルール**。インフラは import せず、データは引数で渡す                     |
-| リポジトリ実装   | **`create~Repository(db)`** 形式のファクトリで `I*Repository` を返す                                                         |
-| ユースケース     | **`Deps` + `Input`**。**DB + リポジトリファクトリ**、または **`ITransactionManager` + ファクトリ**（複数永続化を原子化）、`Input` に **リクエスト由来の値** |
-| ルート           | **`presentation/routes/`**。パス登録のみ。**`presentation/controllers/`** のメソッドへ委譲する                               |
-| コントローラ     | **`presentation/controllers/`**。`Context` ↔ ユースケースの橋。**ドメインロジックを持たない**                                |
+| 項目             | 約束                                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| リポジトリ IF    | ドメイン（`domain/model/<feature>/I*Repository.ts`）にのみ定義                                                                             |
+| VO               | `toValue` を持たせ、永続化・DTO 組み立てで使う                                                                                             |
+| Entity / VO      | DB 復元用に `reconstitute` を用意（`create` とは分ける）                                                                                   |
+| ドメインサービス | `domain/service/`。複数 model をまたぐドメインルール。インフラは import せず、データは引数で渡す                                           |
+| リポジトリ実装   | `create~Repository(db)` 形式のファクトリで `I*Repository` を返す                                                                           |
+| ユースケース     | `Deps` + `Input`。DB + リポジトリファクトリ、または `ITransactionManager` + ファクトリ（複数永続化を原子化）、`Input` にリクエスト由来の値 |
+| ルート           | `presentation/routes/`。パス登録のみ。`presentation/controllers/` のメソッドへ委譲する                                                     |
+| コントローラ     | `presentation/controllers/`。`Context` ↔ ユースケースの橋。ドメインロジックを持たない                                                      |

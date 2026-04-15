@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
 import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
 import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
@@ -5,11 +6,11 @@ import type {
   AppDatabase,
   DbClient,
 } from "../../infrastructure/database/db.js";
+import { items } from "../../infrastructure/database/schema.js";
 import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
 
 type Deps = {
   readonly db: AppDatabase;
-  readonly createItemRepository: (client: DbClient) => IItemRepository;
 };
 
 type Input = {
@@ -17,19 +18,28 @@ type Input = {
 };
 
 export const getItemDetail = (deps: Deps, input: Input): ItemDto | null => {
-  const item = deps.createItemRepository(deps.db).findById(input.itemId);
-  if (!item) {
+  // NOT USE REPOSITORY
+  // const item = deps.createItemRepository(deps.db).findById(input.itemId);
+
+  // Queryを直接実行する
+  const row = deps.db
+    .select()
+    .from(items)
+    .where(eq(items.id, input.itemId))
+    .limit(1)
+    .all()[0];
+
+  if (!row) {
     return null;
   }
-  const result = itemDtoSchema.parse({
-    id: item.id,
-    name: item.name,
-    description: item.description,
-    price: ItemPrice.toValue(item.price),
-    status: ItemStatus.toValue(item.status),
-    sellerId: item.sellerId,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
+  return itemDtoSchema.parse({
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    price: row.price,
+    status: row.status,
+    sellerId: row.sellerId,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   });
-  return result;
 };

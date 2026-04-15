@@ -6,6 +6,8 @@ import { getItemDetail } from "../../usecase/query/getItemDetail.js";
 import type { DbVariables } from "../middleware/dbMiddleware.js";
 
 export const itemController = {
+  // Command
+
   /**
    * 商品を出品する
    * @param c - Hono context
@@ -31,6 +33,8 @@ export const itemController = {
     return c.json(result, 201);
   },
 
+  // Query
+
   /**
    * 商品一覧を取得する
    * @param c - Hono context
@@ -38,7 +42,7 @@ export const itemController = {
    */
   list: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
-    const result = await getItemAllList({ db, createItemRepository });
+    const result = await getItemAllList({ db });
     return c.json(result);
   },
 
@@ -50,7 +54,7 @@ export const itemController = {
   getById: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const itemId = c.req.param("itemId")!;
-    const result = await getItemDetail({ db, createItemRepository }, { itemId });
+    const result = await getItemDetail({ db }, { itemId });
     return c.json(result);
   },
 } as const;

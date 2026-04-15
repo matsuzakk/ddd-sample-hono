@@ -1,9 +1,6 @@
-import type { IOrderRepository } from "../../domain/model/order/IOrderRepository.js";
-import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
-import type {
-  AppDatabase,
-  DbClient,
-} from "../../infrastructure/database/db.js";
+import { eq } from "drizzle-orm";
+import type { AppDatabase } from "../../infrastructure/database/db.js";
+import { orders } from "../../infrastructure/database/schema.js";
 import { orderDtoSchema } from "../dto/orderDto.js";
 
 type Input = {
@@ -12,23 +9,23 @@ type Input = {
 
 type Deps = {
   readonly db: AppDatabase;
-  readonly createOrderRepository: (client: DbClient) => IOrderRepository;
 };
 
 export const getOrderList = (deps: Deps, input: Input) => {
-  const orders = deps
-    .createOrderRepository(deps.db)
-    .findByUserId(input.userId);
+  const rows = deps.db
+    .select()
+    .from(orders)
+    .where(eq(orders.userId, input.userId))
+    .all();
 
-  const result = orders.map((order) =>
+  return rows.map((row) =>
     orderDtoSchema.parse({
-      id: order.id,
-      userId: order.userId,
-      itemId: order.itemId,
-      status: OrderStatus.toValue(order.status),
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt,
+      id: row.id,
+      userId: row.userId,
+      itemId: row.itemId,
+      status: row.status,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     }),
   );
-  return result;
 };

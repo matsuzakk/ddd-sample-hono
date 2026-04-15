@@ -11,6 +11,8 @@ import { getOrderDetail } from "../../usecase/query/getOrderDetail.js";
 import type { DbVariables } from "../middleware/dbMiddleware.js";
 
 export const orderController = {
+  // Command
+
   /**
    * 商品を購入する
    * @param c - Hono context
@@ -85,6 +87,8 @@ export const orderController = {
     return c.json(result);
   },
 
+  // Query
+
   /**
    * 注文を取得する
    * @param c - Hono context
@@ -93,10 +97,7 @@ export const orderController = {
   getById: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const orderId = c.req.param("orderId")!;
-    const result = await getOrderDetail(
-      { db, createOrderRepository, createOrderHistoryRepository },
-      { orderId },
-    );
+    const result = await getOrderDetail({ db }, { orderId });
     return c.json(result);
   },
 } as const;

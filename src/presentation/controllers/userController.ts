@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
-import { createOrderRepository } from "../../infrastructure/repository/orderRepository.js";
 import { createUserRepository } from "../../infrastructure/repository/userRepository.js";
 import { registerUser } from "../../usecase/command/registerUser.js";
 import { getItemSellList } from "../../usecase/query/getItemSellList.js";
@@ -8,6 +7,8 @@ import { getOrderList } from "../../usecase/query/getOrderList.js";
 import type { DbVariables } from "../middleware/dbMiddleware.js";
 
 export const userController = {
+  // Command
+
   /**
    * ユーザーを登録する
    * @param c - Hono context
@@ -23,6 +24,8 @@ export const userController = {
     return c.json(result, 201);
   },
 
+  // Query
+
   /**
    * ユーザーが出品した商品一覧を取得する
    * @param c - Hono context
@@ -31,10 +34,7 @@ export const userController = {
   listSellerItems: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const userId = c.req.param("userId")!;
-    const result = await getItemSellList(
-      { db, createItemRepository },
-      { sellerId: userId },
-    );
+    const result = await getItemSellList({ db }, { sellerId: userId });
     return c.json(result);
   },
 
@@ -46,7 +46,7 @@ export const userController = {
   listOrders: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const userId = c.req.param("userId")!;
-    const result = await getOrderList({ db, createOrderRepository }, { userId });
+    const result = await getOrderList({ db }, { userId });
     return c.json(result);
   },
 } as const;

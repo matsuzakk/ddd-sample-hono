@@ -5,26 +5,30 @@ import type {
   AppDatabase,
   DbClient,
 } from "../../infrastructure/database/db.js";
+import { items } from "../../infrastructure/database/schema.js";
 import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
 
 type Deps = {
   readonly db: AppDatabase;
-  readonly createItemRepository: (client: DbClient) => IItemRepository;
 };
 
 export const getItemAllList = (deps: Deps): ItemDto[] => {
-  const items = deps.createItemRepository(deps.db).findAll();
+  // NOT USE REPOSITORY
+  // const items = deps.createItemRepository(deps.db).findAll();
 
-  const result = items.map((item) =>
+  // Queryを直接実行する
+  const rows = deps.db.select().from(items).all();
+
+  const result = rows.map((row) =>
     itemDtoSchema.parse({
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      price: ItemPrice.toValue(item.price),
-      status: ItemStatus.toValue(item.status),
-      sellerId: item.sellerId,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      status: row.status,
+      sellerId: row.sellerId,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     }),
   );
   return result;
