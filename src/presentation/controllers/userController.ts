@@ -1,5 +1,4 @@
 import type { Context } from "hono";
-import { HTTPException } from "hono/http-exception";
 import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
 import { createOrderRepository } from "../../infrastructure/repository/orderRepository.js";
 import { createUserRepository } from "../../infrastructure/repository/userRepository.js";
@@ -17,15 +16,11 @@ export const userController = {
   register: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
     const body = await c.req.json<{ name: string; email: string }>();
-    try {
-      const result = await registerUser(
-        { db, createUserRepository },
-        { name: body.name, email: body.email },
-      );
-      return c.json(result, 201);
-    } catch (e) {
-      throw new HTTPException(400, { message: String(e) });
-    }
+    const result = await registerUser(
+      { db, createUserRepository },
+      { name: body.name, email: body.email },
+    );
+    return c.json(result, 201);
   },
 
   /**

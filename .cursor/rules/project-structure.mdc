@@ -27,9 +27,10 @@ DDD のレイヤを `src/` 配下にまとめた **Hono + TypeScript + SQLite（
 │   │   ├── command/           # 状態を変える操作（登録・購入・発送・キャンセル等）
 │   │   ├── query/             # 参照系（一覧・詳細等）
 │   │   └── dto/               # ユースケース入出力用のデータ形式
-│   ├── presentation/          # インターフェース層（Hono Handler）
-│   │   ├── middleware/        # ミドルウェア
-│   │   └── routes/            # ユースケースを呼び出すパス別ルータ
+│   ├── presentation/          # インターフェース層（HTTP）
+│   │   ├── middleware/        # ミドルウェア（例: DB を Context に載せる）
+│   │   ├── controllers/       # ユースケース呼び出し・レスポンス組み立て
+│   │   └── routes/            # パスとメソッド、ミドルウェアの登録
 │   └── infrastructure/        # インフラ層（永続化の具体実装）
 │       ├── database/          # Drizzle スキーマ、DB 接続、migrations
 │       └── repository/        # I*Repository の実装

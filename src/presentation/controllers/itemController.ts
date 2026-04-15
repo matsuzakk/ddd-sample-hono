@@ -1,5 +1,4 @@
 import type { Context } from "hono";
-import { HTTPException } from "hono/http-exception";
 import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
 import { itemSell } from "../../usecase/command/itemSell.js";
 import { itemDetail } from "../../usecase/query/itemDetail.js";
@@ -20,20 +19,16 @@ export const itemController = {
       description: string;
       price: number;
     }>();
-    try {
-      const result = await itemSell(
-        { db, createItemRepository },
-        {
-          sellerId: body.sellerId,
-          name: body.name,
-          description: body.description,
-          price: body.price,
-        },
-      );
-      return c.json(result, 201);
-    } catch (e) {
-      throw new HTTPException(400, { message: String(e) });
-    }
+    const result = await itemSell(
+      { db, createItemRepository },
+      {
+        sellerId: body.sellerId,
+        name: body.name,
+        description: body.description,
+        price: body.price,
+      },
+    );
+    return c.json(result, 201);
   },
 
   /**
@@ -56,9 +51,6 @@ export const itemController = {
     const db = c.get("db");
     const itemId = c.req.param("itemId")!;
     const result = await itemDetail({ db, createItemRepository }, { itemId });
-    if (!result) {
-      throw new HTTPException(404, { message: "Item not found" });
-    }
     return c.json(result);
   },
 } as const;
