@@ -1,11 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
-import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
-import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
-import type {
-  AppDatabase,
-  DbClient,
-} from "../../infrastructure/database/db.js";
+import type { AppDatabase } from "../../infrastructure/database/db.js";
 import { items } from "../../infrastructure/database/schema.js";
 import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
 
@@ -18,10 +12,6 @@ type Input = {
 };
 
 export const getItemDetail = (deps: Deps, input: Input): ItemDto | null => {
-  // NOT USE REPOSITORY
-  // const item = deps.createItemRepository(deps.db).findById(input.itemId);
-
-  // Queryを直接実行する
   const row = deps.db
     .select()
     .from(items)

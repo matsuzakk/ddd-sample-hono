@@ -1,5 +1,4 @@
 import type { Context } from "hono";
-import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
 import { createUserRepository } from "../../infrastructure/repository/userRepository.js";
 import { registerUser } from "../../usecase/command/registerUser.js";
 import { getItemSellList } from "../../usecase/query/getItemSellList.js";

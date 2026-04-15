@@ -18,23 +18,6 @@ export const createOrderRepository = (db: DbClient): IOrderRepository => ({
       })
       .run();
   },
-  findByUserId: (userId: string) => {
-    const rows = db
-      .select()
-      .from(orders)
-      .where(eq(orders.userId, userId))
-      .all();
-    return rows.map((row) =>
-      Order.reconstitute(
-        row.id,
-        row.userId,
-        row.itemId,
-        OrderStatus.reconstitute(row.status),
-        row.createdAt,
-        row.updatedAt,
-      ),
-    );
-  },
   findById: (id: string) => {
     const rows = db
       .select()

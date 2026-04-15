@@ -1,10 +1,4 @@
-import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
-import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
-import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
-import type {
-  AppDatabase,
-  DbClient,
-} from "../../infrastructure/database/db.js";
+import type { AppDatabase } from "../../infrastructure/database/db.js";
 import { items } from "../../infrastructure/database/schema.js";
 import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
 
@@ -13,10 +7,6 @@ type Deps = {
 };
 
 export const getItemAllList = (deps: Deps): ItemDto[] => {
-  // NOT USE REPOSITORY
-  // const items = deps.createItemRepository(deps.db).findAll();
-
-  // Queryを直接実行する
   const rows = deps.db.select().from(items).all();
 
   const result = rows.map((row) =>

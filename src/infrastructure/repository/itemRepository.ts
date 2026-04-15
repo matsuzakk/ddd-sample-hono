@@ -22,21 +22,6 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
       })
       .run();
   },
-  findAll: () => {
-    const rows = db.select().from(items).all();
-    return rows.map((row) =>
-      Item.reconstitute(
-        row.id,
-        row.name,
-        row.description,
-        ItemPrice.reconstitute(row.price),
-        ItemStatus.reconstitute(row.status),
-        row.sellerId,
-        row.createdAt,
-        row.updatedAt,
-      ),
-    );
-  },
   findById: (id: string) => {
     const rows = db.select().from(items).where(eq(items.id, id)).limit(1).all();
     const row = rows[0];
@@ -53,25 +38,6 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
       row.sellerId,
       row.createdAt,
       row.updatedAt,
-    );
-  },
-  findBySellerId: (sellerId: string) => {
-    const rows = db
-      .select()
-      .from(items)
-      .where(eq(items.sellerId, sellerId))
-      .all();
-    return rows.map((row) =>
-      Item.reconstitute(
-        row.id,
-        row.name,
-        row.description,
-        ItemPrice.reconstitute(row.price),
-        ItemStatus.reconstitute(row.status),
-        row.sellerId,
-        row.createdAt,
-        row.updatedAt,
-      ),
     );
   },
   update: (item: Item) => {
