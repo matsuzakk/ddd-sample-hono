@@ -20,7 +20,9 @@ export const createApp = (options?: AppOptions) => {
   const app = new Hono<{ Variables: DbVariables }>();
 
   app.onError((err, c) => {
-    console.error(err);
+    if (process.env.NODE_ENV !== "test") {
+      console.error(err);
+    }
 
     if (err instanceof HTTPException) {
       return err.getResponse();
