@@ -1,3 +1,86 @@
 ---
+description: ドメイン・ユースケース・E2Eのテスト方針とサンプル
 alwaysApply: true
 ---
+
+# テスト方針
+
+フレームワークや設定値の詳細には踏み込まず、**何を守るテストか**を層ごとに分けて書く。
+
+## ドメイン（`src/domain/**/*.test.ts`）
+
+- 値オブジェクト・エンティティの**不変条件**（許容範囲・禁止遷移）を優先する。
+- **正常系**と**代表例の異常系**が分かるようにケースを分ける。
+- インフラ（DB・HTTP）に依存させず、ファクトリ（`create` / `reconstitute`）と純粋な振る舞いだけを検証する。
+- ドメインエラーの**意味**（ユーザー向けメッセージやコードの意図）がテスト名から読み取れるようにする。
+- リポジトリやユースケースの振る舞いはここでは書かない（責務の境界）。
+
+```typescript
+import { describe, expect, it } from "vitest";
+import { Order } from "./Order.js";
+import { OrderStatusMap } from "./OrderStatus.js";
+
+describe("Order", () => {
+  it("購入済みの注文のみ発送済みへ遷移できる", () => {
+    const order = Order.reconstitute(/* ...購入済み... */);
+    const shipped = Order.markShipped(order);
+    expect(shipped.status).toBe(OrderStatusMap.SHIPPED);
+  });
+});
+```
+
+## ユースケース（`src/usecase/**/*.test.ts`）
+
+- **ユースケース1本＝1つの振る舞い**（コマンド／クエリ）を軸に、入出力の意味が伝わるテスト名にする。
+- ドメインで保証したルールは重ねて細かく検証せず、**アプリケーションの編集結果**（永続化の結果・返却DTOの形）に焦点を当てる。
+- DB は**インメモリ等のテスト用**に切り替え、本番ファイルを汚さない。
+- 失敗系は**ビジネス上起こりうる理由**（見つからない・不正な状態遷移など）に対応させる。
+- コントローラやルーティングは含めない（HTTPはE2Eへ）。
+
+```typescript
+import { describe, expect, it } from "vitest";
+import { createMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
+import { registerUser } from "./registerUser.js";
+
+describe("registerUser", () => {
+  it("ユーザーを登録するとDTOに名前とメールが含まれる", () => {
+    const { db, close } = createMemoryAppDatabase();
+    try {
+      const dto = registerUser(/* deps */, { name: "...", email: "a@b.co" });
+      expect(dto.name).toBe("...");
+    } finally {
+      close();
+    }
+  });
+});
+```
+
+## E2E（`e2e/**/*.spec.ts`）
+
+- **HTTPの入口から出口まで**を見る。ドメインの細かい分岐の網羅はユースケース／ドメインに任せる。
+- `describe` は **`METHOD パス`**（例: `POST /orders`）、`test` は**日本語で検証内容**＋期待ステータスを括弧で添える。
+- データ準備は**モック定数とシード関数**に寄せ、各テストで意図が読み取れるようにする。
+- ステータスコードは**仕様の約束**として検証し、本文は業務上重要なフィールドに絞る。
+- テストごとに**DBを分離**し、前のテストの副作用に依存しない。
+
+```typescript
+import { describe, expect, test } from "vitest";
+import { createE2eApp, seedData } from "./config/setup.js";
+
+describe("POST /orders", () => {
+  test("出品中の商品を購入すると注文が作成され購入済みになる(201)", async () => {
+    const { app, close } = createE2eApp();
+    try {
+      const { buyer, item } = await seedData(app);
+      const res = await app.request("/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: buyer.id, itemId: item.id }),
+      });
+      expect(res.status).toBe(201);
+    } finally {
+      close();
+    }
+  });
+});
+```
