@@ -1,4 +1,4 @@
-import { MOCK_USER } from "./user";
+import { MOCK_USER } from "./user.js";
 
 export const MOCK_ITEM = {
   SAMPLE: {
