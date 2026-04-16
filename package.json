@@ -10,7 +10,8 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "e2e": "vitest run --config e2e/config/vitest.e2e.config.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.12",

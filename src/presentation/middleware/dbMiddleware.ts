@@ -9,10 +9,18 @@ export type DbVariables = {
 /**
  * Attaches Drizzle `db` to Hono context: `c.get("db")`.
  */
-export const dbMiddleware: MiddlewareHandler<{
+export const createDbMiddleware = (
+  resolveDb: () => AppDatabase,
+): MiddlewareHandler<{
   Variables: DbVariables;
-}> = async (c, next) => {
-  const { db } = getDatabase();
-  c.set("db", db);
-  await next();
+}> => {
+  return async (c, next) => {
+    c.set("db", resolveDb());
+    await next();
+  };
 };
+
+/**
+ * Default: shared app DB from `getDatabase()`.
+ */
+export const dbMiddleware = createDbMiddleware(() => getDatabase().db);
