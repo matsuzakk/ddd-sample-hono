@@ -25,11 +25,15 @@ type Input = {
 
 export const sellItemUsecase = (deps: Deps, input: Input): ItemDto => {
   const userRepository = deps.createUserRepository(deps.db);
+
   const seller = userRepository.findById(input.sellerId);
+
+  // 販売者のユーザーが存在しない場合はエラー
   if (!seller) {
     throw new NotFoundError("Seller not found");
   }
 
+  // 販売する商品を登録
   const itemRepository = deps.createItemRepository(deps.db);
   const item = Item.create(
     crypto.randomUUID(),

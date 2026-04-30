@@ -75,8 +75,11 @@ describe("GET /users/orders", () => {
 
       const purchaseRes = await app.request("/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: buyer.id, itemId: item.id }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": buyer.id,
+        },
+        body: JSON.stringify({ itemId: item.id }),
       });
       expect(purchaseRes.status).toBe(201);
       const order = (await purchaseRes.json()) as { id: string };

@@ -4,6 +4,8 @@ import { getOrderListUsecase } from "../../usecase/query/getOrderListUsecase.js"
 import type { AppVariables } from "../../env.js";
 
 export const userController = {
+  // Query
+
   /**
    * ユーザーが出品した商品一覧を取得する
    * @param c - Hono context

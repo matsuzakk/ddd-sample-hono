@@ -1,3 +1,5 @@
+import { eq } from "drizzle-orm";
+import { ItemStatusMap } from "../../domain/model/item/ItemStatus.js";
 import type { AppDatabase } from "../../infrastructure/database/db.js";
 import { items } from "../../infrastructure/database/schema.js";
 import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
@@ -7,7 +9,11 @@ type Deps = {
 };
 
 export const getItemAllListUsecase = (deps: Deps): ItemDto[] => {
-  const rows = deps.db.select().from(items).all();
+  const rows = deps.db
+    .select()
+    .from(items)
+    .where(eq(items.status, ItemStatusMap.SELLABLE))
+    .all();
 
   const result = rows.map((row) =>
     itemDtoSchema.parse({

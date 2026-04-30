@@ -53,11 +53,13 @@ curl -sS -b cookies.txt "http://localhost:3000/auth/get-session" | jq
 curl -sS "http://localhost:3000/health"
 ```
 
+以下のAPIは、**要セッション**です。
+
 ## Users (`/users`)
 
 ### ユーザーが出品した商品一覧を取得する
 
-`GET /users/:userId/items` … **要セッション**
+`GET /users/:userId/items`
 
 ```bash
 curl -sS "http://localhost:3000/users/sellItems" \
@@ -66,7 +68,7 @@ curl -sS "http://localhost:3000/users/sellItems" \
 
 ### ユーザーの注文履歴を取得する
 
-`GET /users/:userId/orders` … **要セッション**
+`GET /users/:userId/orders`
 
 ```bash
 curl -sS "http://localhost:3000/users/orders" \
@@ -77,7 +79,7 @@ curl -sS "http://localhost:3000/users/orders" \
 
 ### 商品を出品する
 
-`POST /items` … **要セッション**
+`POST /items`
 
 ```bash
 curl -sS -X POST "http://localhost:3000/items" \
@@ -88,7 +90,7 @@ curl -sS -X POST "http://localhost:3000/items" \
 
 ### 出品されている商品一覧をすべて取得する
 
-`GET /items` … **要セッション**
+`GET /items`
 
 ```bash
 curl -sS "http://localhost:3000/items" \
@@ -97,7 +99,7 @@ curl -sS "http://localhost:3000/items" \
 
 ### 商品詳細を取得する
 
-`GET /items/:itemId` … **要セッション**
+`GET /items/:itemId`
 
 ```bash
 curl -sS "http://localhost:3000/items/ITEM_ID_HERE" \
@@ -108,18 +110,18 @@ curl -sS "http://localhost:3000/items/ITEM_ID_HERE" \
 
 ### 商品を購入する
 
-`POST /orders` … **要セッション**
+`POST /orders`
 
 ```bash
 curl -sS -X POST "http://localhost:3000/orders" \
   -H "Content-Type: application/json" \
   -b cookies.txt \
-  -d '{"userId":"BUYER_USER_ID","itemId":"ITEM_ID_HERE"}' | jq
+  -d '{"itemId":"ITEM_ID_HERE"}' | jq
 ```
 
 ### 注文をキャンセルする
 
-`PUT /orders/:orderId/cancel` … **要セッション**
+`PUT /orders/:orderId/cancel`
 
 ```bash
 curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/cancel" \
@@ -128,7 +130,7 @@ curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/cancel" \
 
 ### 注文を発送する
 
-`PUT /orders/:orderId/ship` … **要セッション**
+`PUT /orders/:orderId/ship`
 
 ```bash
 curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/ship" \
@@ -137,7 +139,7 @@ curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/ship" \
 
 ### 注文を配達完了にする
 
-`PUT /orders/:orderId/deliver` … **要セッション**
+`PUT /orders/:orderId/deliver`
 
 ```bash
 curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/deliver" \
@@ -146,7 +148,7 @@ curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/deliver" \
 
 ### 注文詳細を取得する
 
-`GET /orders/:orderId` … **要セッション**
+`GET /orders/:orderId`
 
 ```bash
 curl -sS "http://localhost:3000/orders/ORDER_ID_HERE" \

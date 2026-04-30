@@ -11,8 +11,11 @@ describe("POST /orders", () => {
 
       const res = await app.request("/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: buyer.id, itemId: item.id }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": buyer.id,
+        },
+        body: JSON.stringify({ itemId: item.id }),
       });
 
       expect(res.status).toBe(201);
@@ -40,11 +43,11 @@ describe("POST /orders", () => {
 
       const res = await app.request("/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.id,
-          itemId: "missing-item-id",
-        }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": user.id,
+        },
+        body: JSON.stringify({ itemId: "missing-item-id" }),
       });
 
       expect(res.status).toBe(404);
@@ -64,8 +67,11 @@ describe("GET /orders/:orderId", () => {
 
       const purchaseRes = await app.request("/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: buyer.id, itemId: item.id }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": buyer.id,
+        },
+        body: JSON.stringify({ itemId: item.id }),
       });
       expect(purchaseRes.status).toBe(201);
       const created = (await purchaseRes.json()) as { id: string };
@@ -98,8 +104,11 @@ describe("PUT /orders/:orderId/ship", () => {
 
       const purchaseRes = await app.request("/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: buyer.id, itemId: item.id }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": buyer.id,
+        },
+        body: JSON.stringify({ itemId: item.id }),
       });
       const order = (await purchaseRes.json()) as { id: string };
 
@@ -125,8 +134,11 @@ describe("PUT /orders/:orderId/deliver", () => {
 
       const purchaseRes = await app.request("/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: buyer.id, itemId: item.id }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": buyer.id,
+        },
+        body: JSON.stringify({ itemId: item.id }),
       });
       const order = (await purchaseRes.json()) as { id: string };
 
@@ -165,8 +177,11 @@ describe("PUT /orders/:orderId/cancel", () => {
 
       const purchaseRes = await app.request("/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: buyer.id, itemId: item.id }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": buyer.id,
+        },
+        body: JSON.stringify({ itemId: item.id }),
       });
       const order = (await purchaseRes.json()) as { id: string };
 

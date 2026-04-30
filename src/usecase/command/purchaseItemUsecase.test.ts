@@ -10,11 +10,11 @@ import {
   ValidationError,
 } from "../../domain/model/shared/error.js";
 import { createPassthroughTxManager } from "../../infrastructure/database/test/testDb.js";
-import { purchaseOrderUsecase } from "./purchaseOrderUsecase.js";
+import { purchaseItemUsecase } from "./purchaseItemUsecase.js";
 
-type PurchaseOrderDeps = Parameters<typeof purchaseOrderUsecase>[0];
+type PurchaseItemDeps = Parameters<typeof purchaseItemUsecase>[0];
 
-describe("purchaseOrder", () => {
+describe("purchaseItemUsecase", () => {
   let mockItemRepository: {
     create: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
@@ -26,7 +26,7 @@ describe("purchaseOrder", () => {
     update: ReturnType<typeof vi.fn>;
   };
   let mockOrderHistoryRepository: { create: ReturnType<typeof vi.fn> };
-  let deps: PurchaseOrderDeps;
+  let deps: PurchaseItemDeps;
 
   beforeEach(() => {
     mockItemRepository = {
@@ -70,7 +70,7 @@ describe("purchaseOrder", () => {
       .mockReturnValueOnce("20000000-0000-4000-8000-000000000001");
 
     // 実行
-    const dto = purchaseOrderUsecase(deps, {
+    const dto = purchaseItemUsecase(deps, {
       userId: "buyer",
       itemId: "item-1",
     });
@@ -107,7 +107,7 @@ describe("purchaseOrder", () => {
 
     // 実行 & 検証
     expect(() =>
-      purchaseOrderUsecase(deps, { userId: "buyer", itemId: "missing" }),
+      purchaseItemUsecase(deps, { userId: "buyer", itemId: "missing" }),
     ).toThrow(NotFoundError);
     expect(mockItemRepository.update).not.toHaveBeenCalled();
     expect(mockOrderRepository.create).not.toHaveBeenCalled();
@@ -131,7 +131,7 @@ describe("purchaseOrder", () => {
 
     // 実行 & 検証
     expect(() =>
-      purchaseOrderUsecase(deps, { userId: "buyer", itemId: "item-1" }),
+      purchaseItemUsecase(deps, { userId: "buyer", itemId: "item-1" }),
     ).toThrow(NotFoundError);
   });
 
@@ -149,7 +149,7 @@ describe("purchaseOrder", () => {
 
     // 実行 & 検証
     expect(() =>
-      purchaseOrderUsecase(deps, { userId: "seller", itemId: "item-1" }),
+      purchaseItemUsecase(deps, { userId: "seller", itemId: "item-1" }),
     ).toThrow(ValidationError);
   });
 });

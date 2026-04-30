@@ -28,11 +28,15 @@ export const deliverOrderUsecase = (deps: Deps, input: Input): OrderDto => {
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
 
     const order = orderRepository.findById(input.orderId);
+    // 注文が存在しない場合
     if (!order) {
       throw new NotFoundError("Order not found");
     }
 
+    // 注文を配達完了にする
     const updatedOrder = Order.markDelivered(order);
+
+    // 注文履歴を発行する
     const history = OrderHistory.recordTransition(
       crypto.randomUUID(),
       order,

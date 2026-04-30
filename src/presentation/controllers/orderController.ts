@@ -5,7 +5,7 @@ import { createOrderHistoryRepository } from "../../infrastructure/repository/or
 import { createOrderRepository } from "../../infrastructure/repository/orderRepository.js";
 import { cancelOrderUsecase } from "../../usecase/command/cancelOrderUsecase.js";
 import { deliverOrderUsecase } from "../../usecase/command/deliverOrderUsecase.js";
-import { purchaseOrderUsecase } from "../../usecase/command/purchaseOrderUsecase.js";
+import { purchaseItemUsecase } from "../../usecase/command/purchaseItemUsecase.js";
 import { shipOrderUsecase } from "../../usecase/command/shipOrderUsecase.js";
 import { getOrderDetailUsecase } from "../../usecase/query/getOrderDetailUsecase.js";
 import type { AppVariables } from "../../env.js";
@@ -21,15 +21,17 @@ export const orderController = {
   purchase: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
-    const body = await c.req.json<{ userId: string; itemId: string }>();
-    const result = await purchaseOrderUsecase(
+    const userId = c.get("sessionUserId") as string;
+
+    const body = await c.req.json<{ itemId: string }>();
+    const result = await purchaseItemUsecase(
       {
         txManager,
         createItemRepository,
         createOrderRepository,
         createOrderHistoryRepository,
       },
-      { userId: body.userId, itemId: body.itemId },
+      { userId, itemId: body.itemId },
     );
     return c.json(result, 201);
   },
@@ -42,7 +44,9 @@ export const orderController = {
   cancel: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
+    const userId = c.get("sessionUserId") as string;
     const orderId = c.req.param("orderId")!;
+
     const result = await cancelOrderUsecase(
       {
         txManager,
@@ -50,7 +54,7 @@ export const orderController = {
         createOrderRepository,
         createOrderHistoryRepository,
       },
-      { orderId },
+      { userId, orderId },
     );
     return c.json(result);
   },
