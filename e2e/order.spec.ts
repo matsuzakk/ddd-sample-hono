@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { OrderStatusMap } from "../src/domain/model/order/OrderStatus.js";
 import { createE2eApp, seedData } from "./config/setup.js";
+import { MOCK_USER_PASSWORD } from "./mock/user.js";
 
 describe("POST /orders", () => {
   test("出品中の商品を購入すると注文が作成され購入済みになる(201)", async () => {
@@ -37,6 +38,7 @@ describe("POST /orders", () => {
         body: JSON.stringify({
           name: "Only user",
           email: "only@example.com",
+          password: MOCK_USER_PASSWORD,
         }),
       });
       expect(registerRes.status).toBe(201);

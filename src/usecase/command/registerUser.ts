@@ -1,32 +1,38 @@
-import type { IUserRepository } from "../../domain/model/user/IUserRepository.js";
-import { Email, User } from "../../domain/model/user/User.js";
-import type {
-  AppDatabase,
-  DbClient,
-} from "../../infrastructure/database/db.js";
+import { User } from "../../domain/model/user/User.js";
+import type { AuthInstance } from "../../infrastructure/auth/index.js";
 import { userDtoSchema, type UserDto } from "../dto/userDto.js";
 
 type Deps = {
-  readonly db: AppDatabase;
-  readonly createUserRepository: (client: DbClient) => IUserRepository;
+  readonly auth: AuthInstance;
 };
 
 type Input = {
   readonly name: string;
   readonly email: string;
+  readonly password: string;
 };
 
 /**
- * ユーザーを登録
+ * ユーザーを登録（better-auth メール＋パスワード）
  */
-export const registerUser = (deps: Deps, input: Input): UserDto => {
-  const user = User.create(crypto.randomUUID(), input.name, input.email);
-  deps.createUserRepository(deps.db).create(user);
+export const registerUser = async (
+  deps: Deps,
+  input: Input,
+): Promise<UserDto> => {
+  User.create("placeholder", input.name, input.email);
 
-  const result = userDtoSchema.parse({
-    id: user.id,
-    name: user.name,
-    email: Email.toValue(user.email),
+  const result = await deps.auth.api.signUpEmail({
+    body: {
+      name: input.name,
+      email: input.email,
+      password: input.password,
+    },
   });
-  return result;
+
+  const createdUser = result.user;
+  return userDtoSchema.parse({
+    id: createdUser.id,
+    name: createdUser.name,
+    email: createdUser.email,
+  });
 };

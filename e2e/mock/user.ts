@@ -10,3 +10,5 @@ export const MOCK_USER = {
     email: "buyer@example.com",
   },
 } as const;
+
+export const MOCK_USER_PASSWORD = "Password123" as const;

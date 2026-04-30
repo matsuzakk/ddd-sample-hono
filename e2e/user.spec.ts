@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { OrderStatusMap } from "../src/domain/model/order/OrderStatus.js";
 import { createE2eApp, seedData } from "./config/setup.js";
-import { MOCK_USER } from "./mock/user.js";
+import { MOCK_USER, MOCK_USER_PASSWORD } from "./mock/user.js";
 
 describe("POST /users", () => {
   test("名前とメールでユーザーを登録すると作成されたユーザーが返る(201)", async () => {
@@ -13,6 +13,7 @@ describe("POST /users", () => {
         body: JSON.stringify({
           name: MOCK_USER.SELLER.name,
           email: MOCK_USER.SELLER.email,
+          password: MOCK_USER_PASSWORD,
         }),
       });
 
@@ -40,6 +41,7 @@ describe("POST /users", () => {
         body: JSON.stringify({
           name: "Valid name",
           email: "not-an-email",
+          password: MOCK_USER_PASSWORD,
         }),
       });
 
@@ -60,6 +62,7 @@ describe("POST /users", () => {
         body: JSON.stringify({
           name: "",
           email: "empty-name@example.com",
+          password: MOCK_USER_PASSWORD,
         }),
       });
 
@@ -100,6 +103,7 @@ describe("GET /users/:userId/items", () => {
         body: JSON.stringify({
           name: "No items user",
           email: "no-items@example.com",
+          password: MOCK_USER_PASSWORD,
         }),
       });
       expect(registerRes.status).toBe(201);
@@ -128,6 +132,7 @@ describe("GET /users/:userId/orders", () => {
         body: JSON.stringify({
           name: "No orders user",
           email: "no-orders@example.com",
+          password: MOCK_USER_PASSWORD,
         }),
       });
       expect(registerRes.status).toBe(201);

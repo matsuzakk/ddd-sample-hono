@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { createUserRepository } from "../../infrastructure/repository/userRepository.js";
+import { createAuth } from "../../infrastructure/auth/index.js";
 import { registerUser } from "../../usecase/command/registerUser.js";
 import { getItemSellList } from "../../usecase/query/getItemSellList.js";
 import { getOrderList } from "../../usecase/query/getOrderList.js";
@@ -15,10 +15,19 @@ export const userController = {
    */
   register: async (c: Context<{ Variables: DbVariables }>) => {
     const db = c.get("db");
-    const body = await c.req.json<{ name: string; email: string }>();
+    const auth = createAuth(db);
+    const body = await c.req.json<{
+      name: string;
+      email: string;
+      password: string;
+    }>();
     const result = await registerUser(
-      { db, createUserRepository },
-      { name: body.name, email: body.email },
+      { auth },
+      {
+        name: body.name,
+        email: body.email,
+        password: body.password,
+      },
     );
     return c.json(result, 201);
   },

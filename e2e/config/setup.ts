@@ -3,7 +3,7 @@ import { createApp } from "../../src/app.js";
 import { createMemoryAppDatabase } from "../../src/infrastructure/database/test/testDb.js";
 import type { DbVariables } from "../../src/presentation/middleware/dbMiddleware.js";
 import { MOCK_ITEM } from "../mock/item.js";
-import { MOCK_USER } from "../mock/user.js";
+import { MOCK_USER, MOCK_USER_PASSWORD } from "../mock/user.js";
 
 export const createE2eApp = () => {
   const { db, close } = createMemoryAppDatabase();
@@ -18,6 +18,7 @@ export const seedData = async (app: Hono<{ Variables: DbVariables }>) => {
     body: JSON.stringify({
       name: MOCK_USER.SELLER.name,
       email: MOCK_USER.SELLER.email,
+      password: MOCK_USER_PASSWORD,
     }),
   });
   if (!sellerRes.ok) {
@@ -31,6 +32,7 @@ export const seedData = async (app: Hono<{ Variables: DbVariables }>) => {
     body: JSON.stringify({
       name: MOCK_USER.BUYER.name,
       email: MOCK_USER.BUYER.email,
+      password: MOCK_USER_PASSWORD,
     }),
   });
   if (!buyerRes.ok) {

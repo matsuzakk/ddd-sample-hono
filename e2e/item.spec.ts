@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { ItemStatusMap } from "../src/domain/model/item/ItemStatus.js";
 import { createE2eApp, seedData } from "./config/setup.js";
 import { MOCK_ITEM } from "./mock/item.js";
-import { MOCK_USER } from "./mock/user.js";
+import { MOCK_USER, MOCK_USER_PASSWORD } from "./mock/user.js";
 
 describe("POST /items", () => {
   test("出品リクエストで商品が作成され出品中で返る(201)", async () => {
@@ -14,6 +14,7 @@ describe("POST /items", () => {
         body: JSON.stringify({
           name: MOCK_USER.SELLER.name,
           email: MOCK_USER.SELLER.email,
+          password: MOCK_USER_PASSWORD,
         }),
       });
       expect(registerRes.status).toBe(201);
@@ -53,6 +54,7 @@ describe("POST /items", () => {
         body: JSON.stringify({
           name: MOCK_USER.SELLER.name,
           email: MOCK_USER.SELLER.email,
+          password: MOCK_USER_PASSWORD,
         }),
       });
       const seller = (await registerRes.json()) as { id: string };
