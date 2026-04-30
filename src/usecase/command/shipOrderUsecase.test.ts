@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Item } from "../../domain/model/item/Item.js";
+import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
 import { Order } from "../../domain/model/order/Order.js";
 import {
   OrderStatus,
@@ -14,6 +16,11 @@ import { shipOrderUsecase } from "./shipOrderUsecase.js";
 type ShipOrderDeps = Parameters<typeof shipOrderUsecase>[0];
 
 describe("shipOrder", () => {
+  let mockItemRepository: {
+    create: ReturnType<typeof vi.fn>;
+    findById: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+  };
   let mockOrderRepository: {
     create: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
@@ -23,6 +30,11 @@ describe("shipOrder", () => {
   let deps: ShipOrderDeps;
 
   beforeEach(() => {
+    mockItemRepository = {
+      create: vi.fn(),
+      findById: vi.fn(),
+      update: vi.fn(),
+    };
     mockOrderRepository = {
       create: vi.fn(),
       findById: vi.fn(),
@@ -33,6 +45,7 @@ describe("shipOrder", () => {
     };
     deps = {
       txManager: createPassthroughTxManager(),
+      createItemRepository: vi.fn(() => mockItemRepository),
       createOrderRepository: vi.fn(() => mockOrderRepository),
       createOrderHistoryRepository: vi.fn(() => mockOrderHistoryRepository),
     };
@@ -47,11 +60,20 @@ describe("shipOrder", () => {
     mockOrderRepository.findById.mockReturnValue(
       Order.reconstitute(
         "order-1",
-        "user-1",
+        "buyer-1",
         "item-1",
         OrderStatus.create(OrderStatusMap.PURCHASED),
         new Date("2024-01-01T00:00:00.000Z"),
         new Date("2024-01-02T00:00:00.000Z"),
+      ),
+    );
+    mockItemRepository.findById.mockReturnValue(
+      Item.create(
+        "item-1",
+        "Book",
+        "Description",
+        ItemPrice.create(100),
+        "seller-1",
       ),
     );
     vi.spyOn(crypto, "randomUUID").mockReturnValue(
@@ -59,10 +81,14 @@ describe("shipOrder", () => {
     );
 
     // 実行
-    const dto = shipOrderUsecase(deps, { orderId: "order-1" });
+    const dto = shipOrderUsecase(deps, {
+      userId: "seller-1",
+      orderId: "order-1",
+    });
 
     // 検証: 注文の更新
     expect(mockOrderRepository.findById).toHaveBeenCalledWith("order-1");
+    expect(mockItemRepository.findById).toHaveBeenCalledWith("item-1");
     expect(mockOrderRepository.update).toHaveBeenCalledTimes(1);
     expect(
       OrderStatus.isShipped(mockOrderRepository.update.mock.calls[0][0].status),
@@ -84,9 +110,37 @@ describe("shipOrder", () => {
     mockOrderRepository.findById.mockReturnValue(null);
 
     // 実行 & 検証
-    expect(() => shipOrderUsecase(deps, { orderId: "missing" })).toThrow(
-      NotFoundError,
+    expect(() =>
+      shipOrderUsecase(deps, { userId: "seller-1", orderId: "missing" }),
+    ).toThrow(NotFoundError);
+    expect(mockOrderRepository.update).not.toHaveBeenCalled();
+    expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
+  });
+
+  it("販売者以外が発送しようとしたとき NotFoundError とし更新しない", () => {
+    mockOrderRepository.findById.mockReturnValue(
+      Order.reconstitute(
+        "order-1",
+        "buyer-1",
+        "item-1",
+        OrderStatus.create(OrderStatusMap.PURCHASED),
+        new Date("2024-01-01T00:00:00.000Z"),
+        new Date("2024-01-02T00:00:00.000Z"),
+      ),
     );
+    mockItemRepository.findById.mockReturnValue(
+      Item.create(
+        "item-1",
+        "Book",
+        "Description",
+        ItemPrice.create(100),
+        "seller-1",
+      ),
+    );
+
+    expect(() =>
+      shipOrderUsecase(deps, { userId: "buyer-1", orderId: "order-1" }),
+    ).toThrow(ValidationError);
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
   });
@@ -96,17 +150,26 @@ describe("shipOrder", () => {
     mockOrderRepository.findById.mockReturnValue(
       Order.reconstitute(
         "order-1",
-        "user-1",
+        "buyer-1",
         "item-1",
         OrderStatus.create(OrderStatusMap.SHIPPED),
         new Date("2024-01-01T00:00:00.000Z"),
         new Date("2024-01-02T00:00:00.000Z"),
       ),
     );
+    mockItemRepository.findById.mockReturnValue(
+      Item.create(
+        "item-1",
+        "Book",
+        "Description",
+        ItemPrice.create(100),
+        "seller-1",
+      ),
+    );
 
     // 実行 & 検証
-    expect(() => shipOrderUsecase(deps, { orderId: "order-1" })).toThrow(
-      ValidationError,
-    );
+    expect(() =>
+      shipOrderUsecase(deps, { userId: "seller-1", orderId: "order-1" }),
+    ).toThrow(ValidationError);
   });
 });

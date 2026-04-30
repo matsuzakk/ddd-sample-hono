@@ -19,6 +19,7 @@ type Deps = {
 };
 
 type Input = {
+  readonly userId: string;
   readonly orderId: string;
 };
 
@@ -30,6 +31,11 @@ export const deliverOrderUsecase = (deps: Deps, input: Input): OrderDto => {
     const order = orderRepository.findById(input.orderId);
     // 注文が存在しない場合
     if (!order) {
+      throw new NotFoundError("Order not found");
+    }
+
+    // 注文の購入者が受取者本人と一致しない場合はエラー
+    if (order.userId !== input.userId) {
       throw new NotFoundError("Order not found");
     }
 

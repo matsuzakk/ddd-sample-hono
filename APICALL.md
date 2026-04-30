@@ -66,7 +66,7 @@ curl -sS "http://localhost:3000/users/sellItems" \
   -b cookies.txt | jq
 ```
 
-### ユーザーの注文履歴を取得する
+### ユーザーの注文履歴一覧を取得する
 
 `GET /users/:userId/orders`
 

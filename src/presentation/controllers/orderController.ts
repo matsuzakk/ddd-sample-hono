@@ -67,10 +67,11 @@ export const orderController = {
   deliver: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
+    const userId = c.get("sessionUserId") as string;
     const orderId = c.req.param("orderId")!;
     const result = await deliverOrderUsecase(
       { txManager, createOrderRepository, createOrderHistoryRepository },
-      { orderId },
+      { userId, orderId },
     );
     return c.json(result);
   },
@@ -83,10 +84,16 @@ export const orderController = {
   ship: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
+    const userId = c.get("sessionUserId") as string;
     const orderId = c.req.param("orderId")!;
     const result = await shipOrderUsecase(
-      { txManager, createOrderRepository, createOrderHistoryRepository },
-      { orderId },
+      {
+        txManager,
+        createItemRepository,
+        createOrderRepository,
+        createOrderHistoryRepository,
+      },
+      { userId, orderId },
     );
     return c.json(result);
   },

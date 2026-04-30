@@ -100,7 +100,7 @@ describe("PUT /orders/:orderId/ship", () => {
   test("購入済みの注文を発送すると発送済みステータスが返る(200)", async () => {
     const { app, close } = createE2eApp();
     try {
-      const { buyer, item } = await seedData(app);
+      const { buyer, seller, item } = await seedData(app);
 
       const purchaseRes = await app.request("/orders", {
         method: "POST",
@@ -114,7 +114,10 @@ describe("PUT /orders/:orderId/ship", () => {
 
       const shipRes = await app.request(`/orders/${order.id}/ship`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": seller.id,
+        },
         body: JSON.stringify({}),
       });
       expect(shipRes.status).toBe(200);
@@ -130,7 +133,7 @@ describe("PUT /orders/:orderId/deliver", () => {
   test("発送済みの注文を配達完了にすると到着済みになり履歴が増える(200)", async () => {
     const { app, close } = createE2eApp();
     try {
-      const { buyer, item } = await seedData(app);
+      const { buyer, seller, item } = await seedData(app);
 
       const purchaseRes = await app.request("/orders", {
         method: "POST",
@@ -144,14 +147,20 @@ describe("PUT /orders/:orderId/deliver", () => {
 
       const shipRes = await app.request(`/orders/${order.id}/ship`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": seller.id,
+        },
         body: JSON.stringify({}),
       });
       expect(shipRes.status).toBe(200);
 
       const deliverRes = await app.request(`/orders/${order.id}/deliver`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": buyer.id,
+        },
         body: JSON.stringify({}),
       });
       expect(deliverRes.status).toBe(200);

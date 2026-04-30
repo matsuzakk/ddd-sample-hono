@@ -47,7 +47,7 @@ describe("deliverOrder", () => {
     mockOrderRepository.findById.mockReturnValue(
       Order.reconstitute(
         "order-1",
-        "user-1",
+        "buyer-1",
         "item-1",
         OrderStatus.create(OrderStatusMap.SHIPPED),
         new Date("2024-01-01T00:00:00.000Z"),
@@ -59,7 +59,10 @@ describe("deliverOrder", () => {
     );
 
     // 実行
-    const dto = deliverOrderUsecase(deps, { orderId: "order-1" });
+    const dto = deliverOrderUsecase(deps, {
+      userId: "buyer-1",
+      orderId: "order-1",
+    });
 
     // 検証: 注文の更新
     expect(mockOrderRepository.update).toHaveBeenCalledTimes(1);
@@ -79,9 +82,28 @@ describe("deliverOrder", () => {
     mockOrderRepository.findById.mockReturnValue(null);
 
     // 実行 & 検証
-    expect(() => deliverOrderUsecase(deps, { orderId: "missing" })).toThrow(
-      NotFoundError,
+    expect(() =>
+      deliverOrderUsecase(deps, { userId: "buyer-1", orderId: "missing" }),
+    ).toThrow(NotFoundError);
+    expect(mockOrderRepository.update).not.toHaveBeenCalled();
+    expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
+  });
+
+  it("購入者以外が受取完了にしようとしたとき NotFoundError とし更新しない", () => {
+    mockOrderRepository.findById.mockReturnValue(
+      Order.reconstitute(
+        "order-1",
+        "buyer-1",
+        "item-1",
+        OrderStatus.create(OrderStatusMap.SHIPPED),
+        new Date("2024-01-01T00:00:00.000Z"),
+        new Date("2024-01-02T00:00:00.000Z"),
+      ),
     );
+
+    expect(() =>
+      deliverOrderUsecase(deps, { userId: "seller-1", orderId: "order-1" }),
+    ).toThrow(NotFoundError);
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
   });
@@ -91,7 +113,7 @@ describe("deliverOrder", () => {
     mockOrderRepository.findById.mockReturnValue(
       Order.reconstitute(
         "order-1",
-        "user-1",
+        "buyer-1",
         "item-1",
         OrderStatus.create(OrderStatusMap.PURCHASED),
         new Date("2024-01-01T00:00:00.000Z"),
@@ -100,8 +122,8 @@ describe("deliverOrder", () => {
     );
 
     // 実行 & 検証
-    expect(() => deliverOrderUsecase(deps, { orderId: "order-1" })).toThrow(
-      ValidationError,
-    );
+    expect(() =>
+      deliverOrderUsecase(deps, { userId: "buyer-1", orderId: "order-1" }),
+    ).toThrow(ValidationError);
   });
 });
