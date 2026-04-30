@@ -6,42 +6,19 @@ Base URL: `http://localhost:3000`
 
 JSON のレスポンスはすべて `| jq` で整形しています。[jq](https://jqlang.org/) が未インストールの場合は `brew install jq` などで入れてください（`GET /health` はプレーンテキストのため `jq` なし）。
 
-## Authentication (better-auth セッション)
+## 認証
 
-`GET /health` と **`/auth` プレフィックス**（better-auth のルート）以外の API は、**有効なセッション Cookie** が無いと `400` と `{"code":"UNAUTHENTICATED","message":"Authentication required"}` が返ります。
-
-### better-auth（`/auth` … 認証不要）
-
-`createAuth` の `basePath` は `/auth`。Hono への載せ方は [Better Auth · Hono integration](https://www.better-auth.com/docs/integrations/hono) と同様に `auth.handler(c.req.raw)` を **`/auth/*`** にマウントしています（`app.route("/auth", handler)` は `handler` が `Hono` でないため使えません）。
-
-代表的なエンドポイント（公式パス）:
+代表的なエンドポイント（better-auth）:
 
 | 用途           | メソッドとパス                        |
 | -------------- | ------------------------------------- |
-| サインイン     | `POST /auth/sign-in/email`            |
 | サインアップ   | `POST /auth/sign-up/email`            |
+| サインイン     | `POST /auth/sign-in/email`            |
 | セッション取得 | `GET` または `POST /auth/get-session` |
 
-### Cookie ジャーで curl する（`-c` / `-b`）
+### サインアップ
 
-- **`-c cookies.txt`** … レスポンスの `Set-Cookie` を `cookies.txt` に保存（新規作成または追記・更新）。
-- **`-b cookies.txt`** … `cookies.txt` に入っている Cookie をリクエストに付与。
-
-サインインして Cookie を保存する例（以降の例ではプロジェクト直下の `cookies.txt` を想定。git にコミットしないでください）:
-
-```bash
-curl -sS -c cookies.txt -X POST "http://localhost:3000/auth/sign-in/email" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"bob@example.com","password":"password123"}' | jq
-```
-
-現在のセッション確認:
-
-```bash
-curl -sS -b cookies.txt "http://localhost:3000/auth/get-session" | jq
-```
-
-サインアップ（メール＋パスワード。パスワードは better-auth のデフォルトで **8 文字以上**）:
+メール＋パスワードでサインアップします。
 
 ```bash
 curl -sS -c cookies.txt -X POST "http://localhost:3000/auth/sign-up/email" \
@@ -49,17 +26,24 @@ curl -sS -c cookies.txt -X POST "http://localhost:3000/auth/sign-up/email" \
   -d '{"name":"Bob","email":"bob@example.com","password":"password123"}' | jq
 ```
 
-本リポジトリの `createAuth` は `emailAndPassword.autoSignIn: false` のため、**サインアップ直後はセッション Cookie が付かない**ことがあります。その場合は続けてサインインを `-b cookies.txt -c cookies.txt` で実行し、同じファイルにセッションを載せてください。
+本リポジトリの `createAuth` は `emailAndPassword.autoSignIn: false` のため、**サインアップ直後はセッション Cookie が付かない**。
+その場合は続けてサインインを実行し、同じファイルにセッションを載せてください。
+
+### サインイン
+
+Cookie を保存する例（以降の例ではプロジェクト直下の `cookies.txt` を想定。git にコミットしないでください）:
 
 ```bash
-curl -sS -b cookies.txt -c cookies.txt -X POST "http://localhost:3000/auth/sign-in/email" \
+curl -sS -c cookies.txt -X POST "http://localhost:3000/auth/sign-in/email" \
   -H "Content-Type: application/json" \
   -d '{"email":"bob@example.com","password":"password123"}' | jq
 ```
 
-### それ以外の API
+### 現在のセッション確認
 
-以降の例では、**Cookie が必要なリクエスト**に **`-b cookies.txt`** を付けています（上記でサインイン済みの `cookies.txt` を用意してください）。
+```bash
+curl -sS -b cookies.txt "http://localhost:3000/auth/get-session" | jq
+```
 
 ## Health
 
@@ -71,7 +55,7 @@ curl -sS "http://localhost:3000/health"
 
 ## Users (`/users`)
 
-### List items sold by user (my listings)
+### ユーザーが出品した商品一覧を取得する
 
 `GET /users/:userId/items` … **要セッション**
 
@@ -80,7 +64,7 @@ curl -sS "http://localhost:3000/users/sellItems" \
   -b cookies.txt | jq
 ```
 
-### List orders for user (purchases as buyer)
+### ユーザーの注文履歴を取得する
 
 `GET /users/:userId/orders` … **要セッション**
 
@@ -91,7 +75,7 @@ curl -sS "http://localhost:3000/users/orders" \
 
 ## Items (`/items`)
 
-### Sell item (list for sale)
+### 自分が出品した商品一覧を取得する
 
 `POST /items` … **要セッション**
 
@@ -102,7 +86,7 @@ curl -sS -X POST "http://localhost:3000/items" \
   -d '{"name":"Used book","description":"Good condition","price":1200}' | jq
 ```
 
-### List all items
+### 出品されている商品一覧を取得する
 
 `GET /items` … **要セッション**
 
@@ -111,7 +95,7 @@ curl -sS "http://localhost:3000/items" \
   -b cookies.txt | jq
 ```
 
-### Get item detail
+### 商品詳細を取得する
 
 `GET /items/:itemId` … **要セッション**
 
@@ -122,7 +106,7 @@ curl -sS "http://localhost:3000/items/ITEM_ID_HERE" \
 
 ## Orders (`/orders`)
 
-### Purchase item
+### 商品を購入する
 
 `POST /orders` … **要セッション**
 
@@ -133,7 +117,7 @@ curl -sS -X POST "http://localhost:3000/orders" \
   -d '{"userId":"BUYER_USER_ID","itemId":"ITEM_ID_HERE"}' | jq
 ```
 
-### Cancel order (purchased only)
+### 注文をキャンセルする
 
 `PUT /orders/:orderId/cancel` … **要セッション**
 
@@ -142,7 +126,7 @@ curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/cancel" \
   -b cookies.txt | jq
 ```
 
-### Mark shipped
+### 注文を発送する
 
 `PUT /orders/:orderId/ship` … **要セッション**
 
@@ -151,7 +135,7 @@ curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/ship" \
   -b cookies.txt | jq
 ```
 
-### Mark delivered
+### 注文を配達完了にする
 
 `PUT /orders/:orderId/deliver` … **要セッション**
 
@@ -160,7 +144,7 @@ curl -sS -X PUT "http://localhost:3000/orders/ORDER_ID_HERE/deliver" \
   -b cookies.txt | jq
 ```
 
-### Order detail + status histories
+### 注文詳細を取得する
 
 `GET /orders/:orderId` … **要セッション**
 
