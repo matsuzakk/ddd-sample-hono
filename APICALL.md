@@ -75,7 +75,7 @@ curl -sS "http://localhost:3000/users/orders" \
 
 ## Items (`/items`)
 
-### 自分が出品した商品一覧を取得する
+### 商品を出品する
 
 `POST /items` … **要セッション**
 
@@ -86,7 +86,7 @@ curl -sS -X POST "http://localhost:3000/items" \
   -d '{"name":"Used book","description":"Good condition","price":1200}' | jq
 ```
 
-### 出品されている商品一覧を取得する
+### 出品されている商品一覧をすべて取得する
 
 `GET /items` … **要セッション**
 
