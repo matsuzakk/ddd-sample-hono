@@ -19,10 +19,12 @@ import { cancelOrder } from "./cancelOrder.js";
 
 describe("cancelOrder", () => {
   let mockItemRepository: {
+    create: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
   };
   let mockOrderRepository: {
+    create: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
   };
@@ -31,10 +33,12 @@ describe("cancelOrder", () => {
 
   beforeEach(() => {
     mockItemRepository = {
+      create: vi.fn(),
       findById: vi.fn(),
       update: vi.fn(),
     };
     mockOrderRepository = {
+      create: vi.fn(),
       findById: vi.fn(),
       update: vi.fn(),
     };
@@ -77,7 +81,9 @@ describe("cancelOrder", () => {
         new Date("2024-01-02T00:00:00.000Z"),
       ),
     );
-    vi.spyOn(crypto, "randomUUID").mockReturnValue("hist-cancel-1");
+    vi.spyOn(crypto, "randomUUID").mockReturnValue(
+      "60000000-0000-4000-8000-000000000001",
+    );
 
     // 実行
     const dto = cancelOrder(deps, { orderId: "order-1" });

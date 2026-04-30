@@ -16,6 +16,7 @@ type PurchaseOrderDeps = Parameters<typeof purchaseOrder>[0];
 
 describe("purchaseOrder", () => {
   let mockItemRepository: {
+    create: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
   };
@@ -29,6 +30,7 @@ describe("purchaseOrder", () => {
 
   beforeEach(() => {
     mockItemRepository = {
+      create: vi.fn(),
       findById: vi.fn(),
       update: vi.fn(),
     };
@@ -64,8 +66,8 @@ describe("purchaseOrder", () => {
       ),
     );
     vi.spyOn(crypto, "randomUUID")
-      .mockReturnValueOnce("order-1")
-      .mockReturnValueOnce("hist-1");
+      .mockReturnValueOnce("10000000-0000-4000-8000-000000000001")
+      .mockReturnValueOnce("20000000-0000-4000-8000-000000000001");
 
     // 実行
     const dto = purchaseOrder(deps, {
@@ -83,18 +85,18 @@ describe("purchaseOrder", () => {
     // 検証: 注文と履歴
     expect(mockOrderRepository.create).toHaveBeenCalledTimes(1);
     const createdOrder = mockOrderRepository.create.mock.calls[0][0];
-    expect(createdOrder.id).toBe("order-1");
+    expect(createdOrder.id).toBe("10000000-0000-4000-8000-000000000001");
     expect(createdOrder.userId).toBe("buyer");
     expect(createdOrder.itemId).toBe("item-1");
 
     expect(mockOrderHistoryRepository.create).toHaveBeenCalledTimes(1);
     const history = mockOrderHistoryRepository.create.mock.calls[0][0];
-    expect(history.id).toBe("hist-1");
-    expect(history.orderId).toBe("order-1");
+    expect(history.id).toBe("20000000-0000-4000-8000-000000000001");
+    expect(history.orderId).toBe("10000000-0000-4000-8000-000000000001");
     expect(history.fromStatus).toBeNull();
 
     // 検証: DTO
-    expect(dto.id).toBe("order-1");
+    expect(dto.id).toBe("10000000-0000-4000-8000-000000000001");
     expect(dto.userId).toBe("buyer");
     expect(dto.itemId).toBe("item-1");
   });

@@ -15,6 +15,7 @@ type DeliverOrderDeps = Parameters<typeof deliverOrder>[0];
 
 describe("deliverOrder", () => {
   let mockOrderRepository: {
+    create: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
   };
@@ -23,6 +24,7 @@ describe("deliverOrder", () => {
 
   beforeEach(() => {
     mockOrderRepository = {
+      create: vi.fn(),
       findById: vi.fn(),
       update: vi.fn(),
     };
@@ -52,7 +54,9 @@ describe("deliverOrder", () => {
         new Date("2024-01-02T00:00:00.000Z"),
       ),
     );
-    vi.spyOn(crypto, "randomUUID").mockReturnValue("hist-d-1");
+    vi.spyOn(crypto, "randomUUID").mockReturnValue(
+      "50000000-0000-4000-8000-000000000001",
+    );
 
     // 実行
     const dto = deliverOrder(deps, { orderId: "order-1" });

@@ -10,10 +10,14 @@ describe("sellItem", () => {
   let appDb: AppDatabase;
 
   beforeEach(() => {
-    vi.spyOn(crypto, "randomUUID").mockReturnValue("item-id-1");
+    vi.spyOn(crypto, "randomUUID").mockReturnValue(
+      "30000000-0000-4000-8000-000000000001",
+    );
     mockCreate = vi.fn();
     createItemRepository = vi.fn().mockImplementation(() => ({
       create: mockCreate,
+      findById: vi.fn(),
+      update: vi.fn(),
     }));
     appDb = {} as AppDatabase;
   });
@@ -37,11 +41,13 @@ describe("sellItem", () => {
     // 検証: ファクトリと永続化
     expect(createItemRepository).toHaveBeenCalledWith(appDb);
     expect(mockCreate).toHaveBeenCalledTimes(1);
-    expect(mockCreate.mock.calls[0][0].id).toBe("item-id-1");
+    expect(mockCreate.mock.calls[0][0].id).toBe(
+      "30000000-0000-4000-8000-000000000001",
+    );
 
     // 検証: レスポンス
     expect(result).toMatchObject({
-      id: "item-id-1",
+      id: "30000000-0000-4000-8000-000000000001",
       name: "Book",
       description: "A good book",
       price: 500,

@@ -15,6 +15,7 @@ type ShipOrderDeps = Parameters<typeof shipOrder>[0];
 
 describe("shipOrder", () => {
   let mockOrderRepository: {
+    create: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
   };
@@ -23,6 +24,7 @@ describe("shipOrder", () => {
 
   beforeEach(() => {
     mockOrderRepository = {
+      create: vi.fn(),
       findById: vi.fn(),
       update: vi.fn(),
     };
@@ -52,7 +54,9 @@ describe("shipOrder", () => {
         new Date("2024-01-02T00:00:00.000Z"),
       ),
     );
-    vi.spyOn(crypto, "randomUUID").mockReturnValue("hist-1");
+    vi.spyOn(crypto, "randomUUID").mockReturnValue(
+      "40000000-0000-4000-8000-000000000001",
+    );
 
     // 実行
     const dto = shipOrder(deps, { orderId: "order-1" });
@@ -67,7 +71,7 @@ describe("shipOrder", () => {
     // 検証: 履歴
     expect(mockOrderHistoryRepository.create).toHaveBeenCalledTimes(1);
     const history = mockOrderHistoryRepository.create.mock.calls[0][0];
-    expect(history.id).toBe("hist-1");
+    expect(history.id).toBe("40000000-0000-4000-8000-000000000001");
     expect(history.orderId).toBe("order-1");
 
     // 検証: DTO
