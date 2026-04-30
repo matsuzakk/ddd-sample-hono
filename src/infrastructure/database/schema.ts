@@ -1,10 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-/**
- * Domain `users` + better-auth columns. Physical table `users`.
- * better-auth model `user` → drizzleAdapter `user: schema.users`.
- */
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
