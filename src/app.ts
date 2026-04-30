@@ -47,14 +47,11 @@ export const createApp = (options?: AppOptions) => {
 
   app.use("*", createDbMiddleware(resolveDb));
   app.use("*", authMiddleware);
-
   app.get("/health", (c) => {
     return c.text("Hello Hono!");
   });
-
   // https://www.better-auth.com/docs/integrations/hono
   app.all("/auth/*", (c) => createAuth(c.get("db")).handler(c.req.raw));
-
   app.route("/users", usersRoute);
   app.route("/items", itemsRoute);
   app.route("/orders", ordersRoute);

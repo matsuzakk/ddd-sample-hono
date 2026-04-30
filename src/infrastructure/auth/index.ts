@@ -34,8 +34,3 @@ export const createAuth = (db: AppDatabase) =>
       // },
     },
   });
-
-// export type AuthType = {
-//   user: AuthInstance["$Infer"]["Session"]["user"] | null;
-//   session: AuthInstance["$Infer"]["Session"]["session"] | null;
-// };
