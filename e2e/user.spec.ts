@@ -9,7 +9,7 @@ describe("GET /users/items", () => {
     try {
       const { seller, item } = await seedData(app);
 
-      const res = await app.request("/users/items", {
+      const res = await app.request("/users/sellItems", {
         method: "GET",
         headers: { "x-e2e-user-id": seller.id },
       });
@@ -32,7 +32,7 @@ describe("GET /users/items", () => {
         password: MOCK_USER_PASSWORD,
       });
 
-      const res = await app.request("/users/items", {
+      const res = await app.request("/users/sellItems", {
         method: "GET",
         headers: { "x-e2e-user-id": user.id },
       });
