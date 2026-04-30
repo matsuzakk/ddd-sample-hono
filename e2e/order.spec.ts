@@ -187,7 +187,10 @@ describe("PUT /orders/:orderId/cancel", () => {
 
       const cancelRes = await app.request(`/orders/${order.id}/cancel`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": buyer.id,
+        },
         body: JSON.stringify({}),
       });
       expect(cancelRes.status).toBe(200);
