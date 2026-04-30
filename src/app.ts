@@ -2,9 +2,9 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { DomainError } from "./domain/model/shared/error.js";
-import { APIError } from "better-auth";
 import type { AppDatabase } from "./infrastructure/database/db.js";
 import { getDatabase } from "./infrastructure/database/db.js";
+import { authMiddleware } from "./presentation/middleware/authMiddleware.js";
 import {
   createDbMiddleware,
   type DbVariables,
@@ -47,8 +47,9 @@ export const createApp = (options?: AppOptions) => {
     options?.db !== undefined ? () => options.db! : () => getDatabase().db;
 
   app.use("*", createDbMiddleware(resolveDb));
+  app.use("*", authMiddleware);
 
-  app.get("/", (c) => {
+  app.get("/health", (c) => {
     return c.text("Hello Hono!");
   });
 

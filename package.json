@@ -11,7 +11,7 @@
     "db:studio": "drizzle-kit studio",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "vitest run --config e2e/config/vitest.e2e.config.ts"
+    "e2e": "E2E=true vitest run --config e2e/config/vitest.e2e.config.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.12",
