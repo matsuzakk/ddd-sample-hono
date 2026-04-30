@@ -3,6 +3,7 @@ import path from "node:path";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema.js";
+import { EnhancedQueryLogger } from "drizzle-query-logger";
 
 export type AppDatabase = ReturnType<typeof createDatabase>["db"];
 export type SqliteClient = ReturnType<typeof createDatabase>["client"];
@@ -13,6 +14,8 @@ function resolveSqlitePath(): string {
   return process.env.SQLITE_PATH ?? defaultPath;
 }
 
+const sqlLogger = new EnhancedQueryLogger();
+
 /**
  * Creates a SQLite connection and Drizzle ORM instance.
  * Callers are responsible for closing the client when the process shuts down.
@@ -21,7 +24,10 @@ export const createDatabase = (sqlitePath = resolveSqlitePath()) => {
   const dir = path.dirname(path.resolve(sqlitePath));
   fs.mkdirSync(dir, { recursive: true });
   const client = new Database(sqlitePath);
-  const db = drizzle(client, { schema });
+  const db = drizzle(client, {
+    schema,
+    logger: process.env.NODE_ENV !== "production" ? sqlLogger : undefined,
+  });
   return { client, db };
 };
 
