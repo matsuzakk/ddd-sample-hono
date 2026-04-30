@@ -3,14 +3,15 @@ import { OrderStatusMap } from "../src/domain/model/order/OrderStatus.js";
 import { createE2eApp, seedData, signUpEmailViaHttp } from "./config/setup.js";
 import { MOCK_USER_PASSWORD } from "./mock/user.js";
 
-describe("GET /users/:userId/items", () => {
+describe("GET /users/items", () => {
   test("出品者の出品一覧にシードした商品が含まれる(200)", async () => {
     const { app, close } = createE2eApp();
     try {
       const { seller, item } = await seedData(app);
 
-      const res = await app.request(`/users/${seller.id}/items`, {
+      const res = await app.request("/users/items", {
         method: "GET",
+        headers: { "x-e2e-user-id": seller.id },
       });
 
       expect(res.status).toBe(200);
@@ -31,8 +32,9 @@ describe("GET /users/:userId/items", () => {
         password: MOCK_USER_PASSWORD,
       });
 
-      const res = await app.request(`/users/${user.id}/items`, {
+      const res = await app.request("/users/items", {
         method: "GET",
+        headers: { "x-e2e-user-id": user.id },
       });
 
       expect(res.status).toBe(200);
@@ -44,7 +46,7 @@ describe("GET /users/:userId/items", () => {
   });
 });
 
-describe("GET /users/:userId/orders", () => {
+describe("GET /users/orders", () => {
   test("注文が無いユーザーの一覧は空配列が返る(200)", async () => {
     const { app, close } = createE2eApp();
     try {
@@ -54,8 +56,9 @@ describe("GET /users/:userId/orders", () => {
         password: MOCK_USER_PASSWORD,
       });
 
-      const res = await app.request(`/users/${user.id}/orders`, {
+      const res = await app.request("/users/orders", {
         method: "GET",
+        headers: { "x-e2e-user-id": user.id },
       });
 
       expect(res.status).toBe(200);
@@ -78,8 +81,9 @@ describe("GET /users/:userId/orders", () => {
       expect(purchaseRes.status).toBe(201);
       const order = (await purchaseRes.json()) as { id: string };
 
-      const res = await app.request(`/users/${buyer.id}/orders`, {
+      const res = await app.request("/users/orders", {
         method: "GET",
+        headers: { "x-e2e-user-id": buyer.id },
       });
 
       expect(res.status).toBe(200);

@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { orderController } from "../controllers/orderController.js";
-import type { DbVariables } from "../middleware/dbMiddleware.js";
+import type { AppVariables } from "../../env.js";
 
-export const ordersRoute = new Hono<{ Variables: DbVariables }>();
+export const ordersRoute = new Hono<{ Variables: AppVariables }>();
 
 ordersRoute.post("/", orderController.purchase);
 ordersRoute.put("/:orderId/cancel", orderController.cancel);

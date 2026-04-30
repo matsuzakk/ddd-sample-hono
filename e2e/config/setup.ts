@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { createApp } from "../../src/app.js";
 import { createMemoryAppDatabase } from "../../src/infrastructure/database/test/testDb.js";
-import type { DbVariables } from "../../src/presentation/middleware/dbMiddleware.js";
+import type { AppVariables } from "../../src/env.js";
 import { MOCK_ITEM } from "../mock/item.js";
 import { MOCK_USER, MOCK_USER_PASSWORD } from "../mock/user.js";
 
@@ -15,7 +15,7 @@ export type E2eSignedUpUser = {
  * better-auth のメールサインアップ（`POST /auth/sign-up/email`）でユーザーを作成する。
  */
 export const signUpEmailViaHttp = async (
-  app: Hono<{ Variables: DbVariables }>,
+  app: Hono<{ Variables: AppVariables }>,
   input: {
     readonly name: string;
     readonly email: string;
@@ -44,7 +44,7 @@ export const createE2eApp = () => {
   return { app, close };
 };
 
-export const seedData = async (app: Hono<{ Variables: DbVariables }>) => {
+export const seedData = async (app: Hono<{ Variables: AppVariables }>) => {
   const seller = await signUpEmailViaHttp(app, {
     name: MOCK_USER.SELLER.name,
     email: MOCK_USER.SELLER.email,

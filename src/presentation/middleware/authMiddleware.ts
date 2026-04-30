@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from "hono";
 import { createAuth } from "../../infrastructure/auth/index.js";
-import type { DbVariables } from "./dbMiddleware.js";
+import type { AppVariables } from "../../env.js";
 
 /**
  * セッション検証をスキップするルート一覧。
@@ -13,10 +13,14 @@ export const AUTH_EXCLUDED_ROUTES = [
  * セッション必須のエンドポイントを保護する認証ミドルウェア
  */
 export const authMiddleware: MiddlewareHandler<{
-  Variables: DbVariables;
+  Variables: AppVariables;
 }> = async (c, next) => {
-  // E2Eテスト時はスキップ
+  // E2Eテスト時はカスタムヘッダーでユーザーを指定する
   if (process.env.E2E === "true") {
+    const testUserId = c.req.header("x-e2e-user-id");
+    if (testUserId) {
+      c.set("sessionUserId", testUserId);
+    }
     await next();
     return;
   }
@@ -48,5 +52,6 @@ export const authMiddleware: MiddlewareHandler<{
     );
   }
 
+  c.set("sessionUserId", data.user.id);
   await next();
 };

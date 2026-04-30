@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { getItemSellList } from "../../usecase/query/getItemSellList.js";
 import { getOrderList } from "../../usecase/query/getOrderList.js";
-import type { DbVariables } from "../middleware/dbMiddleware.js";
+import type { AppVariables } from "../../env.js";
 
 export const userController = {
   /**
@@ -9,9 +9,10 @@ export const userController = {
    * @param c - Hono context
    * @returns - Promise<Response>
    */
-  listSellerItems: async (c: Context<{ Variables: DbVariables }>) => {
+  listSellerItems: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
-    const userId = c.req.param("userId")!;
+    const userId = c.get("sessionUserId") as string;
+
     const result = await getItemSellList({ db }, { sellerId: userId });
     return c.json(result);
   },
@@ -21,9 +22,10 @@ export const userController = {
    * @param c - Hono context
    * @returns - Promise<Response>
    */
-  listOrders: async (c: Context<{ Variables: DbVariables }>) => {
+  listOrders: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
-    const userId = c.req.param("userId")!;
+    const userId = c.get("sessionUserId") as string;
+
     const result = await getOrderList({ db }, { userId });
     return c.json(result);
   },

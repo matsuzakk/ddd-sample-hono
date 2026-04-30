@@ -8,7 +8,7 @@ import { deliverOrder } from "../../usecase/command/deliverOrder.js";
 import { purchaseOrder } from "../../usecase/command/purchaseOrder.js";
 import { shipOrder } from "../../usecase/command/shipOrder.js";
 import { getOrderDetail } from "../../usecase/query/getOrderDetail.js";
-import type { DbVariables } from "../middleware/dbMiddleware.js";
+import type { AppVariables } from "../../env.js";
 
 export const orderController = {
   // Command
@@ -18,7 +18,7 @@ export const orderController = {
    * @param c - Hono context
    * @returns - Promise<Response>
    */
-  purchase: async (c: Context<{ Variables: DbVariables }>) => {
+  purchase: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
     const body = await c.req.json<{ userId: string; itemId: string }>();
@@ -39,7 +39,7 @@ export const orderController = {
    * @param c - Hono context
    * @returns - Promise<Response>
    */
-  cancel: async (c: Context<{ Variables: DbVariables }>) => {
+  cancel: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
     const orderId = c.req.param("orderId")!;
@@ -60,7 +60,7 @@ export const orderController = {
    * @param c - Hono context
    * @returns - Promise<Response>
    */
-  deliver: async (c: Context<{ Variables: DbVariables }>) => {
+  deliver: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
     const orderId = c.req.param("orderId")!;
@@ -76,7 +76,7 @@ export const orderController = {
    * @param c - Hono context
    * @returns - Promise<Response>
    */
-  ship: async (c: Context<{ Variables: DbVariables }>) => {
+  ship: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
     const orderId = c.req.param("orderId")!;
@@ -94,7 +94,7 @@ export const orderController = {
    * @param c - Hono context
    * @returns - Promise<Response>
    */
-  getById: async (c: Context<{ Variables: DbVariables }>) => {
+  getById: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const orderId = c.req.param("orderId")!;
     const result = await getOrderDetail({ db }, { orderId });

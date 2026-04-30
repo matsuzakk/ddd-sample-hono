@@ -6,20 +6,18 @@ import type { AppDatabase } from "./infrastructure/database/db.js";
 import { getDatabase } from "./infrastructure/database/db.js";
 import { createAuth } from "./infrastructure/auth/index.js";
 import { authMiddleware } from "./presentation/middleware/authMiddleware.js";
-import {
-  createDbMiddleware,
-  type DbVariables,
-} from "./presentation/middleware/dbMiddleware.js";
+import { createDbMiddleware } from "./presentation/middleware/dbMiddleware.js";
 import { itemsRoute } from "./presentation/routes/items.js";
 import { ordersRoute } from "./presentation/routes/orders.js";
 import { usersRoute } from "./presentation/routes/users.js";
+import type { AppVariables } from "./env.js";
 
 export type AppOptions = {
   readonly db?: AppDatabase;
 };
 
 export const createApp = (options?: AppOptions) => {
-  const app = new Hono<{ Variables: DbVariables }>();
+  const app = new Hono<{ Variables: AppVariables }>();
 
   app.onError((err, c) => {
     if (process.env.NODE_ENV !== "test") {
