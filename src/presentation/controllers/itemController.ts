@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
+import { createUserRepository } from "../../infrastructure/repository/userRepository.js";
 import { sellItem } from "../../usecase/command/sellItem.js";
 import { getItemAllList } from "../../usecase/query/getItemAllList.js";
 import { getItemDetail } from "../../usecase/query/getItemDetail.js";
@@ -23,7 +24,7 @@ export const itemController = {
       price: number;
     }>();
     const result = await sellItem(
-      { db, createItemRepository },
+      { db, createItemRepository, createUserRepository },
       {
         sellerId,
         name: body.name,

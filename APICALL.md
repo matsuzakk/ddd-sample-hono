@@ -16,10 +16,10 @@ JSON のレスポンスはすべて `| jq` で整形しています。[jq](https
 
 代表的なエンドポイント（公式パス）:
 
-| 用途 | メソッドとパス |
-|------|----------------|
-| サインイン | `POST /auth/sign-in/email` |
-| サインアップ | `POST /auth/sign-up/email` |
+| 用途           | メソッドとパス                        |
+| -------------- | ------------------------------------- |
+| サインイン     | `POST /auth/sign-in/email`            |
+| サインアップ   | `POST /auth/sign-up/email`            |
 | セッション取得 | `GET` または `POST /auth/get-session` |
 
 ### Cookie ジャーで curl する（`-c` / `-b`）
@@ -76,7 +76,7 @@ curl -sS "http://localhost:3000/health"
 `GET /users/:userId/items` … **要セッション**
 
 ```bash
-curl -sS "http://localhost:3000/users/USER_ID_HERE/items" \
+curl -sS "http://localhost:3000/users/sellItems" \
   -b cookies.txt | jq
 ```
 
@@ -85,13 +85,13 @@ curl -sS "http://localhost:3000/users/USER_ID_HERE/items" \
 `GET /users/:userId/orders` … **要セッション**
 
 ```bash
-curl -sS "http://localhost:3000/users/USER_ID_HERE/orders" \
+curl -sS "http://localhost:3000/users/orders" \
   -b cookies.txt | jq
 ```
 
 ## Items (`/items`)
 
-### Create item (list for sale)
+### Sell item (list for sale)
 
 `POST /items` … **要セッション**
 
@@ -99,7 +99,7 @@ curl -sS "http://localhost:3000/users/USER_ID_HERE/orders" \
 curl -sS -X POST "http://localhost:3000/items" \
   -H "Content-Type: application/json" \
   -b cookies.txt \
-  -d '{"sellerId":"SELLER_USER_ID","name":"Used book","description":"Good condition","price":1200}' | jq
+  -d '{"name":"Used book","description":"Good condition","price":1200}' | jq
 ```
 
 ### List all items

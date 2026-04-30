@@ -9,7 +9,7 @@ export const userController = {
    * @param c - Hono context
    * @returns - Promise<Response>
    */
-  listSellerItems: async (c: Context<{ Variables: AppVariables }>) => {
+  listSellItems: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const userId = c.get("sessionUserId") as string;
 

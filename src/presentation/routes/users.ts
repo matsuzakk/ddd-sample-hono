@@ -4,5 +4,5 @@ import type { AppVariables } from "../../env.js";
 
 export const usersRoute = new Hono<{ Variables: AppVariables }>();
 
-usersRoute.get("/items", userController.listSellerItems);
+usersRoute.get("/sellItems", userController.listSellItems);
 usersRoute.get("/orders", userController.listOrders);

@@ -2,6 +2,8 @@ import type { IItemRepository } from "../../domain/model/item/IItemRepository.js
 import { Item } from "../../domain/model/item/Item.js";
 import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
 import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
+import { NotFoundError } from "../../domain/model/shared/error.js";
+import type { IUserRepository } from "../../domain/model/user/IUserRepository.js";
 import type {
   AppDatabase,
   DbClient,
@@ -11,6 +13,7 @@ import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
 type Deps = {
   readonly db: AppDatabase;
   readonly createItemRepository: (client: DbClient) => IItemRepository;
+  readonly createUserRepository: (client: DbClient) => IUserRepository;
 };
 
 type Input = {
@@ -21,14 +24,21 @@ type Input = {
 };
 
 export const sellItem = (deps: Deps, input: Input): ItemDto => {
+  const userRepository = deps.createUserRepository(deps.db);
+  const seller = userRepository.findById(input.sellerId);
+  if (!seller) {
+    throw new NotFoundError("Seller not found");
+  }
+
+  const itemRepository = deps.createItemRepository(deps.db);
   const item = Item.create(
     crypto.randomUUID(),
     input.name,
     input.description,
     ItemPrice.create(input.price),
-    input.sellerId,
+    seller.id,
   );
-  deps.createItemRepository(deps.db).create(item);
+  itemRepository.create(item);
 
   const result = itemDtoSchema.parse({
     id: item.id,

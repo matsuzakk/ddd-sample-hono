@@ -16,7 +16,10 @@ describe("POST /items", () => {
 
       const res = await app.request("/items", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": seller.id,
+        },
         body: JSON.stringify({
           ...MOCK_ITEM.SAMPLE,
           sellerId: seller.id,
@@ -50,7 +53,10 @@ describe("POST /items", () => {
 
       const res = await app.request("/items", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-e2e-user-id": seller.id,
+        },
         body: JSON.stringify({
           name: MOCK_ITEM.SAMPLE.name,
           description: MOCK_ITEM.SAMPLE.description,
