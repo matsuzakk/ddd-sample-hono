@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { withMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
 import { items } from "../../infrastructure/database/schema.js";
-import { getItemSellList } from "./getItemSellList.js";
+import { getItemSellListUsecase } from "./getItemSellListUsecase.js";
 
 describe("getItemSellList", () => {
   it("sellerId が一致する商品だけを返す", () => {
@@ -41,7 +41,7 @@ describe("getItemSellList", () => {
         ])
         .run();
 
-      const list = getItemSellList({ db }, { sellerId: "alice" });
+      const list = getItemSellListUsecase({ db }, { sellerId: "alice" });
       expect(list).toHaveLength(2);
       expect(list.map((x) => x.id).sort()).toEqual(["a", "c"]);
       expect(list.every((x) => x.sellerId === "alice")).toBe(true);
@@ -50,7 +50,7 @@ describe("getItemSellList", () => {
 
   it("一致する行がなければ空配列", () => {
     withMemoryAppDatabase((db) => {
-      expect(getItemSellList({ db }, { sellerId: "nobody" })).toEqual([]);
+      expect(getItemSellListUsecase({ db }, { sellerId: "nobody" })).toEqual([]);
     });
   });
 });

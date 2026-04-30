@@ -4,12 +4,12 @@ import {
   orderHistories,
   orders,
 } from "../../infrastructure/database/schema.js";
-import { getOrderDetail } from "./getOrderDetail.js";
+import { getOrderDetailUsecase } from "./getOrderDetailUsecase.js";
 
 describe("getOrderDetail", () => {
   it("注文がないとき order は null、histories は空", () => {
     withMemoryAppDatabase((db) => {
-      const result = getOrderDetail({ db }, { orderId: "missing" });
+      const result = getOrderDetailUsecase({ db }, { orderId: "missing" });
       expect(result.order).toBeNull();
       expect(result.histories).toEqual([]);
     });
@@ -46,7 +46,7 @@ describe("getOrderDetail", () => {
         ])
         .run();
 
-      const { order, histories } = getOrderDetail(
+      const { order, histories } = getOrderDetailUsecase(
         { db },
         {
           orderId: "order-1",
@@ -92,7 +92,7 @@ describe("getOrderDetail", () => {
         })
         .run();
 
-      const { order, histories } = getOrderDetail(
+      const { order, histories } = getOrderDetailUsecase(
         { db },
         {
           orderId: "order-x",

@@ -11,7 +11,7 @@ type Input = {
   readonly itemId: string;
 };
 
-export const getItemDetail = (deps: Deps, input: Input): ItemDto | null => {
+export const getItemDetailUsecase = (deps: Deps, input: Input): ItemDto | null => {
   const row = deps.db
     .select()
     .from(items)

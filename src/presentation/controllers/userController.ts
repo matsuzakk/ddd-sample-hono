@@ -1,6 +1,6 @@
 import type { Context } from "hono";
-import { getItemSellList } from "../../usecase/query/getItemSellList.js";
-import { getOrderList } from "../../usecase/query/getOrderList.js";
+import { getItemSellListUsecase } from "../../usecase/query/getItemSellListUsecase.js";
+import { getOrderListUsecase } from "../../usecase/query/getOrderListUsecase.js";
 import type { AppVariables } from "../../env.js";
 
 export const userController = {
@@ -13,7 +13,7 @@ export const userController = {
     const db = c.get("db");
     const userId = c.get("sessionUserId") as string;
 
-    const result = await getItemSellList({ db }, { sellerId: userId });
+    const result = await getItemSellListUsecase({ db }, { sellerId: userId });
     return c.json(result);
   },
 
@@ -26,7 +26,7 @@ export const userController = {
     const db = c.get("db");
     const userId = c.get("sessionUserId") as string;
 
-    const result = await getOrderList({ db }, { userId });
+    const result = await getOrderListUsecase({ db }, { userId });
     return c.json(result);
   },
 } as const;

@@ -40,12 +40,12 @@ describe("Order", () => {
 ```typescript
 import { describe, expect, it, vi } from "vitest";
 import type { AppDatabase } from "../../infrastructure/database/db.js";
-import { sellItem } from "./sellItem.js";
+import { sellItemUsecase } from "./sellItemUsecase.js";
 
-describe("sellItem", () => {
+describe("sellItemUsecase", () => {
   it("商品を出品するとDTOに名前と価格が含まれる", () => {
     const createItemRepository = vi.fn(() => ({ create: vi.fn() }));
-    const dto = sellItem(
+    const dto = sellItemUsecase(
       { db: {} as AppDatabase, createItemRepository },
       { sellerId: "seller-1", name: "Book", description: "Good", price: 100 },
     );

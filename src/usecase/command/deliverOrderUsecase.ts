@@ -1,9 +1,3 @@
-import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
-import { Item } from "../../domain/model/item/Item.js";
-import {
-  ItemStatus,
-  ItemStatusMap,
-} from "../../domain/model/item/ItemStatus.js";
 import type {
   IOrderHistoryRepository,
   IOrderRepository,
@@ -18,7 +12,6 @@ import { NotFoundError } from "../../domain/model/shared/error.js";
 
 type Deps = {
   readonly txManager: ITransactionManager<DbClient>;
-  readonly createItemRepository: (client: DbClient) => IItemRepository;
   readonly createOrderRepository: (client: DbClient) => IOrderRepository;
   readonly createOrderHistoryRepository: (
     client: DbClient,
@@ -29,9 +22,8 @@ type Input = {
   readonly orderId: string;
 };
 
-export const cancelOrder = (deps: Deps, input: Input): OrderDto => {
+export const deliverOrderUsecase = (deps: Deps, input: Input): OrderDto => {
   return deps.txManager.run((tx) => {
-    const itemRepository = deps.createItemRepository(tx);
     const orderRepository = deps.createOrderRepository(tx);
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
 
@@ -40,25 +32,15 @@ export const cancelOrder = (deps: Deps, input: Input): OrderDto => {
       throw new NotFoundError("Order not found");
     }
 
-    const updatedOrder = Order.cancel(order);
+    const updatedOrder = Order.markDelivered(order);
     const history = OrderHistory.recordTransition(
       crypto.randomUUID(),
       order,
       updatedOrder,
     );
 
-    const updatedItem = itemRepository.findById(order.itemId);
-    if (!updatedItem) {
-      throw new NotFoundError("Item not found");
-    }
-    const updatedUpdatedItem = Item.changeStatus(
-      updatedItem,
-      ItemStatus.create(ItemStatusMap.SELLABLE),
-    );
-
     orderRepository.update(updatedOrder);
     orderHistoryRepository.create(history);
-    itemRepository.update(updatedUpdatedItem);
 
     return orderDtoSchema.parse({
       id: updatedOrder.id,

@@ -10,9 +10,9 @@ import {
   ValidationError,
 } from "../../domain/model/shared/error.js";
 import { createPassthroughTxManager } from "../../infrastructure/database/test/testDb.js";
-import { purchaseOrder } from "./purchaseOrder.js";
+import { purchaseOrderUsecase } from "./purchaseOrderUsecase.js";
 
-type PurchaseOrderDeps = Parameters<typeof purchaseOrder>[0];
+type PurchaseOrderDeps = Parameters<typeof purchaseOrderUsecase>[0];
 
 describe("purchaseOrder", () => {
   let mockItemRepository: {
@@ -70,7 +70,7 @@ describe("purchaseOrder", () => {
       .mockReturnValueOnce("20000000-0000-4000-8000-000000000001");
 
     // 実行
-    const dto = purchaseOrder(deps, {
+    const dto = purchaseOrderUsecase(deps, {
       userId: "buyer",
       itemId: "item-1",
     });
@@ -107,7 +107,7 @@ describe("purchaseOrder", () => {
 
     // 実行 & 検証
     expect(() =>
-      purchaseOrder(deps, { userId: "buyer", itemId: "missing" }),
+      purchaseOrderUsecase(deps, { userId: "buyer", itemId: "missing" }),
     ).toThrow(NotFoundError);
     expect(mockItemRepository.update).not.toHaveBeenCalled();
     expect(mockOrderRepository.create).not.toHaveBeenCalled();
@@ -131,7 +131,7 @@ describe("purchaseOrder", () => {
 
     // 実行 & 検証
     expect(() =>
-      purchaseOrder(deps, { userId: "buyer", itemId: "item-1" }),
+      purchaseOrderUsecase(deps, { userId: "buyer", itemId: "item-1" }),
     ).toThrow(NotFoundError);
   });
 
@@ -149,7 +149,7 @@ describe("purchaseOrder", () => {
 
     // 実行 & 検証
     expect(() =>
-      purchaseOrder(deps, { userId: "seller", itemId: "item-1" }),
+      purchaseOrderUsecase(deps, { userId: "seller", itemId: "item-1" }),
     ).toThrow(ValidationError);
   });
 });

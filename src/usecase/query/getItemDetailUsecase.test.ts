@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { withMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
 import { items } from "../../infrastructure/database/schema.js";
-import { getItemDetail } from "./getItemDetail.js";
+import { getItemDetailUsecase } from "./getItemDetailUsecase.js";
 
 describe("getItemDetail", () => {
   it("該当行がないとき null を返す", () => {
     withMemoryAppDatabase((db) => {
-      const result = getItemDetail({ db }, { itemId: "missing" });
+      const result = getItemDetailUsecase({ db }, { itemId: "missing" });
       expect(result).toBeNull();
     });
   });
@@ -26,7 +26,7 @@ describe("getItemDetail", () => {
         })
         .run();
 
-      const result = getItemDetail({ db }, { itemId: "item-1" });
+      const result = getItemDetailUsecase({ db }, { itemId: "item-1" });
       expect(result).toEqual({
         id: "item-1",
         name: "Sample product",

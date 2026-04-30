@@ -6,7 +6,7 @@ type Deps = {
   readonly db: AppDatabase;
 };
 
-export const getItemAllList = (deps: Deps): ItemDto[] => {
+export const getItemAllListUsecase = (deps: Deps): ItemDto[] => {
   const rows = deps.db.select().from(items).all();
 
   const result = rows.map((row) =>

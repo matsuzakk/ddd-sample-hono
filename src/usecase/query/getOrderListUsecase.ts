@@ -11,7 +11,7 @@ type Deps = {
   readonly db: AppDatabase;
 };
 
-export const getOrderList = (deps: Deps, input: Input) => {
+export const getOrderListUsecase = (deps: Deps, input: Input) => {
   const rows = deps.db
     .select()
     .from(orders)

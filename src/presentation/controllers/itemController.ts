@@ -1,9 +1,9 @@
 import type { Context } from "hono";
 import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
 import { createUserRepository } from "../../infrastructure/repository/userRepository.js";
-import { sellItem } from "../../usecase/command/sellItem.js";
-import { getItemAllList } from "../../usecase/query/getItemAllList.js";
-import { getItemDetail } from "../../usecase/query/getItemDetail.js";
+import { sellItemUsecase } from "../../usecase/command/sellItemUsecase.js";
+import { getItemAllListUsecase } from "../../usecase/query/getItemAllListUsecase.js";
+import { getItemDetailUsecase } from "../../usecase/query/getItemDetailUsecase.js";
 import type { AppVariables } from "../../env.js";
 
 export const itemController = {
@@ -23,7 +23,7 @@ export const itemController = {
       description: string;
       price: number;
     }>();
-    const result = await sellItem(
+    const result = await sellItemUsecase(
       { db, createItemRepository, createUserRepository },
       {
         sellerId,
@@ -44,7 +44,7 @@ export const itemController = {
    */
   list: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
-    const result = await getItemAllList({ db });
+    const result = await getItemAllListUsecase({ db });
     return c.json(result);
   },
 
@@ -56,7 +56,7 @@ export const itemController = {
   getById: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const itemId = c.req.param("itemId")!;
-    const result = await getItemDetail({ db }, { itemId });
+    const result = await getItemDetailUsecase({ db }, { itemId });
     return c.json(result);
   },
 } as const;

@@ -3,11 +3,11 @@ import { createTransactionManager } from "../../infrastructure/database/transact
 import { createItemRepository } from "../../infrastructure/repository/itemRepository.js";
 import { createOrderHistoryRepository } from "../../infrastructure/repository/orderHistoryRepository.js";
 import { createOrderRepository } from "../../infrastructure/repository/orderRepository.js";
-import { cancelOrder } from "../../usecase/command/cancelOrder.js";
-import { deliverOrder } from "../../usecase/command/deliverOrder.js";
-import { purchaseOrder } from "../../usecase/command/purchaseOrder.js";
-import { shipOrder } from "../../usecase/command/shipOrder.js";
-import { getOrderDetail } from "../../usecase/query/getOrderDetail.js";
+import { cancelOrderUsecase } from "../../usecase/command/cancelOrderUsecase.js";
+import { deliverOrderUsecase } from "../../usecase/command/deliverOrderUsecase.js";
+import { purchaseOrderUsecase } from "../../usecase/command/purchaseOrderUsecase.js";
+import { shipOrderUsecase } from "../../usecase/command/shipOrderUsecase.js";
+import { getOrderDetailUsecase } from "../../usecase/query/getOrderDetailUsecase.js";
 import type { AppVariables } from "../../env.js";
 
 export const orderController = {
@@ -22,7 +22,7 @@ export const orderController = {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
     const body = await c.req.json<{ userId: string; itemId: string }>();
-    const result = await purchaseOrder(
+    const result = await purchaseOrderUsecase(
       {
         txManager,
         createItemRepository,
@@ -43,7 +43,7 @@ export const orderController = {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
     const orderId = c.req.param("orderId")!;
-    const result = await cancelOrder(
+    const result = await cancelOrderUsecase(
       {
         txManager,
         createItemRepository,
@@ -64,7 +64,7 @@ export const orderController = {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
     const orderId = c.req.param("orderId")!;
-    const result = await deliverOrder(
+    const result = await deliverOrderUsecase(
       { txManager, createOrderRepository, createOrderHistoryRepository },
       { orderId },
     );
@@ -80,7 +80,7 @@ export const orderController = {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
     const orderId = c.req.param("orderId")!;
-    const result = await shipOrder(
+    const result = await shipOrderUsecase(
       { txManager, createOrderRepository, createOrderHistoryRepository },
       { orderId },
     );
@@ -97,7 +97,7 @@ export const orderController = {
   getById: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const orderId = c.req.param("orderId")!;
-    const result = await getOrderDetail({ db }, { orderId });
+    const result = await getOrderDetailUsecase({ db }, { orderId });
     return c.json(result);
   },
 } as const;

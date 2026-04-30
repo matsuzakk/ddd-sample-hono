@@ -23,7 +23,7 @@ type Input = {
   readonly price: number;
 };
 
-export const sellItem = (deps: Deps, input: Input): ItemDto => {
+export const sellItemUsecase = (deps: Deps, input: Input): ItemDto => {
   const userRepository = deps.createUserRepository(deps.db);
   const seller = userRepository.findById(input.sellerId);
   if (!seller) {

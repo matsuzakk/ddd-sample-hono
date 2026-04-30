@@ -33,7 +33,7 @@ type Input = {
 /**
  * 商品を購入する
  */
-export const purchaseOrder = (deps: Deps, input: Input): OrderDto => {
+export const purchaseOrderUsecase = (deps: Deps, input: Input): OrderDto => {
   return deps.txManager.run((tx) => {
     const itemRepository = deps.createItemRepository(tx);
     const orderRepository = deps.createOrderRepository(tx);

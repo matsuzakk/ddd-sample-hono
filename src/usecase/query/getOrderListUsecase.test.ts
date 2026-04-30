@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { withMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
 import { orders } from "../../infrastructure/database/schema.js";
-import { getOrderList } from "./getOrderList.js";
+import { getOrderListUsecase } from "./getOrderListUsecase.js";
 
 describe("getOrderList", () => {
   it("userId が一致する注文だけを返す", () => {
@@ -35,7 +35,7 @@ describe("getOrderList", () => {
         ])
         .run();
 
-      const list = getOrderList({ db }, { userId: "u1" });
+      const list = getOrderListUsecase({ db }, { userId: "u1" });
       expect(list).toHaveLength(2);
       expect(list.map((x) => x.id).sort()).toEqual(["o1", "o3"]);
       expect(list.every((x) => x.userId === "u1")).toBe(true);
@@ -44,7 +44,7 @@ describe("getOrderList", () => {
 
   it("一致する行がなければ空配列", () => {
     withMemoryAppDatabase((db) => {
-      expect(getOrderList({ db }, { userId: "ghost" })).toEqual([]);
+      expect(getOrderListUsecase({ db }, { userId: "ghost" })).toEqual([]);
     });
   });
 });

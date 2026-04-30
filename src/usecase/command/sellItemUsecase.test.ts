@@ -6,7 +6,7 @@ import {
 } from "../../domain/model/shared/error.js";
 import { User } from "../../domain/model/user/User.js";
 import type { AppDatabase } from "../../infrastructure/database/db.js";
-import { sellItem } from "./sellItem.js";
+import { sellItemUsecase } from "./sellItemUsecase.js";
 
 describe("sellItem", () => {
   let mockCreate: ReturnType<typeof vi.fn>;
@@ -44,7 +44,7 @@ describe("sellItem", () => {
 
   it("商品を作成しリポジトリへ保存して ItemDto を返す", () => {
     // 実行
-    const result = sellItem(
+    const result = sellItemUsecase(
       { db: appDb, createItemRepository, createUserRepository },
       {
         sellerId: "seller-1",
@@ -80,7 +80,7 @@ describe("sellItem", () => {
     mockUserRepository.findById.mockReturnValue(null);
 
     expect(() =>
-      sellItem(
+      sellItemUsecase(
         { db: appDb, createItemRepository, createUserRepository },
         {
           sellerId: "missing-seller",
@@ -96,7 +96,7 @@ describe("sellItem", () => {
   it("価格が無効なときは永続化せず ValidationError を投げる", () => {
     // 実行 & 検証
     expect(() =>
-      sellItem(
+      sellItemUsecase(
         { db: appDb, createItemRepository, createUserRepository },
         {
           sellerId: "seller-1",

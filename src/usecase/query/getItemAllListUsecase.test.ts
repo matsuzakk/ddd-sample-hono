@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { withMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
 import { items } from "../../infrastructure/database/schema.js";
-import { getItemAllList } from "./getItemAllList.js";
+import { getItemAllListUsecase } from "./getItemAllListUsecase.js";
 
 describe("getItemAllList", () => {
   it("テーブルが空なら空配列", () => {
     withMemoryAppDatabase((db) => {
-      expect(getItemAllList({ db })).toEqual([]);
+      expect(getItemAllListUsecase({ db })).toEqual([]);
     });
   });
 
@@ -37,7 +37,7 @@ describe("getItemAllList", () => {
         ])
         .run();
 
-      const list = getItemAllList({ db });
+      const list = getItemAllListUsecase({ db });
       expect(list).toHaveLength(2);
       expect(list.map((x) => x.id).sort()).toEqual(["i1", "i2"]);
     });

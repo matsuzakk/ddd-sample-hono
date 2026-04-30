@@ -15,7 +15,7 @@ import {
   ValidationError,
 } from "../../domain/model/shared/error.js";
 import { createPassthroughTxManager } from "../../infrastructure/database/test/testDb.js";
-import { cancelOrder } from "./cancelOrder.js";
+import { cancelOrderUsecase } from "./cancelOrderUsecase.js";
 
 describe("cancelOrder", () => {
   let mockItemRepository: {
@@ -29,7 +29,7 @@ describe("cancelOrder", () => {
     update: ReturnType<typeof vi.fn>;
   };
   let mockOrderHistoryRepository: { create: ReturnType<typeof vi.fn> };
-  let deps: Parameters<typeof cancelOrder>[0];
+  let deps: Parameters<typeof cancelOrderUsecase>[0];
 
   beforeEach(() => {
     mockItemRepository = {
@@ -86,7 +86,7 @@ describe("cancelOrder", () => {
     );
 
     // 実行
-    const dto = cancelOrder(deps, { orderId: "order-1" });
+    const dto = cancelOrderUsecase(deps, { orderId: "order-1" });
 
     // 検証: 注文キャンセル
     expect(mockOrderRepository.findById).toHaveBeenCalledWith("order-1");
@@ -114,7 +114,7 @@ describe("cancelOrder", () => {
     mockOrderRepository.findById.mockReturnValue(null);
 
     // 実行 & 検証
-    expect(() => cancelOrder(deps, { orderId: "missing" })).toThrow(
+    expect(() => cancelOrderUsecase(deps, { orderId: "missing" })).toThrow(
       NotFoundError,
     );
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
@@ -137,7 +137,7 @@ describe("cancelOrder", () => {
     mockItemRepository.findById.mockReturnValue(null);
 
     // 実行 & 検証
-    expect(() => cancelOrder(deps, { orderId: "order-1" })).toThrow(
+    expect(() => cancelOrderUsecase(deps, { orderId: "order-1" })).toThrow(
       NotFoundError,
     );
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
@@ -171,7 +171,7 @@ describe("cancelOrder", () => {
     );
 
     // 実行 & 検証
-    expect(() => cancelOrder(deps, { orderId: "order-1" })).toThrow(
+    expect(() => cancelOrderUsecase(deps, { orderId: "order-1" })).toThrow(
       ValidationError,
     );
   });
