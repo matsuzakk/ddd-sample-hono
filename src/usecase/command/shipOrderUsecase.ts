@@ -1,4 +1,5 @@
 import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
+import { Item } from "../../domain/model/item/Item.js";
 import type {
   IOrderHistoryRepository,
   IOrderRepository,
@@ -41,8 +42,12 @@ export const shipOrderUsecase = (deps: Deps, input: Input): OrderDto => {
     }
 
     const item = itemRepository.findById(order.itemId);
-    // 商品が存在しない場合や、商品の販売者が発送者本人と一致しない場合はエラー
-    if (!item || item.sellerId !== input.userId) {
+    // 商品が存在しない場合
+    if (!item) {
+      throw new NotFoundError("Item not found");
+    }
+    // 商品の販売者が発送者本人と一致しない場合はエラー
+    if (!Item.isSeller(item, input.userId)) {
       throw new ValidationError(
         "You cannot ship this order because you are not the seller",
       );

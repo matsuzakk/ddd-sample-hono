@@ -101,6 +101,16 @@ describe("Item", () => {
     expect(Item.isPurchasableByUser(item, "buyer")).toBe(true);
   });
 
+  it("isSeller は販売者と一致すると true", () => {
+    const item = Item.create("i", "n", "d", ItemPrice.create(0), "seller-1");
+    expect(Item.isSeller(item, "seller-1")).toBe(true);
+  });
+
+  it("isSeller は販売者と一致しないと false", () => {
+    const item = Item.create("i", "n", "d", ItemPrice.create(0), "seller-1");
+    expect(Item.isSeller(item, "buyer-1")).toBe(false);
+  });
+
   it("changeStatus はステータスと updatedAt を更新する", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-06-01T12:00:00.000Z"));

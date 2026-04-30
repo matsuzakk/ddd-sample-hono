@@ -112,4 +112,14 @@ describe("Order", () => {
     );
     expect(() => Order.cancel(shipped)).toThrow(ValidationError);
   });
+
+  it("isPurchaser は購入者と一致すると true", () => {
+    const order = Order.create("o", "buyer-1", sellableItem("s"));
+    expect(Order.isPurchaser(order, "buyer-1")).toBe(true);
+  });
+
+  it("isPurchaser は購入者と一致しないと false", () => {
+    const order = Order.create("o", "buyer-1", sellableItem("s"));
+    expect(Order.isPurchaser(order, "other-user")).toBe(false);
+  });
 });

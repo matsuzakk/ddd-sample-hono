@@ -112,6 +112,27 @@ describe("cancelOrder", () => {
     expect(dto.status).toBe(OrderStatusMap.CANCELED);
   });
 
+  it("購入者以外がキャンセルしようとしたとき NotFoundError とし副作用がない", () => {
+    mockOrderRepository.findById.mockReturnValue(
+      Order.reconstitute(
+        "order-1",
+        "buyer",
+        "item-1",
+        OrderStatus.create(OrderStatusMap.PURCHASED),
+        new Date("2024-01-01T00:00:00.000Z"),
+        new Date("2024-01-02T00:00:00.000Z"),
+      ),
+    );
+
+    expect(() =>
+      cancelOrderUsecase(deps, { userId: "other", orderId: "order-1" }),
+    ).toThrow(NotFoundError);
+    expect(mockOrderRepository.update).not.toHaveBeenCalled();
+    expect(mockItemRepository.findById).not.toHaveBeenCalled();
+    expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
+    expect(mockItemRepository.update).not.toHaveBeenCalled();
+  });
+
   it("注文が無いとき NotFoundError とし副作用がない", () => {
     // 準備: 注文なし
     mockOrderRepository.findById.mockReturnValue(null);

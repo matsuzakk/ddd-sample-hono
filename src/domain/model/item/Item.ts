@@ -90,6 +90,11 @@ export const Item = {
     return item.sellerId !== userId;
   },
 
+  /** 操作者がこの商品の販売者本人か（発送などの可否判定用） */
+  isSeller(item: Item, userId: string): boolean {
+    return item.sellerId === userId;
+  },
+
   changeStatus(item: Item, status: ItemStatusVO): Item {
     return {
       ...item,

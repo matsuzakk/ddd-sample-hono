@@ -57,6 +57,11 @@ export const Order = {
     return { id, userId, itemId, status, createdAt, updatedAt };
   },
 
+  /** 操作者が注文の購入者本人か（キャンセル・受取完了などの可否判定用） */
+  isPurchaser(order: Order, actorUserId: string): boolean {
+    return order.userId === actorUserId;
+  },
+
   markShipped(order: Order): Order {
     if (!OrderStatus.isPurchased(order.status)) {
       throw new ValidationError("Order cannot be shipped");

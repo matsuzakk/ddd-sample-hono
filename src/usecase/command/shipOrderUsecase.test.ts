@@ -117,7 +117,7 @@ describe("shipOrder", () => {
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
   });
 
-  it("販売者以外が発送しようとしたとき NotFoundError とし更新しない", () => {
+  it("販売者以外が発送しようとしたとき ValidationError とし更新しない", () => {
     mockOrderRepository.findById.mockReturnValue(
       Order.reconstitute(
         "order-1",

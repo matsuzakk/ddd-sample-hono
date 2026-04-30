@@ -42,8 +42,7 @@ export const cancelOrderUsecase = (deps: Deps, input: Input): OrderDto => {
       throw new NotFoundError("Order not found");
     }
 
-    // 注文の購入者がキャンセル者本人と一致しない場合はエラー
-    if (order.userId !== input.userId) {
+    if (!Order.isPurchaser(order, input.userId)) {
       throw new NotFoundError("Order not found");
     }
 
