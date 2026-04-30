@@ -1,39 +1,9 @@
 import type { Context } from "hono";
-import { createAuth } from "../../infrastructure/auth/index.js";
-import { registerUser } from "../../usecase/command/registerUser.js";
 import { getItemSellList } from "../../usecase/query/getItemSellList.js";
 import { getOrderList } from "../../usecase/query/getOrderList.js";
 import type { DbVariables } from "../middleware/dbMiddleware.js";
 
 export const userController = {
-  // Command
-
-  /**
-   * ユーザーを登録する
-   * @param c - Hono context
-   * @returns - Promise<Response>
-   */
-  register: async (c: Context<{ Variables: DbVariables }>) => {
-    const db = c.get("db");
-    const auth = createAuth(db);
-    const body = await c.req.json<{
-      name: string;
-      email: string;
-      password: string;
-    }>();
-    const result = await registerUser(
-      { auth },
-      {
-        name: body.name,
-        email: body.email,
-        password: body.password,
-      },
-    );
-    return c.json(result, 201);
-  },
-
-  // Query
-
   /**
    * ユーザーが出品した商品一覧を取得する
    * @param c - Hono context

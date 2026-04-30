@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { OrderStatusMap } from "../src/domain/model/order/OrderStatus.js";
-import { createE2eApp, seedData } from "./config/setup.js";
+import { createE2eApp, seedData, signUpEmailViaHttp } from "./config/setup.js";
 import { MOCK_USER_PASSWORD } from "./mock/user.js";
 
 describe("POST /orders", () => {
@@ -32,17 +32,11 @@ describe("POST /orders", () => {
   test("存在しない商品IDを指定するとNOT_FOUND_ENTITYが返る(404)", async () => {
     const { app, close } = createE2eApp();
     try {
-      const registerRes = await app.request("/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "Only user",
-          email: "only@example.com",
-          password: MOCK_USER_PASSWORD,
-        }),
+      const user = await signUpEmailViaHttp(app, {
+        name: "Only user",
+        email: "only@example.com",
+        password: MOCK_USER_PASSWORD,
       });
-      expect(registerRes.status).toBe(201);
-      const user = (await registerRes.json()) as { id: string };
 
       const res = await app.request("/orders", {
         method: "POST",

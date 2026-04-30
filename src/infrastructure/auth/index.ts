@@ -7,6 +7,7 @@ export const createAuth = (db: AppDatabase) =>
   betterAuth({
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+    basePath: "/auth",
     database: drizzleAdapter(db, {
       provider: "sqlite",
       schema: {
@@ -33,8 +34,6 @@ export const createAuth = (db: AppDatabase) =>
       // },
     },
   });
-
-export type AuthInstance = ReturnType<typeof createAuth>;
 
 // export type AuthType = {
 //   user: AuthInstance["$Infer"]["Session"]["user"] | null;

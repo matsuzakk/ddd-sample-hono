@@ -4,6 +4,7 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { DomainError } from "./domain/model/shared/error.js";
 import type { AppDatabase } from "./infrastructure/database/db.js";
 import { getDatabase } from "./infrastructure/database/db.js";
+import { createAuth } from "./infrastructure/auth/index.js";
 import { authMiddleware } from "./presentation/middleware/authMiddleware.js";
 import {
   createDbMiddleware,
@@ -52,6 +53,9 @@ export const createApp = (options?: AppOptions) => {
   app.get("/health", (c) => {
     return c.text("Hello Hono!");
   });
+
+  // https://www.better-auth.com/docs/integrations/hono
+  app.all("/auth/*", (c) => createAuth(c.get("db")).handler(c.req.raw));
 
   app.route("/users", usersRoute);
   app.route("/items", itemsRoute);

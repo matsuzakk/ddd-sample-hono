@@ -7,7 +7,6 @@ import type { DbVariables } from "./dbMiddleware.js";
  */
 export const AUTH_EXCLUDED_ROUTES = [
   { method: "GET", path: "/health" },
-  { method: "POST", path: "/users" },
 ] as const satisfies { method: string; path: string }[];
 
 /**
@@ -24,6 +23,7 @@ export const authMiddleware: MiddlewareHandler<{
 
   // 認証不要のルートの場合はスキップ
   if (
+    c.req.path.startsWith("/auth") ||
     AUTH_EXCLUDED_ROUTES.some(
       (r) => r.path === c.req.path && r.method === c.req.method,
     )
@@ -32,6 +32,7 @@ export const authMiddleware: MiddlewareHandler<{
     return;
   }
 
+  // セッションが有効かどうかを検証
   const auth = createAuth(c.get("db"));
   const data = await auth.api.getSession({
     headers: c.req.raw.headers,

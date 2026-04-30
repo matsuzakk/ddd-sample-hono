@@ -32,3 +32,6 @@ data/
 
 # dist
 dist/
+
+# curl cookies
+cookies.txt

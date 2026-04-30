@@ -38,19 +38,19 @@ describe("Order", () => {
 - コントローラやルーティングは含めない（HTTPはE2Eへ）。
 
 ```typescript
-import { describe, expect, it } from "vitest";
-import { createMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
-import { registerUser } from "./registerUser.js";
+import { describe, expect, it, vi } from "vitest";
+import type { AppDatabase } from "../../infrastructure/database/db.js";
+import { sellItem } from "./sellItem.js";
 
-describe("registerUser", () => {
-  it("ユーザーを登録するとDTOに名前とメールが含まれる", () => {
-    const { db, close } = createMemoryAppDatabase();
-    try {
-      const dto = registerUser(/* deps */, { name: "...", email: "a@b.co" });
-      expect(dto.name).toBe("...");
-    } finally {
-      close();
-    }
+describe("sellItem", () => {
+  it("商品を出品するとDTOに名前と価格が含まれる", () => {
+    const createItemRepository = vi.fn(() => ({ create: vi.fn() }));
+    const dto = sellItem(
+      { db: {} as AppDatabase, createItemRepository },
+      { sellerId: "seller-1", name: "Book", description: "Good", price: 100 },
+    );
+    expect(dto.name).toBe("Book");
+    expect(dto.price).toBe(100);
   });
 });
 ```

@@ -5,6 +5,39 @@ import type { DbVariables } from "../../src/presentation/middleware/dbMiddleware
 import { MOCK_ITEM } from "../mock/item.js";
 import { MOCK_USER, MOCK_USER_PASSWORD } from "../mock/user.js";
 
+export type E2eSignedUpUser = {
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+};
+
+/**
+ * better-auth のメールサインアップ（`POST /auth/sign-up/email`）でユーザーを作成する。
+ */
+export const signUpEmailViaHttp = async (
+  app: Hono<{ Variables: DbVariables }>,
+  input: {
+    readonly name: string;
+    readonly email: string;
+    readonly password: string;
+  },
+): Promise<E2eSignedUpUser> => {
+  const res = await app.request("/auth/sign-up/email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: input.name,
+      email: input.email,
+      password: input.password,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`sign-up failed: ${res.status} ${await res.text()}`);
+  }
+  const body = (await res.json()) as { user: E2eSignedUpUser };
+  return body.user;
+};
+
 export const createE2eApp = () => {
   const { db, close } = createMemoryAppDatabase();
   const app = createApp({ db });
@@ -12,33 +45,17 @@ export const createE2eApp = () => {
 };
 
 export const seedData = async (app: Hono<{ Variables: DbVariables }>) => {
-  const sellerRes = await app.request("/users", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: MOCK_USER.SELLER.name,
-      email: MOCK_USER.SELLER.email,
-      password: MOCK_USER_PASSWORD,
-    }),
+  const seller = await signUpEmailViaHttp(app, {
+    name: MOCK_USER.SELLER.name,
+    email: MOCK_USER.SELLER.email,
+    password: MOCK_USER_PASSWORD,
   });
-  if (!sellerRes.ok) {
-    throw new Error(`seed seller failed: ${sellerRes.status}`);
-  }
-  const seller = (await sellerRes.json()) as { id: string };
 
-  const buyerRes = await app.request("/users", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: MOCK_USER.BUYER.name,
-      email: MOCK_USER.BUYER.email,
-      password: MOCK_USER_PASSWORD,
-    }),
+  const buyer = await signUpEmailViaHttp(app, {
+    name: MOCK_USER.BUYER.name,
+    email: MOCK_USER.BUYER.email,
+    password: MOCK_USER_PASSWORD,
   });
-  if (!buyerRes.ok) {
-    throw new Error(`seed buyer failed: ${buyerRes.status}`);
-  }
-  const buyer = await buyerRes.json();
 
   const itemRes = await app.request("/items", {
     method: "POST",
