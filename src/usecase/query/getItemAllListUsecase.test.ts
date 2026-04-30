@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { withMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
 import { items } from "../../infrastructure/database/schema.js";
 import { getItemAllListUsecase } from "./getItemAllListUsecase.js";
+import { ItemStatusMap } from "../../domain/model/item/ItemStatus.js";
 
 describe("getItemAllList", () => {
   it("テーブルが空なら空配列", () => {
@@ -19,7 +20,7 @@ describe("getItemAllList", () => {
             name: "One",
             description: "d1",
             price: 0,
-            status: 0,
+            status: ItemStatusMap.SELLABLE,
             sellerId: "s1",
             createdAt: new Date("2024-03-01T00:00:00.000Z"),
             updatedAt: new Date("2024-03-02T00:00:00.000Z"),
@@ -29,8 +30,19 @@ describe("getItemAllList", () => {
             name: "Two",
             description: "d2",
             price: 999_999,
-            status: 1,
+            status: ItemStatusMap.SELLABLE,
             sellerId: "s2",
+            createdAt: new Date("2024-03-01T00:00:00.000Z"),
+            updatedAt: new Date("2024-03-02T00:00:00.000Z"),
+          },
+          // 購入済みの商品は除外
+          {
+            id: "i3",
+            name: "Three",
+            description: "d3",
+            price: 1000000,
+            status: ItemStatusMap.PURCHASED,
+            sellerId: "s3",
             createdAt: new Date("2024-03-01T00:00:00.000Z"),
             updatedAt: new Date("2024-03-02T00:00:00.000Z"),
           },

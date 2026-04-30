@@ -86,7 +86,10 @@ describe("cancelOrder", () => {
     );
 
     // 実行
-    const dto = cancelOrderUsecase(deps, { orderId: "order-1" });
+    const dto = cancelOrderUsecase(deps, {
+      userId: "buyer",
+      orderId: "order-1",
+    });
 
     // 検証: 注文キャンセル
     expect(mockOrderRepository.findById).toHaveBeenCalledWith("order-1");
@@ -114,9 +117,9 @@ describe("cancelOrder", () => {
     mockOrderRepository.findById.mockReturnValue(null);
 
     // 実行 & 検証
-    expect(() => cancelOrderUsecase(deps, { orderId: "missing" })).toThrow(
-      NotFoundError,
-    );
+    expect(() =>
+      cancelOrderUsecase(deps, { userId: "buyer", orderId: "missing" }),
+    ).toThrow(NotFoundError);
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockItemRepository.findById).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
@@ -137,9 +140,9 @@ describe("cancelOrder", () => {
     mockItemRepository.findById.mockReturnValue(null);
 
     // 実行 & 検証
-    expect(() => cancelOrderUsecase(deps, { orderId: "order-1" })).toThrow(
-      NotFoundError,
-    );
+    expect(() =>
+      cancelOrderUsecase(deps, { userId: "buyer", orderId: "order-1" }),
+    ).toThrow(NotFoundError);
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
     expect(mockItemRepository.update).not.toHaveBeenCalled();
@@ -171,8 +174,8 @@ describe("cancelOrder", () => {
     );
 
     // 実行 & 検証
-    expect(() => cancelOrderUsecase(deps, { orderId: "order-1" })).toThrow(
-      ValidationError,
-    );
+    expect(() =>
+      cancelOrderUsecase(deps, { userId: "buyer", orderId: "order-1" }),
+    ).toThrow(ValidationError);
   });
 });

@@ -135,21 +135,27 @@ describe("purchaseItemUsecase", () => {
     ).toThrow(NotFoundError);
   });
 
-  it("出品者自身の購入はドメインで ValidationError", () => {
-    // 準備: 自分の商品を買おうとする
+  it("販売者と購入者が同一のとき ValidationError とし永続化しない", () => {
     mockItemRepository.findById.mockReturnValue(
       Item.create(
         "item-1",
         "Book",
         "Description",
         ItemPrice.create(100),
-        "seller",
+        "same-user",
       ),
     );
 
-    // 実行 & 検証
-    expect(() =>
-      purchaseItemUsecase(deps, { userId: "seller", itemId: "item-1" }),
-    ).toThrow(ValidationError);
+    let thrown: unknown;
+    try {
+      purchaseItemUsecase(deps, { userId: "same-user", itemId: "item-1" });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(ValidationError);
+    expect((thrown as Error).message).toBe("You cannot purchase your own item");
+    expect(mockItemRepository.update).not.toHaveBeenCalled();
+    expect(mockOrderRepository.create).not.toHaveBeenCalled();
+    expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,7 @@
 import type { MiddlewareHandler } from "hono";
 import { createAuth } from "../../infrastructure/auth/index.js";
 import type { AppVariables } from "../../env.js";
+import { UnauthenticatedError } from "../../domain/model/shared/error.js";
 
 /**
  * セッション検証をスキップするルート一覧。
@@ -43,12 +44,8 @@ export const authMiddleware: MiddlewareHandler<{
   });
 
   if (!data?.user) {
-    return c.json(
-      {
-        code: "UNAUTHENTICATED",
-        message: "Authentication required",
-      },
-      400,
+    throw new UnauthenticatedError(
+      "This endpoint requires authentication. Please sign in.",
     );
   }
 
