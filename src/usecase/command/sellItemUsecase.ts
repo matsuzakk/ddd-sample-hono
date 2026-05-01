@@ -1,9 +1,9 @@
 import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
 import { Item } from "../../domain/model/item/Item.js";
-import { ItemDescription } from "../../domain/model/item/ItemDescription.js";
-import { ItemName } from "../../domain/model/item/ItemName.js";
-import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
-import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
+import { ItemDescription } from "../../domain/model/item/vo/ItemDescription.js";
+import { ItemName } from "../../domain/model/item/vo/ItemName.js";
+import { ItemPrice } from "../../domain/model/item/vo/ItemPrice.js";
+import { ItemStatus } from "../../domain/model/item/vo/ItemStatus.js";
 import { NotFoundError } from "../../domain/model/shared/error.js";
 import type { IUserRepository } from "../../domain/model/user/IUserRepository.js";
 import type {

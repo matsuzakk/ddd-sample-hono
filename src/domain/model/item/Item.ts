@@ -2,14 +2,14 @@ import { z } from "zod";
 import {
   ItemDescription,
   type ItemDescription as ItemDescriptionVO,
-} from "./ItemDescription.js";
-import { ItemName, type ItemName as ItemNameVO } from "./ItemName.js";
+} from "./vo/ItemDescription.js";
+import { ItemName, type ItemName as ItemNameVO } from "./vo/ItemName.js";
 import {
   ItemStatus,
   ItemStatusMap,
   type ItemStatus as ItemStatusVO,
-} from "./ItemStatus.js";
-import type { ItemPrice as ItemPriceVO } from "./ItemPrice.js";
+} from "./vo/ItemStatus.js";
+import type { ItemPrice as ItemPriceVO } from "./vo/ItemPrice.js";
 
 // --- Zod ブランド（ID）---
 

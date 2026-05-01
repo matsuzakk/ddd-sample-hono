@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ValidationError } from "../shared/error.js";
+import { ValidationError } from "../../shared/error.js";
 
 export const ItemStatusMap = {
   SELLABLE: 0,

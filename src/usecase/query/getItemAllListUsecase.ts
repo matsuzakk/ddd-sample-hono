@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { ItemStatusMap } from "../../domain/model/item/ItemStatus.js";
+import { ItemStatusMap } from "../../domain/model/item/vo/ItemStatus.js";
 import type { AppDatabase } from "../../infrastructure/database/db.js";
 import { items } from "../../infrastructure/database/schema.js";
 import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";

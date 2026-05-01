@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { IOrderRepository } from "../../domain/model/order/IOrderRepository.js";
 import { Order } from "../../domain/model/order/Order.js";
-import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
+import { OrderStatus } from "../../domain/model/order/vo/OrderStatus.js";
 import type { DbClient } from "../database/db.js";
 import { orders } from "../database/schema.js";
 

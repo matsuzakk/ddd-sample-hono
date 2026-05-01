@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ValidationError } from "../shared/error.js";
+import { ValidationError } from "../../shared/error.js";
 
 // --- Zod ブランド（表示名）---
 
@@ -21,9 +21,7 @@ export const UserName = {
       throw new ValidationError(message, { cause: r.error });
     }
     if (value.length < 1) {
-      throw new ValidationError(
-        "Name must be between 1 and 20 characters",
-      );
+      throw new ValidationError("Name must be between 1 and 20 characters");
     }
     return r.data;
   },

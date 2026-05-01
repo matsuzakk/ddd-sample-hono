@@ -5,7 +5,7 @@ import {
   OrderStatus,
   OrderStatusMap,
   type OrderStatus as OrderStatusVO,
-} from "./OrderStatus.js";
+} from "./vo/OrderStatus.js";
 
 // --- Zod ブランド（ID）---
 

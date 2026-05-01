@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { UserEmail } from "./UserEmail.js";
-import { UserName } from "./UserName.js";
+import { UserEmail } from "./vo/UserEmail.js";
+import { UserName } from "./vo/UserName.js";
 
 // --- Zod ブランド（ID）---
 

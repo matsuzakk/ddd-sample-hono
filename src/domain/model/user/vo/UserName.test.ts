@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ValidationError } from "../shared/error.js";
+import { ValidationError } from "../../shared/error.js";
 import { UserName } from "./UserName.js";
 
 describe("UserName", () => {

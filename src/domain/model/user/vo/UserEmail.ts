@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ValidationError } from "../shared/error.js";
+import { ValidationError } from "../../shared/error.js";
 
 // --- Zod ブランド（メール）---
 

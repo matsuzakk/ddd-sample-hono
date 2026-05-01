@@ -3,14 +3,14 @@ import { Item } from "../../domain/model/item/Item.js";
 import {
   ItemStatus,
   ItemStatusMap,
-} from "../../domain/model/item/ItemStatus.js";
+} from "../../domain/model/item/vo/ItemStatus.js";
 import type {
   IOrderHistoryRepository,
   IOrderRepository,
 } from "../../domain/model/order/IOrderRepository.js";
 import { Order } from "../../domain/model/order/Order.js";
 import { OrderHistory } from "../../domain/model/order/OrderHistory.js";
-import { OrderStatus } from "../../domain/model/order/OrderStatus.js";
+import { OrderStatus } from "../../domain/model/order/vo/OrderStatus.js";
 import type { ITransactionManager } from "../../domain/model/shared/ITransactionManager.js";
 import type { DbClient } from "../../infrastructure/database/db.js";
 import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";

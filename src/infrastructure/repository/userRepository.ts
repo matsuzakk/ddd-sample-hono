@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm";
 import type { IUserRepository } from "../../domain/model/user/IUserRepository.js";
 import type { User } from "../../domain/model/user/User.js";
 import { User as UserEntity } from "../../domain/model/user/User.js";
-import { UserEmail } from "../../domain/model/user/UserEmail.js";
-import { UserName } from "../../domain/model/user/UserName.js";
+import { UserEmail } from "../../domain/model/user/vo/UserEmail.js";
+import { UserName } from "../../domain/model/user/vo/UserName.js";
 import type { DbClient } from "../database/db.js";
 import { users } from "../database/schema.js";
 
