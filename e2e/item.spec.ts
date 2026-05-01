@@ -18,11 +18,11 @@ describe("POST /items", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": seller.id,
+          "x-e2e-user-id": String(seller.id),
         },
         body: JSON.stringify({
           ...MOCK_ITEM.SAMPLE,
-          sellerId: seller.id,
+          sellerId: String(seller.id),
         }),
       });
 
@@ -55,7 +55,7 @@ describe("POST /items", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": seller.id,
+          "x-e2e-user-id": String(seller.id),
         },
         body: JSON.stringify({
           name: MOCK_ITEM.SAMPLE.name,

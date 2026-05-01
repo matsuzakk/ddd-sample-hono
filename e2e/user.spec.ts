@@ -11,7 +11,7 @@ describe("GET /users/items", () => {
 
       const res = await app.request("/users/sellItems", {
         method: "GET",
-        headers: { "x-e2e-user-id": seller.id },
+        headers: { "x-e2e-user-id": String(seller.id) },
       });
 
       expect(res.status).toBe(200);
@@ -34,7 +34,7 @@ describe("GET /users/items", () => {
 
       const res = await app.request("/users/sellItems", {
         method: "GET",
-        headers: { "x-e2e-user-id": user.id },
+        headers: { "x-e2e-user-id": String(user.id) },
       });
 
       expect(res.status).toBe(200);
@@ -58,7 +58,7 @@ describe("GET /users/orders", () => {
 
       const res = await app.request("/users/orders", {
         method: "GET",
-        headers: { "x-e2e-user-id": user.id },
+        headers: { "x-e2e-user-id": String(user.id) },
       });
 
       expect(res.status).toBe(200);
@@ -77,7 +77,7 @@ describe("GET /users/orders", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": buyer.id,
+          "x-e2e-user-id": String(buyer.id),
         },
         body: JSON.stringify({ itemId: item.id }),
       });
@@ -86,7 +86,7 @@ describe("GET /users/orders", () => {
 
       const res = await app.request("/users/orders", {
         method: "GET",
-        headers: { "x-e2e-user-id": buyer.id },
+        headers: { "x-e2e-user-id": String(buyer.id) },
       });
 
       expect(res.status).toBe(200);

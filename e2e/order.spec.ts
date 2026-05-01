@@ -13,7 +13,7 @@ describe("POST /orders", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": buyer.id,
+          "x-e2e-user-id": String(buyer.id),
         },
         body: JSON.stringify({ itemId: item.id }),
       });
@@ -45,7 +45,7 @@ describe("POST /orders", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": user.id,
+          "x-e2e-user-id": String(user.id),
         },
         body: JSON.stringify({ itemId: 9_999_999_999 }),
       });
@@ -69,7 +69,7 @@ describe("GET /orders/:orderId", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": buyer.id,
+          "x-e2e-user-id": String(buyer.id),
         },
         body: JSON.stringify({ itemId: item.id }),
       });
@@ -106,7 +106,7 @@ describe("PUT /orders/:orderId/ship", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": buyer.id,
+          "x-e2e-user-id": String(buyer.id),
         },
         body: JSON.stringify({ itemId: item.id }),
       });
@@ -116,7 +116,7 @@ describe("PUT /orders/:orderId/ship", () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": seller.id,
+          "x-e2e-user-id": String(seller.id),
         },
         body: JSON.stringify({}),
       });
@@ -139,7 +139,7 @@ describe("PUT /orders/:orderId/deliver", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": buyer.id,
+          "x-e2e-user-id": String(buyer.id),
         },
         body: JSON.stringify({ itemId: item.id }),
       });
@@ -149,7 +149,7 @@ describe("PUT /orders/:orderId/deliver", () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": seller.id,
+          "x-e2e-user-id": String(seller.id),
         },
         body: JSON.stringify({}),
       });
@@ -159,7 +159,7 @@ describe("PUT /orders/:orderId/deliver", () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": buyer.id,
+          "x-e2e-user-id": String(buyer.id),
         },
         body: JSON.stringify({}),
       });
@@ -188,7 +188,7 @@ describe("PUT /orders/:orderId/cancel", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": buyer.id,
+          "x-e2e-user-id": String(buyer.id),
         },
         body: JSON.stringify({ itemId: item.id }),
       });
@@ -198,7 +198,7 @@ describe("PUT /orders/:orderId/cancel", () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-e2e-user-id": buyer.id,
+          "x-e2e-user-id": String(buyer.id),
         },
         body: JSON.stringify({}),
       });
