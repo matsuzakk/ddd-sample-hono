@@ -8,47 +8,97 @@ alwaysApply: true
 ## 値オブジェクト（VO）
 
 - プリミティブをそのまま渡さず、ブランド型や列挙で意味を付ける。
+- VO のブランドは **`zod` の `.brand()`**（列挙は `z.union` + `z.literal`）。
 - 永続化・API 向けの素の値は `toValue(vo)` メソッドで取り出す（必須）。
 - 新規生成は `create` メソッドを実装。
 - DB から読み込んだ値も `create` で検証・復元する（新規入力と異なる不変条件が必要なときはエンティティの `reconstitute` 側で補う）。
 
 ```typescript
-export type Money = Brand<number, "Money">;
+// domain/model/item/vo/ItemPrice.ts（抜粋）
+import { z } from "zod";
+import { ValidationError } from "../../shared/error.js";
 
-export const Money = {
-  create(amount: number): Money {
-    if (amount < 0) throw new ValidationError("...");
-    return amount as Money;
+const itemPriceSym = Symbol();
+const itemPriceSchema = z
+  .number()
+  .int(/* メッセージ・範囲は実装どおり */)
+  .min(0)
+  .max(999_999)
+  .brand(typeof itemPriceSym);
+
+export type ItemPrice = z.infer<typeof itemPriceSchema>;
+
+export const ItemPrice = {
+  create(price: number): ItemPrice {
+    const r = itemPriceSchema.safeParse(price);
+    if (!r.success) {
+      const message = r.error.issues[0]?.message ?? "Invalid price";
+      throw new ValidationError(message, { cause: r.error });
+    }
+    return r.data;
   },
-  toValue(m: Money): number {
-    return m as number;
+  toValue(price: ItemPrice): number {
+    return price as number;
   },
+  // equals など
 } as const;
 ```
 
 ## エンティティ（Entity）
 
-- `type X = { ... }` で形状を宣言し、ファクトリ・振る舞いは `export const X = { ... }` にまとめる。
+- 永続化前は `id: number | null`、保存後は数値 ID。
+- `type X = Readonly<{ ... }>` で形状を宣言し、**`const` 関数 + `export const X = { ... } as const`** にまとめる（更新はスプレッドで新オブジェクトを返す）。
 - 新規は `create`。DB 行から組み立てるときだけ `reconstitute`（検証は VO 側や必要ならここでも）。
 
 ```typescript
-export type Order = { readonly id: string /* ... */ };
+// domain/model/order/Order.ts（抜粋）
+import type { Item } from "../item/Item.js";
+import { ValidationError } from "../shared/error.js";
+import { OrderStatus, OrderStatusMap } from "./vo/OrderStatus.js";
+
+export type Order = Readonly<{
+  id: number | null;
+  userId: number;
+  itemId: number;
+  status: OrderStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}>;
+
+const create = (userId: number, item: Item): Order => {
+  const now = new Date();
+  return {
+    id: null,
+    userId,
+    itemId: item.id!,
+    status: OrderStatus.create(OrderStatusMap.PURCHASED),
+    createdAt: now,
+    updatedAt: now,
+  };
+};
+
+const reconstitute = (
+  id: number,
+  userId: number,
+  itemId: number,
+  status: OrderStatus,
+  createdAt: Date,
+  updatedAt: Date,
+): Order => ({ id, userId, itemId, status, createdAt, updatedAt });
+
+const cancel = (order: Order): Order => {
+  if (!OrderStatus.isPurchased(order.status)) throw new ValidationError("…");
+  return {
+    ...order,
+    status: OrderStatus.create(OrderStatusMap.CANCELED),
+    updatedAt: new Date(),
+  };
+};
 
 export const Order = {
-  create(/* ... */): Order {
-    /* 不変条件 */
-    return {
-      /* ... */
-    };
-  },
-  reconstitute(/* row の各列 + 既に VO 化した値 */): Order {
-    return {
-      /* ... */
-    };
-  },
-  cancel(order: Order): Order {
-    /* 状態遷移 */
-  },
+  create,
+  reconstitute,
+  cancel,
 } as const;
 ```
 
@@ -196,7 +246,7 @@ export const itemController = {
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | リポジトリ IF    | ドメイン（`domain/model/<feature>/I*Repository.ts`）にのみ定義                                                                             |
 | VO               | `toValue` を持たせ、永続化・DTO 組み立てで使う                                                                                             |
-| Entity / VO      | エンティティは DB 復元用に `reconstitute`。VO は `create` のみ（DB 由来も `create` で検証）                                               |
+| Entity / VO      | エンティティは DB 復元用に `reconstitute`。VO は `create` のみ（DB 由来も `create` で検証）                                                |
 | ドメインサービス | `domain/service/`。複数 model をまたぐドメインルール。インフラは import せず、データは引数で渡す                                           |
 | リポジトリ実装   | `create~Repository(db)` 形式のファクトリで `I*Repository` を返す                                                                           |
 | ユースケース     | `Deps` + `Input`。DB + リポジトリファクトリ、または `ITransactionManager` + ファクトリ（複数永続化を原子化）、`Input` にリクエスト由来の値 |
