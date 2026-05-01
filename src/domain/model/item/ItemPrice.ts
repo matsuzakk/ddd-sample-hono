@@ -1,32 +1,44 @@
-import type { Brand } from "../shared/brand.js";
+import { z } from "zod";
 import { ValidationError } from "../shared/error.js";
+
+// --- Zod ブランド（価格）---
+
+const itemPriceSym = Symbol();
+const itemPriceSchema = z
+  .number()
+  .int()
+  .min(0)
+  .max(999_999)
+  .brand(typeof itemPriceSym);
+
+export type ItemPrice = z.infer<typeof itemPriceSchema>;
+
+const PRICE_VALIDATION_MESSAGE =
+  "Product price must be an integer from 0 to 999999 (JPY)";
 
 /**
  * 商品の価格（0円以上999,999円以下の整数）
+ * 検証は Zod
  */
-export type ItemPrice = Brand<number, "ItemPrice">;
-
 export const ItemPrice = {
   create(price: number): ItemPrice {
-    if (!ItemPrice.isValid(price)) {
-      throw new ValidationError(
-        "Product price must be an integer from 0 to 999999 (JPY)",
-      );
+    const r = itemPriceSchema.safeParse(price);
+    if (!r.success) {
+      throw new ValidationError(PRICE_VALIDATION_MESSAGE);
     }
-    return price as ItemPrice;
+    return r.data;
   },
 
   reconstitute(value: number): ItemPrice {
-    if (!ItemPrice.isValid(value)) {
-      throw new ValidationError(
-        "Product price must be an integer from 0 to 999999 (JPY)",
-      );
+    const r = itemPriceSchema.safeParse(value);
+    if (!r.success) {
+      throw new ValidationError(PRICE_VALIDATION_MESSAGE);
     }
-    return value as ItemPrice;
+    return r.data;
   },
 
   isValid(price: number): boolean {
-    return price >= 0 && price <= 999999;
+    return itemPriceSchema.safeParse(price).success;
   },
 
   toValue(price: ItemPrice): number {

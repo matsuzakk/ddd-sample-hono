@@ -1,4 +1,4 @@
-import type { Brand } from "../shared/brand.js";
+import { z } from "zod";
 import { ValidationError } from "../shared/error.js";
 
 export const ItemStatusMap = {
@@ -6,27 +6,44 @@ export const ItemStatusMap = {
   PURCHASED: 1,
 } as const;
 
-export type ItemStatusType =
-  (typeof ItemStatusMap)[keyof typeof ItemStatusMap];
+export type ItemStatusType = (typeof ItemStatusMap)[keyof typeof ItemStatusMap];
 
-/** 商品の状態（0: 出品中, 1: 購入済） */
-export type ItemStatus = Brand<ItemStatusType, "ItemStatus">;
+// --- Zod ブランド（商品ステータス）---
 
-const ITEM_STATUS_VALUES: ReadonlySet<number> = new Set([
-  ItemStatusMap.SELLABLE,
-  ItemStatusMap.PURCHASED,
-]);
+const itemStatusSym = Symbol();
+const itemStatusSchema = z
+  .union([
+    z.literal(ItemStatusMap.SELLABLE),
+    z.literal(ItemStatusMap.PURCHASED),
+  ])
+  .brand(typeof itemStatusSym);
+
+export type ItemStatus = z.infer<typeof itemStatusSchema>;
+
+const invalidMessage = (value: number): string =>
+  `Invalid item status: ${value}`;
+
+// --- Value Object ---
 
 export const ItemStatus = {
   create(value: ItemStatusType): ItemStatus {
-    return value as ItemStatus;
+    const r = itemStatusSchema.safeParse(value);
+    if (!r.success) {
+      throw new ValidationError(invalidMessage(value as number));
+    }
+    return r.data;
   },
 
   reconstitute(value: number): ItemStatus {
-    if (!ITEM_STATUS_VALUES.has(value)) {
-      throw new ValidationError(`Invalid item status: ${value}`);
+    const r = itemStatusSchema.safeParse(value);
+    if (!r.success) {
+      throw new ValidationError(invalidMessage(value));
     }
-    return value as ItemStatus;
+    return r.data;
+  },
+
+  isValid(value: number): boolean {
+    return itemStatusSchema.safeParse(value).success;
   },
 
   toValue(status: ItemStatus): number {
@@ -38,10 +55,10 @@ export const ItemStatus = {
   },
 
   isPurchased(status: ItemStatus): boolean {
-    return (status as ItemStatusType) === ItemStatusMap.PURCHASED;
+    return ItemStatus.toValue(status) === ItemStatusMap.PURCHASED;
   },
 
   isSellable(status: ItemStatus): boolean {
-    return (status as ItemStatusType) === ItemStatusMap.SELLABLE;
+    return ItemStatus.toValue(status) === ItemStatusMap.SELLABLE;
   },
 } as const;

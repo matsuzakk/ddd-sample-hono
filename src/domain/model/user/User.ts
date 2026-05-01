@@ -1,68 +1,53 @@
-import type { Brand } from "../shared/brand.js";
-import { ValidationError } from "../shared/error.js";
+import { z } from "zod";
+import { UserEmail } from "./UserEmail.js";
+import { UserName } from "./UserName.js";
 
-export type Email = Brand<string, "Email">;
+// --- Zod ブランド（ID）---
 
-export const Email = {
-  create(value: string): Email {
-    if (!Email.isValid(value)) {
-      throw new ValidationError("Email must be valid");
-    }
-    return value as Email;
-  },
+const userRecordIdSym = Symbol();
+export const UserRecordId = z
+  .union([z.number().int().positive(), z.null()])
+  .brand(typeof userRecordIdSym);
+export type UserRecordId = z.infer<typeof UserRecordId>;
 
-  isValid(value: string): boolean {
-    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
-  },
+// --- データ（状態）---
 
-  toValue(email: Email): string {
-    return email as string;
-  },
+export type User = Readonly<{
+  id: UserRecordId;
+  name: UserName;
+  email: UserEmail;
+}>;
 
-  equals(a: Email, b: Email): boolean {
-    return a === b;
-  },
-} as const;
+// --- 振る舞い（純粋関数）---
 
-export type User = {
-  readonly id: number | null;
-  readonly name: string;
-  readonly email: Email;
-};
+const create = (name: string, email: string): User => ({
+  id: UserRecordId.parse(null),
+  name: UserName.create(name),
+  email: UserEmail.create(email),
+});
 
-function isValidName(name: string): boolean {
-  return name.length >= 1 && name.length <= 20;
-}
+/** DB から復元（不整合なら Email / Name 長で検証エラー） */
+const reconstitute = (id: number, name: string, email: string): User => ({
+  id: UserRecordId.parse(id),
+  name: UserName.reconstitute(name),
+  email: UserEmail.create(email),
+});
+
+const changeName = (user: User, name: string): User => ({
+  ...user,
+  name: UserName.create(name),
+});
+
+const changeEmail = (user: User, email: string): User => ({
+  ...user,
+  email: UserEmail.create(email),
+});
+
+// --- エンティティ(コンパニオンオブジェクト) ---
 
 export const User = {
-  create(name: string, email: string): User {
-    if (!isValidName(name)) {
-      throw new ValidationError("Name must be between 1 and 20 characters");
-    }
-    return {
-      id: null,
-      name,
-      email: Email.create(email),
-    };
-  },
-
-  /** DB から復元（不整合なら Email で検証エラー） */
-  reconstitute(id: number, name: string, email: string): User {
-    return {
-      id,
-      name,
-      email: Email.create(email),
-    };
-  },
-
-  changeName(user: User, name: string): User {
-    if (!isValidName(name)) {
-      throw new ValidationError("Name must be between 1 and 20 characters");
-    }
-    return { ...user, name };
-  },
-
-  changeEmail(user: User, email: string): User {
-    return { ...user, email: Email.create(email) };
-  },
+  create,
+  reconstitute,
+  changeName,
+  changeEmail,
 } as const;

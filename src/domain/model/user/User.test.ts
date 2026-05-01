@@ -1,41 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { ValidationError } from "../shared/error.js";
-import { Email, User } from "./User.js";
-
-describe("Email", () => {
-  it("create は有効なアドレスを受け入れる", () => {
-    const email = Email.create("user@example.com");
-    expect(Email.toValue(email)).toBe("user@example.com");
-  });
-
-  it("create は無効なアドレスで ValidationError を投げる", () => {
-    expect(() => Email.create("not-an-email")).toThrow(ValidationError);
-    expect(() => Email.create("")).toThrow(ValidationError);
-  });
-
-  it("isValid は形式に応じて true/false を返す", () => {
-    expect(Email.isValid("a@b.co")).toBe(true);
-    expect(Email.isValid("user.name+tag@sub.example.com")).toBe(true);
-    expect(Email.isValid("invalid")).toBe(false);
-    expect(Email.isValid("@nodomain.com")).toBe(false);
-  });
-
-  it("equals は同じ文字列の Email を true にする（文字列としての同一性）", () => {
-    const a = Email.create("same@example.com");
-    const b = Email.create("same@example.com");
-    expect(Email.equals(a, a)).toBe(true);
-    expect(Email.equals(a, b)).toBe(true);
-    const other = Email.create("other@example.com");
-    expect(Email.equals(a, other)).toBe(false);
-  });
-});
+import { User } from "./User.js";
+import { UserEmail } from "./UserEmail.js";
+import { UserName } from "./UserName.js";
 
 describe("User", () => {
   it("create は有効な名前とメールでユーザーを返す", () => {
     const user = User.create("Alice", "alice@example.com");
     expect(user.id).toBeNull();
-    expect(user.name).toBe("Alice");
-    expect(Email.toValue(user.email)).toBe("alice@example.com");
+    expect(UserName.toValue(user.name)).toBe("Alice");
+    expect(UserEmail.toValue(user.email)).toBe("alice@example.com");
   });
 
   it("create は空文字の名前で ValidationError を投げる", () => {
@@ -51,10 +25,10 @@ describe("User", () => {
     expect(() => User.create("Bob", "bad")).toThrow(ValidationError);
   });
 
-  it("reconstitute はメールのみ検証し名前長は検証しない", () => {
+  it("reconstitute はメールを検証し名前は最大 20 文字まで許容（空文字可）", () => {
     const user = User.reconstitute(1, "", "legacy@example.com");
-    expect(user.name).toBe("");
-    expect(Email.toValue(user.email)).toBe("legacy@example.com");
+    expect(UserName.toValue(user.name)).toBe("");
+    expect(UserEmail.toValue(user.email)).toBe("legacy@example.com");
   });
 
   it("reconstitute は無効なメールで ValidationError を投げる", () => {
@@ -65,8 +39,10 @@ describe("User", () => {
     const user = User.create("Old", "u@example.com");
     const updated = User.changeName(user, "New");
     expect(updated).not.toBe(user);
-    expect(updated.name).toBe("New");
-    expect(Email.toValue(updated.email)).toBe(Email.toValue(user.email));
+    expect(UserName.toValue(updated.name)).toBe("New");
+    expect(UserEmail.toValue(updated.email)).toBe(
+      UserEmail.toValue(user.email),
+    );
   });
 
   it("changeName は無効な名前で ValidationError を投げる", () => {
@@ -78,8 +54,8 @@ describe("User", () => {
     const user = User.create("Name", "old@example.com");
     const updated = User.changeEmail(user, "new@example.com");
     expect(updated).not.toBe(user);
-    expect(Email.toValue(updated.email)).toBe("new@example.com");
-    expect(updated.name).toBe(user.name);
+    expect(UserEmail.toValue(updated.email)).toBe("new@example.com");
+    expect(UserName.equals(updated.name, user.name)).toBe(true);
   });
 
   it("changeEmail は無効なメールで ValidationError を投げる", () => {

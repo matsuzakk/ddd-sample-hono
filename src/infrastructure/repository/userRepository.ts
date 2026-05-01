@@ -1,6 +1,9 @@
 import { eq } from "drizzle-orm";
 import type { IUserRepository } from "../../domain/model/user/IUserRepository.js";
-import { Email, type User, User as UserEntity } from "../../domain/model/user/User.js";
+import type { User } from "../../domain/model/user/User.js";
+import { User as UserEntity } from "../../domain/model/user/User.js";
+import { UserEmail } from "../../domain/model/user/UserEmail.js";
+import { UserName } from "../../domain/model/user/UserName.js";
 import type { DbClient } from "../database/db.js";
 import { users } from "../database/schema.js";
 
@@ -9,8 +12,8 @@ export const createUserRepository = (db: DbClient): IUserRepository => ({
     const row = db
       .insert(users)
       .values({
-        name: user.name,
-        email: Email.toValue(user.email),
+        name: UserName.toValue(user.name),
+        email: UserEmail.toValue(user.email),
       })
       .returning({ id: users.id })
       .all()[0];

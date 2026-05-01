@@ -1,4 +1,4 @@
-import type { Brand } from "../shared/brand.js";
+import { z } from "zod";
 import { ValidationError } from "../shared/error.js";
 
 export const OrderStatusMap = {
@@ -11,28 +11,44 @@ export const OrderStatusMap = {
 export type OrderStatusType =
   (typeof OrderStatusMap)[keyof typeof OrderStatusMap];
 
-export type OrderStatus = Brand<OrderStatusType, "OrderStatus">;
+// --- Zod ブランド（注文ステータス）---
 
-const ORDER_STATUS_VALUES: ReadonlySet<number> = new Set([
-  OrderStatusMap.PURCHASED,
-  OrderStatusMap.SHIPPED,
-  OrderStatusMap.DELIVERED,
-  OrderStatusMap.CANCELED,
-]);
+const orderStatusSym = Symbol();
+const orderStatusSchema = z
+  .union([
+    z.literal(OrderStatusMap.PURCHASED),
+    z.literal(OrderStatusMap.SHIPPED),
+    z.literal(OrderStatusMap.DELIVERED),
+    z.literal(OrderStatusMap.CANCELED),
+  ])
+  .brand(typeof orderStatusSym);
+
+export type OrderStatus = z.infer<typeof orderStatusSchema>;
+
+const invalidMessage = (value: number): string =>
+  `Invalid order status: ${value}`;
+
+// --- Value Object ---
 
 export const OrderStatus = {
-  /**
-   * 0: 購入済, 1: 発送済, 2: 到着済, 3: キャンセル
-   */
   create(value: OrderStatusType): OrderStatus {
-    return value as OrderStatus;
+    const r = orderStatusSchema.safeParse(value);
+    if (!r.success) {
+      throw new ValidationError(invalidMessage(value as number));
+    }
+    return r.data;
   },
 
   reconstitute(value: number): OrderStatus {
-    if (!ORDER_STATUS_VALUES.has(value)) {
-      throw new ValidationError(`Invalid order status: ${value}`);
+    const r = orderStatusSchema.safeParse(value);
+    if (!r.success) {
+      throw new ValidationError(invalidMessage(value));
     }
-    return value as OrderStatus;
+    return r.data;
+  },
+
+  isValid(value: number): boolean {
+    return orderStatusSchema.safeParse(value).success;
   },
 
   toValue(status: OrderStatus): number {
@@ -44,18 +60,18 @@ export const OrderStatus = {
   },
 
   isPurchased(status: OrderStatus): boolean {
-    return (status as OrderStatusType) === OrderStatusMap.PURCHASED;
+    return OrderStatus.toValue(status) === OrderStatusMap.PURCHASED;
   },
 
   isShipped(status: OrderStatus): boolean {
-    return (status as OrderStatusType) === OrderStatusMap.SHIPPED;
+    return OrderStatus.toValue(status) === OrderStatusMap.SHIPPED;
   },
 
   isDelivered(status: OrderStatus): boolean {
-    return (status as OrderStatusType) === OrderStatusMap.DELIVERED;
+    return OrderStatus.toValue(status) === OrderStatusMap.DELIVERED;
   },
 
   isCanceled(status: OrderStatus): boolean {
-    return (status as OrderStatusType) === OrderStatusMap.CANCELED;
+    return OrderStatus.toValue(status) === OrderStatusMap.CANCELED;
   },
 } as const;
