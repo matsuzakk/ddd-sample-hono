@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { NotFoundError } from "../../domain/model/shared/error.js";
 import { withMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
 import {
   items,
@@ -9,11 +10,11 @@ import {
 import { getOrderDetailUsecase } from "./getOrderDetailUsecase.js";
 
 describe("getOrderDetail", () => {
-  it("注文がないとき order は null、histories は空", () => {
+  it("注文がないとき NotFoundError を投げる", () => {
     withMemoryAppDatabase((db) => {
-      const result = getOrderDetailUsecase({ db }, { orderId: 9_999_999 });
-      expect(result.order).toBeNull();
-      expect(result.histories).toEqual([]);
+      expect(() =>
+        getOrderDetailUsecase({ db }, { orderId: 9_999_999 }),
+      ).toThrow(NotFoundError);
     });
   });
 

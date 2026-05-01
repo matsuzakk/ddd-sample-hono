@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
+import { NotFoundError } from "../../domain/model/shared/error.js";
 import { withMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
 import { items, users } from "../../infrastructure/database/schema.js";
 import { getItemDetailUsecase } from "./getItemDetailUsecase.js";
 
 describe("getItemDetail", () => {
-  it("該当行がないとき null を返す", () => {
+  it("該当行がないとき NotFoundError を投げる", () => {
     withMemoryAppDatabase((db) => {
-      const result = getItemDetailUsecase({ db }, { itemId: 9_999_999 });
-      expect(result).toBeNull();
+      expect(() =>
+        getItemDetailUsecase({ db }, { itemId: 9_999_999 }),
+      ).toThrow(NotFoundError);
     });
   });
 
