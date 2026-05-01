@@ -6,24 +6,24 @@ import { ValidationError } from "../shared/error.js";
 const emailSym = Symbol();
 const emailSchema = z
   .string()
-  .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+  .regex(
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    "Email must be valid",
+  )
   .brand(typeof emailSym);
 
 export type UserEmail = z.infer<typeof emailSchema>;
 
-// --- Value Object ---
+// --- Value Object(コンパニオンオブジェクト) ---
 
 export const UserEmail = {
   create(value: string): UserEmail {
     const r = emailSchema.safeParse(value);
     if (!r.success) {
-      throw new ValidationError("Email must be valid");
+      const message = r.error.issues[0]?.message;
+      throw new ValidationError(message, { cause: r.error });
     }
     return r.data;
-  },
-
-  isValid(value: string): boolean {
-    return emailSchema.safeParse(value).success;
   },
 
   toValue(email: UserEmail): string {

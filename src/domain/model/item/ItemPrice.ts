@@ -6,15 +6,12 @@ import { ValidationError } from "../shared/error.js";
 const itemPriceSym = Symbol();
 const itemPriceSchema = z
   .number()
-  .int()
-  .min(0)
-  .max(999_999)
+  .int("Product price must be an integer")
+  .min(0, "Product price must be greater than 0")
+  .max(999_999, "Product price must be less than 999999")
   .brand(typeof itemPriceSym);
 
 export type ItemPrice = z.infer<typeof itemPriceSchema>;
-
-const PRICE_VALIDATION_MESSAGE =
-  "Product price must be an integer from 0 to 999999 (JPY)";
 
 /**
  * 商品の価格（0円以上999,999円以下の整数）
@@ -24,7 +21,8 @@ export const ItemPrice = {
   create(price: number): ItemPrice {
     const r = itemPriceSchema.safeParse(price);
     if (!r.success) {
-      throw new ValidationError(PRICE_VALIDATION_MESSAGE);
+      const message = r.error.issues[0]?.message;
+      throw new ValidationError(message, { cause: r.error });
     }
     return r.data;
   },
@@ -32,7 +30,8 @@ export const ItemPrice = {
   reconstitute(value: number): ItemPrice {
     const r = itemPriceSchema.safeParse(value);
     if (!r.success) {
-      throw new ValidationError(PRICE_VALIDATION_MESSAGE);
+      const message = r.error.issues[0]?.message;
+      throw new ValidationError(message, { cause: r.error });
     }
     return r.data;
   },

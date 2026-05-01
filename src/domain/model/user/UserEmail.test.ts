@@ -8,16 +8,16 @@ describe("UserEmail", () => {
     expect(UserEmail.toValue(email)).toBe("user@example.com");
   });
 
-  it("create は無効なアドレスで ValidationError を投げる", () => {
-    expect(() => UserEmail.create("not-an-email")).toThrow(ValidationError);
-    expect(() => UserEmail.create("")).toThrow(ValidationError);
-  });
-
-  it("isValid は形式に応じて true/false を返す", () => {
-    expect(UserEmail.isValid("a@b.co")).toBe(true);
-    expect(UserEmail.isValid("user.name+tag@sub.example.com")).toBe(true);
-    expect(UserEmail.isValid("invalid")).toBe(false);
-    expect(UserEmail.isValid("@nodomain.com")).toBe(false);
+  it("create は無効なアドレスで ValidationError を投げる（メッセージは Zod の issue 由来）", () => {
+    for (const invalid of ["not-an-email", ""]) {
+      try {
+        UserEmail.create(invalid);
+        expect.fail(`expected throw for ${JSON.stringify(invalid)}`);
+      } catch (e) {
+        expect(e).toBeInstanceOf(ValidationError);
+        expect((e as ValidationError).message).toBe("Email must be valid");
+      }
+    }
   });
 
   it("equals は同じ文字列の Email を true にする（文字列としての同一性）", () => {

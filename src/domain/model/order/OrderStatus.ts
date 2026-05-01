@@ -15,26 +15,26 @@ export type OrderStatusType =
 
 const orderStatusSym = Symbol();
 const orderStatusSchema = z
-  .union([
-    z.literal(OrderStatusMap.PURCHASED),
-    z.literal(OrderStatusMap.SHIPPED),
-    z.literal(OrderStatusMap.DELIVERED),
-    z.literal(OrderStatusMap.CANCELED),
-  ])
+  .union(
+    [
+      z.literal(OrderStatusMap.PURCHASED),
+      z.literal(OrderStatusMap.SHIPPED),
+      z.literal(OrderStatusMap.DELIVERED),
+      z.literal(OrderStatusMap.CANCELED),
+    ],
+    { error: "Invalid order status" },
+  )
   .brand(typeof orderStatusSym);
 
 export type OrderStatus = z.infer<typeof orderStatusSchema>;
 
-const invalidMessage = (value: number): string =>
-  `Invalid order status: ${value}`;
-
 // --- Value Object ---
-
 export const OrderStatus = {
   create(value: OrderStatusType): OrderStatus {
     const r = orderStatusSchema.safeParse(value);
     if (!r.success) {
-      throw new ValidationError(invalidMessage(value as number));
+      const message = r.error.issues[0]?.message;
+      throw new ValidationError(message, { cause: r.error });
     }
     return r.data;
   },
@@ -42,13 +42,10 @@ export const OrderStatus = {
   reconstitute(value: number): OrderStatus {
     const r = orderStatusSchema.safeParse(value);
     if (!r.success) {
-      throw new ValidationError(invalidMessage(value));
+      const message = r.error.issues[0]?.message;
+      throw new ValidationError(message, { cause: r.error });
     }
     return r.data;
-  },
-
-  isValid(value: number): boolean {
-    return orderStatusSchema.safeParse(value).success;
   },
 
   toValue(status: OrderStatus): number {

@@ -22,14 +22,9 @@ describe("UserName", () => {
   });
 
   it("reconstitute は 20 文字を超えると ValidationError を投げる", () => {
-    expect(() => UserName.reconstitute("a".repeat(21))).toThrow(ValidationError);
-  });
-
-  it("isValid は長さに応じて true/false を返す", () => {
-    expect(UserName.isValid("a")).toBe(true);
-    expect(UserName.isValid("a".repeat(20))).toBe(true);
-    expect(UserName.isValid("")).toBe(false);
-    expect(UserName.isValid("a".repeat(21))).toBe(false);
+    expect(() => UserName.reconstitute("a".repeat(21))).toThrow(
+      ValidationError,
+    );
   });
 
   it("equals は文字列としての同一性を返す", () => {
