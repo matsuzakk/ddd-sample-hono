@@ -17,7 +17,7 @@ type Deps = {
 };
 
 type Input = {
-  readonly sellerId: string;
+  readonly sellerId: number;
   readonly name: string;
   readonly description: string;
   readonly price: number;
@@ -28,24 +28,21 @@ export const sellItemUsecase = (deps: Deps, input: Input): ItemDto => {
 
   const seller = userRepository.findById(input.sellerId);
 
-  // 販売者のユーザーが存在しない場合はエラー
-  if (!seller) {
+  if (!seller || seller.id === null) {
     throw new NotFoundError("Seller not found");
   }
 
-  // 販売する商品を登録
   const itemRepository = deps.createItemRepository(deps.db);
   const item = Item.create(
-    crypto.randomUUID(),
     input.name,
     input.description,
     ItemPrice.create(input.price),
     seller.id,
   );
-  itemRepository.create(item);
+  const id = itemRepository.create(item);
 
   const result = itemDtoSchema.parse({
-    id: item.id,
+    id,
     name: item.name,
     description: item.description,
     price: ItemPrice.toValue(item.price),

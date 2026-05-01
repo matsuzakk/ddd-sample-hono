@@ -2,7 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
-  id: text("id").primaryKey(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" })
@@ -31,7 +31,7 @@ export const session = sqliteTable(
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
-    userId: text("user_id")
+    userId: integer("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
   },
@@ -44,7 +44,7 @@ export const account = sqliteTable(
     id: text("id").primaryKey(),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
-    userId: text("user_id")
+    userId: integer("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
@@ -87,28 +87,36 @@ export const verification = sqliteTable(
 );
 
 export const items = sqliteTable("items", {
-  id: text("id").primaryKey(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   description: text("description").notNull(),
   price: integer("price").notNull(),
   status: integer("status").notNull(),
-  sellerId: text("seller_id").notNull(),
+  sellerId: integer("seller_id")
+    .notNull()
+    .references(() => users.id),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
 export const orders = sqliteTable("orders", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  itemId: text("item_id").notNull(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  itemId: integer("item_id")
+    .notNull()
+    .references(() => items.id),
   status: integer("status").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
 export const orderHistories = sqliteTable("order_histories", {
-  id: text("id").primaryKey(),
-  orderId: text("order_id").notNull(),
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  orderId: integer("order_id")
+    .notNull()
+    .references(() => orders.id),
   fromStatus: integer("from_status"),
   toStatus: integer("to_status").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),

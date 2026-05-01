@@ -13,7 +13,7 @@ export const userController = {
    */
   listSellItems: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
-    const userId = c.get("sessionUserId") as string;
+    const userId = c.get("sessionUserId")!;
 
     const result = await getItemSellListUsecase({ db }, { sellerId: userId });
     return c.json(result);
@@ -26,7 +26,7 @@ export const userController = {
    */
   listOrders: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
-    const userId = c.get("sessionUserId") as string;
+    const userId = c.get("sessionUserId")!;
 
     const result = await getOrderListUsecase({ db }, { userId });
     return c.json(result);

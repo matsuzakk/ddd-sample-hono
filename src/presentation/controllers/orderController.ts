@@ -21,9 +21,9 @@ export const orderController = {
   purchase: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
-    const userId = c.get("sessionUserId") as string;
+    const userId = c.get("sessionUserId")!;
 
-    const body = await c.req.json<{ itemId: string }>();
+    const body = await c.req.json<{ itemId: number }>();
     const result = await purchaseItemUsecase(
       {
         txManager,
@@ -31,7 +31,7 @@ export const orderController = {
         createOrderRepository,
         createOrderHistoryRepository,
       },
-      { userId, itemId: body.itemId },
+      { userId, itemId: Number(body.itemId) },
     );
     return c.json(result, 201);
   },
@@ -44,8 +44,8 @@ export const orderController = {
   cancel: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
-    const userId = c.get("sessionUserId") as string;
-    const orderId = c.req.param("orderId")!;
+    const userId = c.get("sessionUserId")!;
+    const orderId = Number(c.req.param("orderId"));
 
     const result = await cancelOrderUsecase(
       {
@@ -67,8 +67,8 @@ export const orderController = {
   deliver: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
-    const userId = c.get("sessionUserId") as string;
-    const orderId = c.req.param("orderId")!;
+    const userId = c.get("sessionUserId")!;
+    const orderId = Number(c.req.param("orderId"));
     const result = await deliverOrderUsecase(
       { txManager, createOrderRepository, createOrderHistoryRepository },
       { userId, orderId },
@@ -84,8 +84,8 @@ export const orderController = {
   ship: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
     const txManager = createTransactionManager(db);
-    const userId = c.get("sessionUserId") as string;
-    const orderId = c.req.param("orderId")!;
+    const userId = c.get("sessionUserId")!;
+    const orderId = Number(c.req.param("orderId"));
     const result = await shipOrderUsecase(
       {
         txManager,
@@ -107,7 +107,7 @@ export const orderController = {
    */
   getById: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
-    const orderId = c.req.param("orderId")!;
+    const orderId = Number(c.req.param("orderId"));
     const result = await getOrderDetailUsecase({ db }, { orderId });
     return c.json(result);
   },

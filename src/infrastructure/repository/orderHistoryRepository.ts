@@ -8,17 +8,24 @@ export const createOrderHistoryRepository = (
   db: DbClient,
 ): IOrderHistoryRepository => ({
   create: (orderHistory: OrderHistory) => {
-    db.insert(orderHistories)
-      .values({
-        id: orderHistory.id,
-        orderId: orderHistory.orderId,
-        fromStatus:
-          orderHistory.fromStatus !== null
-            ? OrderStatus.toValue(orderHistory.fromStatus)
-            : null,
-        toStatus: OrderStatus.toValue(orderHistory.toStatus),
-        createdAt: orderHistory.createdAt,
-      })
-      .run();
+    const base = {
+      orderId: orderHistory.orderId,
+      fromStatus:
+        orderHistory.fromStatus !== null
+          ? OrderStatus.toValue(orderHistory.fromStatus)
+          : null,
+      toStatus: OrderStatus.toValue(orderHistory.toStatus),
+      createdAt: orderHistory.createdAt,
+    };
+    if (orderHistory.id !== null) {
+      db.insert(orderHistories)
+        .values({
+          id: orderHistory.id,
+          ...base,
+        })
+        .run();
+    } else {
+      db.insert(orderHistories).values(base).run();
+    }
   },
 });

@@ -31,7 +31,7 @@ describe("POST /items", () => {
         name: string;
         price: number;
         status: number;
-        sellerId: string;
+        sellerId: number;
       };
       expect(body.name).toBe(MOCK_ITEM.SAMPLE.name);
       expect(body.price).toBe(MOCK_ITEM.SAMPLE.price);
@@ -95,7 +95,7 @@ describe("GET /items", () => {
       const res = await app.request("/items", { method: "GET" });
 
       expect(res.status).toBe(200);
-      const list = (await res.json()) as { id: string }[];
+      const list = (await res.json()) as { id: number }[];
       expect(list.some((row) => row.id === item.id)).toBe(true);
     } finally {
       close();
@@ -112,7 +112,7 @@ describe("GET /items/:itemId", () => {
       const res = await app.request(`/items/${item.id}`, { method: "GET" });
 
       expect(res.status).toBe(200);
-      const body = (await res.json()) as { id: string; name: string };
+      const body = (await res.json()) as { id: number; name: string };
       expect(body.id).toBe(item.id);
       expect(body.name).toBe(MOCK_ITEM.SAMPLE.name);
     } finally {
@@ -123,7 +123,7 @@ describe("GET /items/:itemId", () => {
   test("存在しない商品IDではnullが返る(200)", async () => {
     const { app, close } = createE2eApp();
     try {
-      const res = await app.request("/items/non-existent-item-id", {
+      const res = await app.request("/items/999999999", {
         method: "GET",
       });
 

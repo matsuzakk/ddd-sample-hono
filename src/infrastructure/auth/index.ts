@@ -8,6 +8,11 @@ export const createAuth = (db: AppDatabase) =>
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
     basePath: "/auth",
+    advanced: {
+      database: {
+        generateId: "serial",
+      },
+    },
     database: drizzleAdapter(db, {
       provider: "sqlite",
       schema: {

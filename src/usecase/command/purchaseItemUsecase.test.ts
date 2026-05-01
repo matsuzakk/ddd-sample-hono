@@ -55,59 +55,53 @@ describe("purchaseItemUsecase", () => {
   });
 
   it("販売中の商品を購入し item / order / history を更新する", () => {
-    // 準備: 販売可能な商品と UUID
     mockItemRepository.findById.mockReturnValue(
-      Item.create(
-        "item-1",
+      Item.reconstitute(
+        1,
         "Book",
         "Description",
         ItemPrice.create(100),
-        "seller",
+        ItemStatus.create(ItemStatusMap.SELLABLE),
+        10,
+        new Date("2024-01-01T00:00:00.000Z"),
+        new Date("2024-01-02T00:00:00.000Z"),
       ),
     );
-    vi.spyOn(crypto, "randomUUID")
-      .mockReturnValueOnce("10000000-0000-4000-8000-000000000001")
-      .mockReturnValueOnce("20000000-0000-4000-8000-000000000001");
+    mockOrderRepository.create.mockReturnValue(100);
 
-    // 実行
     const dto = purchaseItemUsecase(deps, {
-      userId: "buyer",
-      itemId: "item-1",
+      userId: 20,
+      itemId: 1,
     });
 
-    // 検証: 取得と更新
-    expect(mockItemRepository.findById).toHaveBeenCalledWith("item-1");
+    expect(mockItemRepository.findById).toHaveBeenCalledWith(1);
     expect(mockItemRepository.update).toHaveBeenCalledTimes(1);
     expect(Item.isPurchased(mockItemRepository.update.mock.calls[0][0])).toBe(
       true,
     );
 
-    // 検証: 注文と履歴
     expect(mockOrderRepository.create).toHaveBeenCalledTimes(1);
     const createdOrder = mockOrderRepository.create.mock.calls[0][0];
-    expect(createdOrder.id).toBe("10000000-0000-4000-8000-000000000001");
-    expect(createdOrder.userId).toBe("buyer");
-    expect(createdOrder.itemId).toBe("item-1");
+    expect(createdOrder.id).toBeNull();
+    expect(createdOrder.userId).toBe(20);
+    expect(createdOrder.itemId).toBe(1);
 
     expect(mockOrderHistoryRepository.create).toHaveBeenCalledTimes(1);
     const history = mockOrderHistoryRepository.create.mock.calls[0][0];
-    expect(history.id).toBe("20000000-0000-4000-8000-000000000001");
-    expect(history.orderId).toBe("10000000-0000-4000-8000-000000000001");
+    expect(history.id).toBeNull();
+    expect(history.orderId).toBe(100);
     expect(history.fromStatus).toBeNull();
 
-    // 検証: DTO
-    expect(dto.id).toBe("10000000-0000-4000-8000-000000000001");
-    expect(dto.userId).toBe("buyer");
-    expect(dto.itemId).toBe("item-1");
+    expect(dto.id).toBe(100);
+    expect(dto.userId).toBe(20);
+    expect(dto.itemId).toBe(1);
   });
 
   it("商品が無いとき NotFoundError とし永続化しない", () => {
-    // 準備: 未ヒット
     mockItemRepository.findById.mockReturnValue(null);
 
-    // 実行 & 検証
     expect(() =>
-      purchaseItemUsecase(deps, { userId: "buyer", itemId: "missing" }),
+      purchaseItemUsecase(deps, { userId: 1, itemId: 999 }),
     ).toThrow(NotFoundError);
     expect(mockItemRepository.update).not.toHaveBeenCalled();
     expect(mockOrderRepository.create).not.toHaveBeenCalled();
@@ -115,40 +109,41 @@ describe("purchaseItemUsecase", () => {
   });
 
   it("購入済み商品は NotFoundError", () => {
-    // 準備: 既に購入済み
     mockItemRepository.findById.mockReturnValue(
       Item.reconstitute(
-        "item-1",
+        1,
         "Book",
         "Description",
         ItemPrice.create(100),
         ItemStatus.create(ItemStatusMap.PURCHASED),
-        "seller",
+        10,
         new Date("2024-01-01T00:00:00.000Z"),
         new Date("2024-01-02T00:00:00.000Z"),
       ),
     );
 
-    // 実行 & 検証
     expect(() =>
-      purchaseItemUsecase(deps, { userId: "buyer", itemId: "item-1" }),
+      purchaseItemUsecase(deps, { userId: 1, itemId: 1 }),
     ).toThrow(NotFoundError);
   });
 
   it("販売者と購入者が同一のとき ValidationError とし永続化しない", () => {
     mockItemRepository.findById.mockReturnValue(
-      Item.create(
-        "item-1",
+      Item.reconstitute(
+        1,
         "Book",
         "Description",
         ItemPrice.create(100),
-        "same-user",
+        ItemStatus.create(ItemStatusMap.SELLABLE),
+        30,
+        new Date("2024-01-01T00:00:00.000Z"),
+        new Date("2024-01-02T00:00:00.000Z"),
       ),
     );
 
     let thrown: unknown;
     try {
-      purchaseItemUsecase(deps, { userId: "same-user", itemId: "item-1" });
+      purchaseItemUsecase(deps, { userId: 30, itemId: 1 });
     } catch (e) {
       thrown = e;
     }

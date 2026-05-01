@@ -8,7 +8,7 @@ type Deps = {
 };
 
 type Input = {
-  readonly itemId: string;
+  readonly itemId: number;
 };
 
 export const getItemDetailUsecase = (deps: Deps, input: Input): ItemDto | null => {

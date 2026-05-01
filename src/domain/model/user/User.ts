@@ -25,7 +25,7 @@ export const Email = {
 } as const;
 
 export type User = {
-  readonly id: string;
+  readonly id: number | null;
   readonly name: string;
   readonly email: Email;
 };
@@ -35,19 +35,19 @@ function isValidName(name: string): boolean {
 }
 
 export const User = {
-  create(id: string, name: string, email: string): User {
+  create(name: string, email: string): User {
     if (!isValidName(name)) {
       throw new ValidationError("Name must be between 1 and 20 characters");
     }
     return {
-      id,
+      id: null,
       name,
       email: Email.create(email),
     };
   },
 
   /** DB から復元（不整合なら Email で検証エラー） */
-  reconstitute(id: string, name: string, email: string): User {
+  reconstitute(id: number, name: string, email: string): User {
     return {
       id,
       name,

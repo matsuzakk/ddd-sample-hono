@@ -2,8 +2,8 @@ import type { Order } from "./Order.js";
 import type { OrderHistory } from "./OrderHistory.js";
 
 export interface IOrderRepository {
-  create(order: Order): void;
-  findById(id: string): Order | null;
+  create(order: Order): number;
+  findById(id: number): Order | null;
   update(order: Order): void;
 }
 

@@ -6,7 +6,7 @@ import { MOCK_ITEM } from "../mock/item.js";
 import { MOCK_USER, MOCK_USER_PASSWORD } from "../mock/user.js";
 
 export type E2eSignedUpUser = {
-  readonly id: string;
+  readonly id: number;
   readonly name: string;
   readonly email: string;
 };
@@ -34,8 +34,14 @@ export const signUpEmailViaHttp = async (
   if (!res.ok) {
     throw new Error(`sign-up failed: ${res.status} ${await res.text()}`);
   }
-  const body = (await res.json()) as { user: E2eSignedUpUser };
-  return body.user;
+  const body = (await res.json()) as {
+    user: { id: string; name: string; email: string };
+  };
+  return {
+    id: Number(body.user.id),
+    name: body.user.name,
+    email: body.user.email,
+  };
 };
 
 export const createE2eApp = () => {
@@ -61,7 +67,7 @@ export const seedData = async (app: Hono<{ Variables: AppVariables }>) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-e2e-user-id": seller.id,
+      "x-e2e-user-id": String(seller.id),
     },
     body: JSON.stringify({
       ...MOCK_ITEM.SAMPLE,

@@ -1,17 +1,17 @@
 import { eq } from "drizzle-orm";
 import type { AppDatabase } from "../../infrastructure/database/db.js";
 import { orders } from "../../infrastructure/database/schema.js";
-import { orderDtoSchema } from "../dto/orderDto.js";
-
-type Input = {
-  readonly userId: string;
-};
+import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
 
 type Deps = {
   readonly db: AppDatabase;
 };
 
-export const getOrderListUsecase = (deps: Deps, input: Input) => {
+type Input = {
+  readonly userId: number;
+};
+
+export const getOrderListUsecase = (deps: Deps, input: Input): OrderDto[] => {
   const rows = deps.db
     .select()
     .from(orders)

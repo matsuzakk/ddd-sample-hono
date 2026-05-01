@@ -8,7 +8,7 @@ type Deps = {
 };
 
 type Input = {
-  readonly sellerId: string;
+  readonly sellerId: number;
 };
 
 export const getItemSellListUsecase = (deps: Deps, input: Input): ItemDto[] => {

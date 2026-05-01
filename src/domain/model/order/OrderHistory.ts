@@ -3,8 +3,8 @@ import type { Order } from "./Order.js";
 import type { OrderStatus } from "./OrderStatus.js";
 
 export type OrderHistory = {
-  readonly id: string;
-  readonly orderId: string;
+  readonly id: number | null;
+  readonly orderId: number;
   readonly fromStatus: OrderStatus | null;
   readonly toStatus: OrderStatus;
   readonly createdAt: Date;
@@ -12,8 +12,8 @@ export type OrderHistory = {
 
 export const OrderHistory = {
   create(
-    id: string,
-    orderId: string,
+    id: number | null,
+    orderId: number,
     fromStatus: OrderStatus | null,
     toStatus: OrderStatus,
   ): OrderHistory {
@@ -27,8 +27,8 @@ export const OrderHistory = {
   },
 
   reconstitute(
-    id: string,
-    orderId: string,
+    id: number,
+    orderId: number,
     fromStatus: OrderStatus | null,
     toStatus: OrderStatus,
     createdAt: Date,
@@ -37,8 +37,16 @@ export const OrderHistory = {
   },
 
   /** 同一注文の状態遷移を記録する（集約の遷移と履歴を揃える） */
-  recordTransition(id: string, before: Order, after: Order): OrderHistory {
-    if (before.id !== after.id) {
+  recordTransition(
+    id: number | null,
+    before: Order,
+    after: Order,
+  ): OrderHistory {
+    if (
+      before.id === null ||
+      after.id === null ||
+      before.id !== after.id
+    ) {
       throw new ValidationError("Order history must reference a single order");
     }
     return OrderHistory.create(id, before.id, before.status, after.status);

@@ -20,7 +20,7 @@ export const authMiddleware: MiddlewareHandler<{
   if (process.env.E2E === "true") {
     const testUserId = c.req.header("x-e2e-user-id");
     if (testUserId) {
-      c.set("sessionUserId", testUserId);
+      c.set("sessionUserId", Number(testUserId));
     }
     await next();
     return;
@@ -49,6 +49,6 @@ export const authMiddleware: MiddlewareHandler<{
     );
   }
 
-  c.set("sessionUserId", data.user.id);
+  c.set("sessionUserId", Number(data.user.id));
   await next();
 };

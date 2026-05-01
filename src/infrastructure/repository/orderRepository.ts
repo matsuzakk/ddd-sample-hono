@@ -7,18 +7,23 @@ import { orders } from "../database/schema.js";
 
 export const createOrderRepository = (db: DbClient): IOrderRepository => ({
   create: (order: Order) => {
-    db.insert(orders)
+    const row = db
+      .insert(orders)
       .values({
-        id: order.id,
         userId: order.userId,
         itemId: order.itemId,
         status: OrderStatus.toValue(order.status),
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
       })
-      .run();
+      .returning({ id: orders.id })
+      .all()[0];
+    if (!row) {
+      throw new Error("Failed to insert order");
+    }
+    return row.id;
   },
-  findById: (id: string) => {
+  findById: (id: number) => {
     const rows = db
       .select()
       .from(orders)
@@ -39,6 +44,9 @@ export const createOrderRepository = (db: DbClient): IOrderRepository => ({
     );
   },
   update: (order: Order) => {
+    if (order.id === null) {
+      throw new Error("Cannot update order without id");
+    }
     db.update(orders)
       .set({
         status: OrderStatus.toValue(order.status),

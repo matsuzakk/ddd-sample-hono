@@ -25,8 +25,8 @@ describe("POST /orders", () => {
         itemId: item.id,
         status: OrderStatusMap.PURCHASED,
       });
-      expect(typeof body.id).toBe("string");
-      expect(String(body.id).length).toBeGreaterThan(0);
+      expect(typeof body.id).toBe("number");
+      expect(body.id).toBeGreaterThan(0);
     } finally {
       close();
     }
@@ -47,7 +47,7 @@ describe("POST /orders", () => {
           "Content-Type": "application/json",
           "x-e2e-user-id": user.id,
         },
-        body: JSON.stringify({ itemId: "missing-item-id" }),
+        body: JSON.stringify({ itemId: 9_999_999_999 }),
       });
 
       expect(res.status).toBe(404);
@@ -74,7 +74,7 @@ describe("GET /orders/:orderId", () => {
         body: JSON.stringify({ itemId: item.id }),
       });
       expect(purchaseRes.status).toBe(201);
-      const created = (await purchaseRes.json()) as { id: string };
+      const created = (await purchaseRes.json()) as { id: number };
 
       const detailRes = await app.request(`/orders/${created.id}`, {
         method: "GET",
@@ -82,8 +82,8 @@ describe("GET /orders/:orderId", () => {
 
       expect(detailRes.status).toBe(200);
       const detail = (await detailRes.json()) as {
-        order: { id: string; status: number };
-        histories: { orderId: string; toStatus: number }[];
+        order: { id: number; status: number };
+        histories: { orderId: number; toStatus: number }[];
       };
 
       expect(detail.order?.id).toBe(created.id);
@@ -110,7 +110,7 @@ describe("PUT /orders/:orderId/ship", () => {
         },
         body: JSON.stringify({ itemId: item.id }),
       });
-      const order = (await purchaseRes.json()) as { id: string };
+      const order = (await purchaseRes.json()) as { id: number };
 
       const shipRes = await app.request(`/orders/${order.id}/ship`, {
         method: "PUT",
@@ -143,7 +143,7 @@ describe("PUT /orders/:orderId/deliver", () => {
         },
         body: JSON.stringify({ itemId: item.id }),
       });
-      const order = (await purchaseRes.json()) as { id: string };
+      const order = (await purchaseRes.json()) as { id: number };
 
       const shipRes = await app.request(`/orders/${order.id}/ship`, {
         method: "PUT",
@@ -192,7 +192,7 @@ describe("PUT /orders/:orderId/cancel", () => {
         },
         body: JSON.stringify({ itemId: item.id }),
       });
-      const order = (await purchaseRes.json()) as { id: string };
+      const order = (await purchaseRes.json()) as { id: number };
 
       const cancelRes = await app.request(`/orders/${order.id}/cancel`, {
         method: "PUT",

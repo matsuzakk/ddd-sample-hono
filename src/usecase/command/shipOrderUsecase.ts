@@ -25,8 +25,8 @@ type Deps = {
 };
 
 type Input = {
-  readonly userId: string;
-  readonly orderId: string;
+  readonly userId: number;
+  readonly orderId: number;
 };
 
 export const shipOrderUsecase = (deps: Deps, input: Input): OrderDto => {
@@ -57,11 +57,7 @@ export const shipOrderUsecase = (deps: Deps, input: Input): OrderDto => {
     const updatedOrder = Order.markShipped(order);
 
     // 注文履歴を発行する
-    const history = OrderHistory.recordTransition(
-      crypto.randomUUID(),
-      order,
-      updatedOrder,
-    );
+    const history = OrderHistory.recordTransition(null, order, updatedOrder);
 
     orderRepository.update(updatedOrder);
     orderHistoryRepository.create(history);

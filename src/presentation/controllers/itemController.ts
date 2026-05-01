@@ -16,7 +16,7 @@ export const itemController = {
    */
   sell: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
-    const sellerId = c.get("sessionUserId") as string;
+    const sellerId = c.get("sessionUserId")!;
 
     const body = await c.req.json<{
       name: string;
@@ -55,7 +55,7 @@ export const itemController = {
    */
   getById: async (c: Context<{ Variables: AppVariables }>) => {
     const db = c.get("db");
-    const itemId = c.req.param("itemId")!;
+    const itemId = Number(c.req.param("itemId"));
     const result = await getItemDetailUsecase({ db }, { itemId });
     return c.json(result);
   },

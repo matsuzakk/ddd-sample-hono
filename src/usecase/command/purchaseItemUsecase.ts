@@ -29,8 +29,8 @@ type Deps = {
 };
 
 type Input = {
-  readonly userId: string;
-  readonly itemId: string;
+  readonly userId: number;
+  readonly itemId: number;
 };
 
 export const purchaseItemUsecase = (deps: Deps, input: Input): OrderDto => {
@@ -40,39 +40,30 @@ export const purchaseItemUsecase = (deps: Deps, input: Input): OrderDto => {
     const orderHistoryRepository = deps.createOrderHistoryRepository(tx);
 
     const item = itemRepository.findById(input.itemId);
-    // 商品が存在しない場合
     if (!item || !Item.isSellable(item)) {
       throw new NotFoundError("Item not found");
     }
 
-    // 商品の販売者が購入者本人の場合はエラー
     if (item.sellerId === input.userId) {
       throw new ValidationError("You cannot purchase your own item");
     }
 
-    // 商品を購入済みにする
     const updatedItem = Item.changeStatus(
       item,
       ItemStatus.create(ItemStatusMap.PURCHASED),
     );
 
-    // 注文を作成する
-    const order = Order.create(crypto.randomUUID(), input.userId, item);
+    const order = Order.create(input.userId, item);
 
-    // 注文履歴を発行する
-    const history = OrderHistory.create(
-      crypto.randomUUID(),
-      order.id,
-      null,
-      order.status,
-    );
+    const orderId = orderRepository.create(order);
+
+    const history = OrderHistory.create(null, orderId, null, order.status);
 
     itemRepository.update(updatedItem);
-    orderRepository.create(order);
     orderHistoryRepository.create(history);
 
     return orderDtoSchema.parse({
-      id: order.id,
+      id: orderId,
       userId: order.userId,
       itemId: order.itemId,
       status: OrderStatus.toValue(order.status),

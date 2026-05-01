@@ -7,9 +7,9 @@ import {
 } from "./OrderStatus.js";
 
 export type Order = {
-  readonly id: string;
-  readonly userId: string;
-  readonly itemId: string;
+  readonly id: number | null;
+  readonly userId: number;
+  readonly itemId: number;
   readonly status: OrderStatusVO;
   readonly createdAt: Date;
   readonly updatedAt: Date;
@@ -24,7 +24,7 @@ function withStatus(order: Order, status: OrderStatusVO): Order {
 }
 
 export const Order = {
-  create(id: string, userId: string, item: Item): Order {
+  create(userId: number, item: Item): Order {
     if (!Item.isPurchasableByUser(item, userId)) {
       throw new ValidationError("Seller cannot purchase their own item");
     }
@@ -35,9 +35,13 @@ export const Order = {
       );
     }
 
+    if (item.id === null) {
+      throw new ValidationError("Item must be persisted before ordering");
+    }
+
     const now = new Date();
     return {
-      id,
+      id: null,
       userId,
       itemId: item.id,
       status: OrderStatus.create(OrderStatusMap.PURCHASED),
@@ -47,9 +51,9 @@ export const Order = {
   },
 
   reconstitute(
-    id: string,
-    userId: string,
-    itemId: string,
+    id: number,
+    userId: number,
+    itemId: number,
     status: OrderStatusVO,
     createdAt: Date,
     updatedAt: Date,
@@ -58,7 +62,7 @@ export const Order = {
   },
 
   /** 操作者が注文の購入者本人か（キャンセル・受取完了などの可否判定用） */
-  isPurchaser(order: Order, actorUserId: string): boolean {
+  isPurchaser(order: Order, actorUserId: number): boolean {
     return order.userId === actorUserId;
   },
 

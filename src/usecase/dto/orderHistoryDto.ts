@@ -8,8 +8,8 @@ export const orderStatusValueSchema = z.union([
 ]);
 
 export const orderHistoryDtoSchema = z.object({
-  id: z.string().min(1),
-  orderId: z.string().min(1),
+  id: z.number().int().positive(),
+  orderId: z.number().int().positive(),
   fromStatus: orderStatusValueSchema.nullable(),
   toStatus: orderStatusValueSchema,
   createdAt: z.coerce.date(),

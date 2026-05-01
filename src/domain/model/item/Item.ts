@@ -7,12 +7,12 @@ import {
 import type { ItemPrice as ItemPriceVO } from "./ItemPrice.js";
 
 export type Item = {
-  readonly id: string;
+  readonly id: number | null;
   readonly name: string;
   readonly description: string;
   readonly price: ItemPriceVO;
   readonly status: ItemStatusVO;
-  readonly sellerId: string;
+  readonly sellerId: number;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 };
@@ -27,11 +27,10 @@ function isValidDescription(description: string): boolean {
 
 export const Item = {
   create(
-    id: string,
     name: string,
     description: string,
     price: ItemPriceVO,
-    sellerId: string,
+    sellerId: number,
   ): Item {
     if (!isValidName(name)) {
       throw new ValidationError(
@@ -45,7 +44,7 @@ export const Item = {
     }
     const now = new Date();
     return {
-      id,
+      id: null,
       name,
       description,
       price,
@@ -57,12 +56,12 @@ export const Item = {
   },
 
   reconstitute(
-    id: string,
+    id: number,
     name: string,
     description: string,
     price: ItemPriceVO,
     status: ItemStatusVO,
-    sellerId: string,
+    sellerId: number,
     createdAt: Date,
     updatedAt: Date,
   ): Item {
@@ -86,12 +85,12 @@ export const Item = {
     return ItemStatus.isSellable(item.status);
   },
 
-  isPurchasableByUser(item: Item, userId: string): boolean {
+  isPurchasableByUser(item: Item, userId: number): boolean {
     return item.sellerId !== userId;
   },
 
   /** 操作者がこの商品の販売者本人か（発送などの可否判定用） */
-  isSeller(item: Item, userId: string): boolean {
+  isSeller(item: Item, userId: number): boolean {
     return item.sellerId === userId;
   },
 

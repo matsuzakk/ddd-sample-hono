@@ -9,9 +9,9 @@ import { items } from "../database/schema.js";
 
 export const createItemRepository = (db: DbClient): IItemRepository => ({
   create: (item: Item) => {
-    db.insert(items)
+    const row = db
+      .insert(items)
       .values({
-        id: item.id,
         name: item.name,
         description: item.description,
         price: ItemPrice.toValue(item.price),
@@ -20,9 +20,14 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
       })
-      .run();
+      .returning({ id: items.id })
+      .all()[0];
+    if (!row) {
+      throw new Error("Failed to insert item");
+    }
+    return row.id;
   },
-  findById: (id: string) => {
+  findById: (id: number) => {
     const rows = db.select().from(items).where(eq(items.id, id)).limit(1).all();
     const row = rows[0];
 
@@ -41,6 +46,9 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
     );
   },
   update: (item: Item) => {
+    if (item.id === null) {
+      throw new Error("Cannot update item without id");
+    }
     db.update(items)
       .set({
         name: item.name,

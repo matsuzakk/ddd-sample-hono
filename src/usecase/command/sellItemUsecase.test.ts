@@ -19,10 +19,7 @@ describe("sellItem", () => {
   let appDb: AppDatabase;
 
   beforeEach(() => {
-    vi.spyOn(crypto, "randomUUID").mockReturnValue(
-      "30000000-0000-4000-8000-000000000001",
-    );
-    mockCreate = vi.fn();
+    mockCreate = vi.fn().mockReturnValue(7);
     createItemRepository = vi.fn().mockImplementation(() => ({
       create: mockCreate,
       findById: vi.fn(),
@@ -31,7 +28,7 @@ describe("sellItem", () => {
     mockUserRepository = {
       create: vi.fn(),
       findById: vi.fn().mockReturnValue(
-        User.reconstitute("seller-1", "Seller", "seller@example.com"),
+        User.reconstitute(1, "Seller", "seller@example.com"),
       ),
     };
     createUserRepository = vi.fn(() => mockUserRepository);
@@ -43,34 +40,29 @@ describe("sellItem", () => {
   });
 
   it("商品を作成しリポジトリへ保存して ItemDto を返す", () => {
-    // 実行
     const result = sellItemUsecase(
       { db: appDb, createItemRepository, createUserRepository },
       {
-        sellerId: "seller-1",
+        sellerId: 1,
         name: "Book",
         description: "A good book",
         price: 500,
       },
     );
 
-    // 検証: ファクトリと永続化
     expect(createUserRepository).toHaveBeenCalledWith(appDb);
-    expect(mockUserRepository.findById).toHaveBeenCalledWith("seller-1");
+    expect(mockUserRepository.findById).toHaveBeenCalledWith(1);
     expect(createItemRepository).toHaveBeenCalledWith(appDb);
     expect(mockCreate).toHaveBeenCalledTimes(1);
-    expect(mockCreate.mock.calls[0][0].id).toBe(
-      "30000000-0000-4000-8000-000000000001",
-    );
+    expect(mockCreate.mock.calls[0][0].id).toBeNull();
 
-    // 検証: レスポンス
     expect(result).toMatchObject({
-      id: "30000000-0000-4000-8000-000000000001",
+      id: 7,
       name: "Book",
       description: "A good book",
       price: 500,
       status: ItemStatusMap.SELLABLE,
-      sellerId: "seller-1",
+      sellerId: 1,
     });
     expect(result.createdAt).toBeInstanceOf(Date);
     expect(result.updatedAt).toBeInstanceOf(Date);
@@ -83,7 +75,7 @@ describe("sellItem", () => {
       sellItemUsecase(
         { db: appDb, createItemRepository, createUserRepository },
         {
-          sellerId: "missing-seller",
+          sellerId: 999,
           name: "Book",
           description: "A good book",
           price: 500,
@@ -94,12 +86,11 @@ describe("sellItem", () => {
   });
 
   it("価格が無効なときは永続化せず ValidationError を投げる", () => {
-    // 実行 & 検証
     expect(() =>
       sellItemUsecase(
         { db: appDb, createItemRepository, createUserRepository },
         {
-          sellerId: "seller-1",
+          sellerId: 1,
           name: "N",
           description: "D",
           price: -1,

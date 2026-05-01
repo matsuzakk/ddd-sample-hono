@@ -26,8 +26,8 @@ type Deps = {
 };
 
 type Input = {
-  readonly userId: string;
-  readonly orderId: string;
+  readonly userId: number;
+  readonly orderId: number;
 };
 
 export const cancelOrderUsecase = (deps: Deps, input: Input): OrderDto => {
@@ -50,11 +50,7 @@ export const cancelOrderUsecase = (deps: Deps, input: Input): OrderDto => {
     const updatedOrder = Order.cancel(order);
 
     // 注文履歴を発行する
-    const history = OrderHistory.recordTransition(
-      crypto.randomUUID(),
-      order,
-      updatedOrder,
-    );
+    const history = OrderHistory.recordTransition(null, order, updatedOrder);
 
     const updatedItem = itemRepository.findById(order.itemId);
     if (!updatedItem) {

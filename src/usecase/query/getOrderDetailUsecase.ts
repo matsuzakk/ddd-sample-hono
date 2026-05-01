@@ -12,7 +12,7 @@ export type Deps = {
 };
 
 export type Input = {
-  readonly orderId: string;
+  readonly orderId: number;
 };
 
 export const getOrderDetailUsecase = (
