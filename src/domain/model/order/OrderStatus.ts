@@ -29,6 +29,7 @@ const orderStatusSchema = z
 export type OrderStatus = z.infer<typeof orderStatusSchema>;
 
 // --- Value Object ---
+
 export const OrderStatus = {
   create(value: OrderStatusType): OrderStatus {
     const r = orderStatusSchema.safeParse(value);

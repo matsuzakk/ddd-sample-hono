@@ -20,6 +20,11 @@ export const UserName = {
       const message = r.error.issues[0]?.message;
       throw new ValidationError(message, { cause: r.error });
     }
+    if (value.length < 1) {
+      throw new ValidationError(
+        "Name must be between 1 and 20 characters",
+      );
+    }
     return r.data;
   },
 

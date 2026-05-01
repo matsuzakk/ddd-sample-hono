@@ -1,6 +1,8 @@
 import { eq } from "drizzle-orm";
 import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
 import { Item } from "../../domain/model/item/Item.js";
+import { ItemDescription } from "../../domain/model/item/ItemDescription.js";
+import { ItemName } from "../../domain/model/item/ItemName.js";
 import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
 import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
 import { getDatabase } from "../database/db.js";
@@ -12,8 +14,8 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
     const row = db
       .insert(items)
       .values({
-        name: item.name,
-        description: item.description,
+        name: ItemName.toValue(item.name),
+        description: ItemDescription.toValue(item.description),
         price: ItemPrice.toValue(item.price),
         status: ItemStatus.toValue(item.status),
         sellerId: item.sellerId,

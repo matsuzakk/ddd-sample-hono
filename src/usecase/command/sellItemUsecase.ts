@@ -1,5 +1,7 @@
 import type { IItemRepository } from "../../domain/model/item/IItemRepository.js";
 import { Item } from "../../domain/model/item/Item.js";
+import { ItemDescription } from "../../domain/model/item/ItemDescription.js";
+import { ItemName } from "../../domain/model/item/ItemName.js";
 import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
 import { ItemStatus } from "../../domain/model/item/ItemStatus.js";
 import { NotFoundError } from "../../domain/model/shared/error.js";
@@ -43,8 +45,8 @@ export const sellItemUsecase = (deps: Deps, input: Input): ItemDto => {
 
   const result = itemDtoSchema.parse({
     id,
-    name: item.name,
-    description: item.description,
+    name: ItemName.toValue(item.name),
+    description: ItemDescription.toValue(item.description),
     price: ItemPrice.toValue(item.price),
     status: ItemStatus.toValue(item.status),
     sellerId: item.sellerId,

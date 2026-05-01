@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { ValidationError } from "../shared/error.js";
+import { ItemDescription } from "./ItemDescription.js";
 import { Item } from "./Item.js";
+import { ItemName } from "./ItemName.js";
 import { ItemPrice } from "./ItemPrice.js";
 import { ItemStatus, ItemStatusMap } from "./ItemStatus.js";
 
@@ -15,8 +17,8 @@ describe("Item", () => {
     const price = ItemPrice.create(1000);
     const item = Item.create("Name", "Description", price, 1);
     expect(item.id).toBeNull();
-    expect(item.name).toBe("Name");
-    expect(item.description).toBe("Description");
+    expect(ItemName.toValue(item.name)).toBe("Name");
+    expect(ItemDescription.toValue(item.description)).toBe("Description");
     expect(ItemPrice.toValue(item.price)).toBe(1000);
     expect(item.sellerId).toBe(1);
     expect(ItemStatus.isSellable(item.status)).toBe(true);
@@ -53,8 +55,8 @@ describe("Item", () => {
       createdAt,
       updatedAt,
     );
-    expect(item.name).toBe("");
-    expect(item.description).toBe("");
+    expect(ItemName.toValue(item.name)).toBe("");
+    expect(ItemDescription.toValue(item.description)).toBe("");
   });
 
   it("isPurchased / isSellable はステータスを委譲する", () => {
@@ -119,9 +121,9 @@ describe("Item", () => {
     expect(() => Item.changeName(item, "")).toThrow(ValidationError);
     expect(() => Item.changeDescription(item, "")).toThrow(ValidationError);
     const renamed = Item.changeName(item, "New");
-    expect(renamed.name).toBe("New");
+    expect(ItemName.toValue(renamed.name)).toBe("New");
     const redescribed = Item.changeDescription(renamed, "Longer text");
-    expect(redescribed.description).toBe("Longer text");
+    expect(ItemDescription.toValue(redescribed.description)).toBe("Longer text");
     const repriced = Item.changePrice(redescribed, ItemPrice.create(999));
     expect(ItemPrice.toValue(repriced.price)).toBe(999);
   });
