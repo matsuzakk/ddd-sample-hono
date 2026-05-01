@@ -3,7 +3,7 @@ import { Order } from "../../domain/model/order/Order.js";
 import {
   OrderStatus,
   OrderStatusMap,
-} from "../../domain/model/order/OrderStatus.js";
+} from "../../domain/model/order/vo/OrderStatus.js";
 import {
   NotFoundError,
   ValidationError,
@@ -92,9 +92,9 @@ describe("deliverOrder", () => {
       ),
     );
 
-    expect(() =>
-      deliverOrderUsecase(deps, { userId: 99, orderId: 1 }),
-    ).toThrow(NotFoundError);
+    expect(() => deliverOrderUsecase(deps, { userId: 99, orderId: 1 })).toThrow(
+      NotFoundError,
+    );
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
   });
@@ -111,8 +111,8 @@ describe("deliverOrder", () => {
       ),
     );
 
-    expect(() =>
-      deliverOrderUsecase(deps, { userId: 20, orderId: 1 }),
-    ).toThrow(ValidationError);
+    expect(() => deliverOrderUsecase(deps, { userId: 20, orderId: 1 })).toThrow(
+      ValidationError,
+    );
   });
 });

@@ -3,25 +3,24 @@ import { ValidationError } from "../../shared/error.js";
 import { UserName } from "./UserName.js";
 
 describe("UserName", () => {
-  it("create は 1〜20 文字を受け入れる", () => {
-    const name = UserName.create("Alice");
-    expect(UserName.toValue(name)).toBe("Alice");
+  it("Zod: 1〜20 文字は create で受理される", () => {
+    expect(UserName.toValue(UserName.create("Alice"))).toBe("Alice");
+    expect(UserName.toValue(UserName.create("a".repeat(20)))).toHaveLength(20);
   });
 
-  it("create は空文字を受け入れる（1 文字以上は User エンティティの create で検証）", () => {
-    const name = UserName.create("");
-    expect(UserName.toValue(name)).toBe("");
+  it("Zod: 空文字は ValidationError", () => {
+    expect(() => UserName.create("")).toThrow(ValidationError);
   });
 
-  it("create は 21 文字以上で ValidationError を投げる", () => {
-    expect(() => UserName.create("a".repeat(21))).toThrow(ValidationError);
+  it("Zod: 21 文字以上は ValidationError", () => {
+    expect(() => UserName.create("x".repeat(21))).toThrow(ValidationError);
   });
 
-  it("equals は文字列としての同一性を返す", () => {
-    const a = UserName.create("Bob");
-    const b = UserName.create("Bob");
-    expect(UserName.equals(a, a)).toBe(true);
-    expect(UserName.equals(a, b)).toBe(true);
-    expect(UserName.equals(a, UserName.create("Other"))).toBe(false);
+  it("equals は表示名の一致を返す", () => {
+    const n = UserName.create("Bob");
+    expect(UserName.equals(n, UserName.create("Bob"))).toBe(true);
+    expect(UserName.equals(UserName.create("a"), UserName.create("b"))).toBe(
+      false,
+    );
   });
 });

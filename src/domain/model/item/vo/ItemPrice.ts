@@ -13,7 +13,7 @@ const itemPriceSchema = z
 
 export type ItemPrice = z.infer<typeof itemPriceSchema>;
 
-// --- Value Object(コンパニオンオブジェクト) ---
+// --- Value Object ---
 
 export const ItemPrice = {
   create(price: number): ItemPrice {

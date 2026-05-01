@@ -1,139 +1,164 @@
 import { describe, expect, it, vi } from "vitest";
 import { Item } from "../item/Item.js";
+import { ValidationError } from "../shared/error.js";
 import { ItemPrice } from "../item/vo/ItemPrice.js";
 import { ItemStatus, ItemStatusMap } from "../item/vo/ItemStatus.js";
-import { ValidationError } from "../shared/error.js";
 import { Order } from "./Order.js";
 import { OrderStatus, OrderStatusMap } from "./vo/OrderStatus.js";
 
-const sellableItem = (sellerId: number) =>
+const sellablePersistedItem = (sellerId: number, itemId: number) =>
   Item.reconstitute(
-    1,
-    "Book",
-    "Good book",
-    ItemPrice.create(500),
+    itemId,
+    "n",
+    "d",
+    ItemPrice.create(100),
     ItemStatus.create(ItemStatusMap.SELLABLE),
     sellerId,
     new Date("2024-01-01T00:00:00.000Z"),
-    new Date("2024-01-02T00:00:00.000Z"),
+    new Date("2024-01-01T00:00:00.000Z"),
   );
-
-const purchasedItem = (sellerId: number) => {
-  const { createdAt, updatedAt } = {
-    createdAt: new Date("2024-01-01T00:00:00.000Z"),
-    updatedAt: new Date("2024-01-02T00:00:00.000Z"),
-  };
-  return Item.reconstitute(
-    2,
-    "Book",
-    "Good book",
-    ItemPrice.create(500),
-    ItemStatus.create(ItemStatusMap.PURCHASED),
-    sellerId,
-    createdAt,
-    updatedAt,
-  );
-};
 
 describe("Order", () => {
-  it("create は購入可能な商品から注文を返す", () => {
-    const item = sellableItem(2);
-    const order = Order.create(1, item);
-    expect(order.id).toBeNull();
-    expect(order.userId).toBe(1);
-    expect(order.itemId).toBe(1);
-    expect(OrderStatus.isPurchased(order.status)).toBe(true);
+  it("create: 自分の出品商品は注文できない", () => {
+    const item = sellablePersistedItem(7, 1);
+    expect(() => Order.create(7, item)).toThrow(ValidationError);
+    expect(() => Order.create(7, item)).toThrow(/Seller cannot purchase/);
   });
 
-  it("create は出品者自身の購入を拒否する", () => {
-    const item = sellableItem(1);
-    expect(() => Order.create(1, item)).toThrow(ValidationError);
+  it("create: 既に購入済みの商品は注文できない", () => {
+    const item = Item.reconstitute(
+      2,
+      "n",
+      "d",
+      ItemPrice.create(1),
+      ItemStatus.create(ItemStatusMap.PURCHASED),
+      1,
+      new Date(),
+      new Date(),
+    );
+    expect(() => Order.create(99, item)).toThrow(ValidationError);
+    expect(() => Order.create(99, item)).toThrow(/already purchased/);
   });
 
-  it("create は購入済み商品を拒否する", () => {
-    const item = purchasedItem(1);
-    expect(() => Order.create(2, item)).toThrow(ValidationError);
+  it("create: 未永続の商品は注文できない", () => {
+    const draft = Item.create("n", "d", ItemPrice.create(1), 1);
+    expect(draft.id).toBeNull();
+    expect(() => Order.create(2, draft)).toThrow(ValidationError);
+    expect(() => Order.create(2, draft)).toThrow(/persisted before ordering/);
   });
 
-  it("create は id のない商品を拒否する", () => {
-    const item = Item.create("n", "d", ItemPrice.create(0), 1);
-    expect(() => Order.create(2, item)).toThrow(ValidationError);
-  });
-
-  it("markShipped は購入済みから発送済みへ遷移する", () => {
+  it("create: 購入可能な永続済み商品から注文を作成すると PURCHASED になる", () => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2025-01-01T00:00:00.000Z"));
-    const order = Order.create(1, sellableItem(2));
-    const before = order.updatedAt.getTime();
-    vi.setSystemTime(new Date("2025-01-01T00:00:05.000Z"));
-    const shipped = Order.markShipped(order);
-    expect(OrderStatus.isShipped(shipped.status)).toBe(true);
-    expect(shipped.updatedAt.getTime()).toBeGreaterThan(before);
+    vi.setSystemTime(new Date("2026-03-01T10:00:00.000Z"));
+    const item = sellablePersistedItem(1, 10);
+    const order = Order.create(2, item);
+    expect(order.id).toBeNull();
+    expect(order.userId).toBe(2);
+    expect(order.itemId).toBe(10);
+    expect(OrderStatus.toValue(order.status)).toBe(OrderStatusMap.PURCHASED);
+    expect(order.createdAt).toEqual(order.updatedAt);
     vi.useRealTimers();
   });
 
-  it("markShipped は購入済み以外で ValidationError を投げる", () => {
-    const order = Order.reconstitute(
+  it("isPurchaser: 購入者一致で true", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+    const order = Order.create(55, sellablePersistedItem(1, 3));
+    const persisted = Order.reconstitute(
       1,
-      1,
-      1,
-      OrderStatus.create(OrderStatusMap.SHIPPED),
-      new Date(),
-      new Date(),
+      order.userId,
+      order.itemId,
+      order.status,
+      order.createdAt,
+      order.updatedAt,
     );
-    expect(() => Order.markShipped(order)).toThrow(ValidationError);
+    expect(Order.isPurchaser(persisted, 55)).toBe(true);
+    expect(Order.isPurchaser(persisted, 56)).toBe(false);
+    vi.useRealTimers();
   });
 
-  it("markDelivered は発送済みから到着済みへ遷移する", () => {
+  it("markShipped: 購入済みからのみ発送に遷移できる", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+    const placed = Order.create(2, sellablePersistedItem(1, 1));
     const order = Order.reconstitute(
       1,
-      1,
-      1,
-      OrderStatus.create(OrderStatusMap.SHIPPED),
-      new Date(),
-      new Date(),
+      placed.userId,
+      placed.itemId,
+      placed.status,
+      placed.createdAt,
+      placed.updatedAt,
     );
+    vi.setSystemTime(new Date("2026-01-01T01:00:00.000Z"));
+    const shipped = Order.markShipped(order);
+    expect(OrderStatus.toValue(shipped.status)).toBe(OrderStatusMap.SHIPPED);
+    expect(shipped.updatedAt.getTime()).toBeGreaterThan(
+      order.updatedAt.getTime(),
+    );
+    expect(() =>
+      Order.markShipped(
+        Order.reconstitute(
+          1,
+          shipped.userId,
+          shipped.itemId,
+          shipped.status,
+          shipped.createdAt,
+          shipped.updatedAt,
+        ),
+      ),
+    ).toThrow(ValidationError);
+    vi.useRealTimers();
+  });
+
+  it("markDelivered: 発送済みからのみ配達済みへ遷移できる", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+    const placed = Order.create(2, sellablePersistedItem(1, 1));
+    let order = Order.reconstitute(
+      9,
+      placed.userId,
+      placed.itemId,
+      placed.status,
+      placed.createdAt,
+      placed.updatedAt,
+    );
+    vi.setSystemTime(new Date("2026-01-01T02:00:00.000Z"));
+    order = Order.markShipped(order);
+    vi.setSystemTime(new Date("2026-01-01T03:00:00.000Z"));
     const delivered = Order.markDelivered(order);
-    expect(OrderStatus.isDelivered(delivered.status)).toBe(true);
-  });
-
-  it("markDelivered は発送済み以外で ValidationError を投げる", () => {
-    const purchased = Order.reconstitute(
-      1,
-      1,
-      1,
-      OrderStatus.create(OrderStatusMap.PURCHASED),
-      new Date(),
-      new Date(),
+    expect(OrderStatus.toValue(delivered.status)).toBe(
+      OrderStatusMap.DELIVERED,
     );
-    expect(() => Order.markDelivered(purchased)).toThrow(ValidationError);
+    expect(() => Order.markDelivered(placed)).toThrow(ValidationError);
+    vi.useRealTimers();
   });
 
-  it("cancel は購入済みからキャンセルへ遷移する", () => {
-    const order = Order.create(1, sellableItem(2));
+  it("cancel: 購入済みからのみキャンセルに遷移できる", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-05T12:00:00.000Z"));
+    const placed = Order.create(2, sellablePersistedItem(1, 1));
+    const order = Order.reconstitute(
+      3,
+      placed.userId,
+      placed.itemId,
+      placed.status,
+      placed.createdAt,
+      placed.updatedAt,
+    );
+    vi.setSystemTime(new Date("2026-05-05T13:00:00.000Z"));
     const canceled = Order.cancel(order);
-    expect(OrderStatus.isCanceled(canceled.status)).toBe(true);
-  });
-
-  it("cancel は購入済み以外で ValidationError を投げる", () => {
-    const shipped = Order.reconstitute(
-      1,
-      1,
-      1,
-      OrderStatus.create(OrderStatusMap.SHIPPED),
-      new Date(),
-      new Date(),
+    expect(OrderStatus.toValue(canceled.status)).toBe(OrderStatusMap.CANCELED);
+    const shipped = Order.markShipped(
+      Order.reconstitute(
+        4,
+        order.userId,
+        order.itemId,
+        order.status,
+        order.createdAt,
+        order.updatedAt,
+      ),
     );
     expect(() => Order.cancel(shipped)).toThrow(ValidationError);
-  });
-
-  it("isPurchaser は購入者と一致すると true", () => {
-    const order = Order.create(5, sellableItem(2));
-    expect(Order.isPurchaser(order, 5)).toBe(true);
-  });
-
-  it("isPurchaser は購入者と一致しないと false", () => {
-    const order = Order.create(5, sellableItem(2));
-    expect(Order.isPurchaser(order, 99)).toBe(false);
+    vi.useRealTimers();
   });
 });

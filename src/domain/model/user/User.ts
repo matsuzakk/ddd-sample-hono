@@ -59,7 +59,7 @@ const changeEmail = (user: User, email: string): User => ({
   email: UserEmail.create(email),
 });
 
-// --- エンティティ(コンパニオンオブジェクト) ---
+// --- エンティティ ---
 
 export const User = {
   create,

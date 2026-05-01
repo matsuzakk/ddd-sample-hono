@@ -1,80 +1,99 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ValidationError } from "../shared/error.js";
 import { Order } from "./Order.js";
 import { OrderHistory } from "./OrderHistory.js";
 import { OrderStatus, OrderStatusMap } from "./vo/OrderStatus.js";
+import { Item } from "../item/Item.js";
+import { ItemPrice } from "../item/vo/ItemPrice.js";
+import { ItemStatus, ItemStatusMap } from "../item/vo/ItemStatus.js";
+
+const persistedOrder = (
+  overrides: Partial<{ id: number; status: OrderStatus }> = {},
+) => {
+  const id = overrides.id ?? 100;
+  const status =
+    overrides.status ?? OrderStatus.create(OrderStatusMap.PURCHASED);
+  const createdAt = new Date("2026-01-01T00:00:00.000Z");
+  const updatedAt = new Date("2026-01-01T01:00:00.000Z");
+  return Order.reconstitute(id, 2, 1, status, createdAt, updatedAt);
+};
 
 describe("OrderHistory", () => {
-  it("create は遷移情報を保持する", () => {
+  it("create: orderId と遷移先・作成日時を持つ（id は任意）", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-02-02T09:00:00.000Z"));
+    const to = OrderStatus.create(OrderStatusMap.SHIPPED);
+    const row = OrderHistory.create(null, 5, null, to);
+    expect(row.id).toBeNull();
+    expect(row.orderId).toBe(5);
+    expect(row.fromStatus).toBeNull();
+    expect(row.toStatus).toBe(to);
+    expect(row.createdAt).toEqual(new Date("2026-02-02T09:00:00.000Z"));
+    vi.useRealTimers();
+  });
+
+  it("reconstitute: 保存した値を復元する", () => {
     const from = OrderStatus.create(OrderStatusMap.PURCHASED);
     const to = OrderStatus.create(OrderStatusMap.SHIPPED);
-    const h = OrderHistory.create(null, 42, from, to);
-    expect(h.id).toBeNull();
-    expect(h.orderId).toBe(42);
-    expect(h.fromStatus).toBe(from);
-    expect(h.toStatus).toBe(to);
-    expect(h.createdAt).toBeInstanceOf(Date);
+    const createdAt = new Date("2025-12-31T23:59:59.999Z");
+    const row = OrderHistory.reconstitute(10, 3, from, to, createdAt);
+    expect(row.id).toBe(10);
+    expect(row.orderId).toBe(3);
+    expect(row.fromStatus).toBe(from);
+    expect(row.toStatus).toBe(to);
+    expect(row.createdAt).toBe(createdAt);
   });
 
-  it("create は初回遷移で from を null にできる", () => {
-    const to = OrderStatus.create(OrderStatusMap.PURCHASED);
-    const h = OrderHistory.create(null, 1, null, to);
-    expect(h.fromStatus).toBeNull();
-    expect(h.toStatus).toBe(to);
-  });
-
-  it("reconstitute は保存済み行から復元する", () => {
-    const at = new Date("2024-05-01T00:00:00.000Z");
-    const to = OrderStatus.create(OrderStatusMap.DELIVERED);
-    const h = OrderHistory.reconstitute(9, 1, null, to, at);
-    expect(h.createdAt).toEqual(at);
-  });
-
-  it("recordTransition は同一注文の before/after から履歴を作る", () => {
-    const createdAt = new Date("2024-01-01T00:00:00.000Z");
-    const updatedAt = new Date("2024-01-01T00:00:01.000Z");
-    const before = Order.reconstitute(
-      1,
-      1,
-      1,
-      OrderStatus.create(OrderStatusMap.PURCHASED),
-      createdAt,
-      updatedAt,
-    );
+  it("recordTransition:同一注文 id の before/after で履歴を作る", () => {
+    const before = persistedOrder({
+      status: OrderStatus.create(OrderStatusMap.PURCHASED),
+    });
     const after = Order.reconstitute(
-      1,
-      1,
-      1,
+      before.id as number,
+      before.userId,
+      before.itemId,
       OrderStatus.create(OrderStatusMap.SHIPPED),
-      createdAt,
-      new Date("2024-01-01T00:00:02.000Z"),
+      before.createdAt,
+      new Date("2026-01-01T02:00:00.000Z"),
     );
-    const h = OrderHistory.recordTransition(null, before, after);
-    expect(h.orderId).toBe(1);
-    expect(h.fromStatus).toBe(before.status);
-    expect(h.toStatus).toBe(after.status);
+    const history = OrderHistory.recordTransition(7, before, after);
+    expect(history.id).toBe(7);
+    expect(history.orderId).toBe(before.id);
+    expect(history.fromStatus).toBe(before.status);
+    expect(history.toStatus).toBe(after.status);
   });
 
-  it("recordTransition は注文 ID が異なると ValidationError を投げる", () => {
-    const createdAt = new Date();
-    const before = Order.reconstitute(
-      1,
-      1,
-      1,
-      OrderStatus.create(OrderStatusMap.PURCHASED),
-      createdAt,
-      createdAt,
-    );
-    const after = Order.reconstitute(
-      2,
-      1,
-      1,
-      OrderStatus.create(OrderStatusMap.SHIPPED),
-      createdAt,
-      createdAt,
-    );
-    expect(() => OrderHistory.recordTransition(null, before, after)).toThrow(
+  it("recordTransition: order id が一致しないとき ValidationError を投げる", () => {
+    const a = persistedOrder({ id: 1 });
+    const b = persistedOrder({ id: 2 });
+    expect(() => OrderHistory.recordTransition(null, a, b)).toThrow(
       ValidationError,
     );
+
+    const nullIdOrder = Order.create(
+      2,
+      Item.reconstitute(
+        99,
+        "n",
+        "d",
+        ItemPrice.create(1),
+        ItemStatus.create(ItemStatusMap.SELLABLE),
+        1,
+        new Date(),
+        new Date(),
+      ),
+    );
+    const withId = Order.reconstitute(
+      1,
+      nullIdOrder.userId,
+      nullIdOrder.itemId,
+      nullIdOrder.status,
+      nullIdOrder.createdAt,
+      nullIdOrder.updatedAt,
+    );
+    const stillNull = { ...nullIdOrder, id: null } as Order;
+    expect(() =>
+      OrderHistory.recordTransition(null, stillNull, withId),
+    ).toThrow(ValidationError);
   });
 });

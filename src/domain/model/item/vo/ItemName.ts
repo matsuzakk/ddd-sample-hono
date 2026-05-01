@@ -12,7 +12,7 @@ const itemNameSchema = z
 
 export type ItemName = z.infer<typeof itemNameSchema>;
 
-// --- Value Object(コンパニオンオブジェクト) ---
+// --- Value Object ---
 
 export const ItemName = {
   create(value: string): ItemName {

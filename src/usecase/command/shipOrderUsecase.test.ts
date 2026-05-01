@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Item } from "../../domain/model/item/Item.js";
-import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
-import { ItemStatus, ItemStatusMap } from "../../domain/model/item/ItemStatus.js";
+import { ItemPrice } from "../../domain/model/item/vo/ItemPrice.js";
+import {
+  ItemStatus,
+  ItemStatusMap,
+} from "../../domain/model/item/vo/ItemStatus.js";
 import { Order } from "../../domain/model/order/Order.js";
 import {
   OrderStatus,
   OrderStatusMap,
-} from "../../domain/model/order/OrderStatus.js";
+} from "../../domain/model/order/vo/OrderStatus.js";
 import {
   NotFoundError,
   ValidationError,
@@ -105,9 +108,9 @@ describe("shipOrder", () => {
   it("注文が無いとき NotFoundError とし更新しない", () => {
     mockOrderRepository.findById.mockReturnValue(null);
 
-    expect(() =>
-      shipOrderUsecase(deps, { userId: 10, orderId: 999 }),
-    ).toThrow(NotFoundError);
+    expect(() => shipOrderUsecase(deps, { userId: 10, orderId: 999 })).toThrow(
+      NotFoundError,
+    );
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
   });
@@ -125,9 +128,9 @@ describe("shipOrder", () => {
     );
     mockItemRepository.findById.mockReturnValue(itemRow());
 
-    expect(() =>
-      shipOrderUsecase(deps, { userId: 20, orderId: 1 }),
-    ).toThrow(ValidationError);
+    expect(() => shipOrderUsecase(deps, { userId: 20, orderId: 1 })).toThrow(
+      ValidationError,
+    );
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
   });
@@ -145,8 +148,8 @@ describe("shipOrder", () => {
     );
     mockItemRepository.findById.mockReturnValue(itemRow());
 
-    expect(() =>
-      shipOrderUsecase(deps, { userId: 10, orderId: 1 }),
-    ).toThrow(ValidationError);
+    expect(() => shipOrderUsecase(deps, { userId: 10, orderId: 1 })).toThrow(
+      ValidationError,
+    );
   });
 });

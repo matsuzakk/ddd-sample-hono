@@ -12,7 +12,7 @@ const userNameSchema = z
 
 export type UserName = z.infer<typeof userNameSchema>;
 
-// --- Value Object(コンパニオンオブジェクト) ---
+// --- Value Object ---
 
 export const UserName = {
   create(value: string): UserName {

@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Item } from "../../domain/model/item/Item.js";
-import { ItemPrice } from "../../domain/model/item/ItemPrice.js";
+import { ItemPrice } from "../../domain/model/item/vo/ItemPrice.js";
 import {
   ItemStatus,
   ItemStatusMap,
-} from "../../domain/model/item/ItemStatus.js";
+} from "../../domain/model/item/vo/ItemStatus.js";
 import {
   NotFoundError,
   ValidationError,

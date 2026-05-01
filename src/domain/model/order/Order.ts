@@ -131,7 +131,7 @@ const cancel = (order: Order): Order => {
   return withStatus(order, OrderStatus.create(OrderStatusMap.CANCELED));
 };
 
-// --- エンティティ(コンパニオンオブジェクト) ---
+// --- エンティティ ---
 
 export const Order = {
   create,

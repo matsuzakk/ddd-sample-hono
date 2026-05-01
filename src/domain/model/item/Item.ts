@@ -159,7 +159,7 @@ const isPurchasableByUser = (item: Item, userId: number): boolean =>
 const isSeller = (item: Item, userId: number): boolean =>
   (item.sellerId as number) === userId;
 
-// --- エンティティ(コンパニオンオブジェクト) ---
+// --- エンティティ ---
 
 export const Item = {
   create,

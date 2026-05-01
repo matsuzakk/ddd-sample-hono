@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ItemStatusMap } from "../../domain/model/item/ItemStatus.js";
+import { ItemStatusMap } from "../../domain/model/item/vo/ItemStatus.js";
 import {
   NotFoundError,
   ValidationError,

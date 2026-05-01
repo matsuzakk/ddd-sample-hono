@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ItemStatusMap } from "../../domain/model/item/ItemStatus.js";
+import { ItemStatusMap } from "../../domain/model/item/vo/ItemStatus.js";
 import { withMemoryAppDatabase } from "../../infrastructure/database/test/testDb.js";
 import { items, users } from "../../infrastructure/database/schema.js";
 import { getItemAllListUsecase } from "./getItemAllListUsecase.js";

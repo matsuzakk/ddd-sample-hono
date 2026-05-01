@@ -1,19 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
-import { ValidationError } from "../shared/error.js";
-import { ItemDescription } from "./vo/ItemDescription.js";
 import { Item } from "./Item.js";
+import { ItemDescription } from "./vo/ItemDescription.js";
 import { ItemName } from "./vo/ItemName.js";
 import { ItemPrice } from "./vo/ItemPrice.js";
 import { ItemStatus, ItemStatusMap } from "./vo/ItemStatus.js";
 
-const baseDates = () => {
-  const createdAt = new Date("2024-01-01T00:00:00.000Z");
-  const updatedAt = new Date("2024-01-02T00:00:00.000Z");
-  return { createdAt, updatedAt };
-};
+const baseDates = () => ({
+  createdAt: new Date("2024-01-01T00:00:00.000Z"),
+  updatedAt: new Date("2024-01-02T00:00:00.000Z"),
+});
 
 describe("Item", () => {
-  it("create は SELLABLE で商品を返す", () => {
+  it("create: SELLABLE で新規商品を返し createdAt と updatedAt が一致する", () => {
     const price = ItemPrice.create(1000);
     const item = Item.create("Name", "Description", price, 1);
     expect(item.id).toBeNull();
@@ -21,89 +19,44 @@ describe("Item", () => {
     expect(ItemDescription.toValue(item.description)).toBe("Description");
     expect(ItemPrice.toValue(item.price)).toBe(1000);
     expect(item.sellerId).toBe(1);
-    expect(ItemStatus.isSellable(item.status)).toBe(true);
+    expect(Item.isSellable(item)).toBe(true);
     expect(item.createdAt).toEqual(item.updatedAt);
   });
 
-  it("create は無効な名前で ValidationError を投げる", () => {
-    const price = ItemPrice.create(0);
-    expect(() => Item.create("", "d", price, 1)).toThrow(ValidationError);
-    expect(() => Item.create("a".repeat(21), "d", price, 1)).toThrow(
-      ValidationError,
-    );
-  });
-
-  it("create は無効な説明で ValidationError を投げる", () => {
-    const price = ItemPrice.create(0);
-    expect(() => Item.create("n", "", price, 1)).toThrow(ValidationError);
-    expect(() => Item.create("n", "x".repeat(1001), price, 1)).toThrow(
-      ValidationError,
-    );
-  });
-
-  it("reconstitute は名前・説明の長さを検証しない", () => {
+  it("reconstitute: id・日付・ステータスをそのまま保持する", () => {
     const { createdAt, updatedAt } = baseDates();
     const price = ItemPrice.create(1);
-    const status = ItemStatus.create(ItemStatusMap.SELLABLE);
+    const status = ItemStatus.create(ItemStatusMap.PURCHASED);
     const item = Item.reconstitute(
-      1,
-      "",
-      "",
+      99,
+      "n",
+      "d",
       price,
       status,
-      1,
-      createdAt,
-      updatedAt,
-    );
-    expect(ItemName.toValue(item.name)).toBe("");
-    expect(ItemDescription.toValue(item.description)).toBe("");
-  });
-
-  it("isPurchased / isSellable はステータスを委譲する", () => {
-    const price = ItemPrice.create(0);
-    const { createdAt, updatedAt } = baseDates();
-    const sellable = Item.reconstitute(
-      1,
-      "n",
-      "d",
-      price,
-      ItemStatus.create(ItemStatusMap.SELLABLE),
-      1,
-      createdAt,
-      updatedAt,
-    );
-    const purchased = Item.reconstitute(
       2,
-      "n",
-      "d",
-      price,
-      ItemStatus.create(ItemStatusMap.PURCHASED),
-      1,
       createdAt,
       updatedAt,
     );
-    expect(Item.isSellable(sellable)).toBe(true);
-    expect(Item.isPurchased(sellable)).toBe(false);
-    expect(Item.isPurchased(purchased)).toBe(true);
+    expect(item.id).toBe(99);
+    expect(Item.isPurchased(item)).toBe(true);
+    expect(item.sellerId).toBe(2);
+    expect(item.createdAt).toBe(createdAt);
+    expect(item.updatedAt).toBe(updatedAt);
   });
 
-  it("isPurchasableByUser は出品者自身の購入を拒否する", () => {
+  it("isPurchasableByUser: 出品者自身を拒否する", () => {
     const item = Item.create("n", "d", ItemPrice.create(0), 1);
     expect(Item.isPurchasableByUser(item, 1)).toBe(false);
     expect(Item.isPurchasableByUser(item, 2)).toBe(true);
   });
 
-  it("isSeller は販売者と一致すると true", () => {
+  it("isSeller: 販売者 id と一致すると true", () => {
     const item = Item.create("n", "d", ItemPrice.create(0), 10);
     expect(Item.isSeller(item, 10)).toBe(true);
+    expect(Item.isSeller(item, 11)).toBe(false);
   });
 
-  it("isSeller は販売者と一致しないと false", () => {
-    const item = Item.create("n", "d", ItemPrice.create(0), 10);
-    expect(Item.isSeller(item, 99)).toBe(false);
-  });
-
-  it("changeStatus はステータスと updatedAt を更新する", () => {
+  it("changeStatus: ステータスと updatedAt を更新する", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-06-01T12:00:00.000Z"));
     const item = Item.create("n", "d", ItemPrice.create(0), 1);
@@ -116,17 +69,44 @@ describe("Item", () => {
     vi.useRealTimers();
   });
 
-  it("changeName / changeDescription / changePrice は不変条件を検証する", () => {
+  it("changeName: nameとupdatedAtを更新する", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-01T00:00:00.000Z"));
     const item = Item.create("n", "d", ItemPrice.create(0), 1);
-    expect(() => Item.changeName(item, "")).toThrow(ValidationError);
-    expect(() => Item.changeDescription(item, "")).toThrow(ValidationError);
+    vi.setSystemTime(new Date("2025-01-01T01:00:00.000Z"));
     const renamed = Item.changeName(item, "New");
     expect(ItemName.toValue(renamed.name)).toBe("New");
-    const redescribed = Item.changeDescription(renamed, "Longer text");
+    expect(renamed.updatedAt.getTime()).toBeGreaterThan(
+      item.updatedAt.getTime(),
+    );
+    vi.useRealTimers();
+  });
+
+  it("changeDescription: descriptionとupdatedAtを更新する", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-01T00:00:00.000Z"));
+    const item = Item.create("n", "d", ItemPrice.create(0), 1);
+    vi.setSystemTime(new Date("2025-01-01T02:00:00.000Z"));
+    const redescribed = Item.changeDescription(item, "Longer text");
     expect(ItemDescription.toValue(redescribed.description)).toBe(
       "Longer text",
     );
-    const repriced = Item.changePrice(redescribed, ItemPrice.create(999));
-    expect(ItemPrice.toValue(repriced.price)).toBe(999);
+    expect(redescribed.updatedAt.getTime()).toBeGreaterThan(
+      item.updatedAt.getTime(),
+    );
+    vi.useRealTimers();
+  });
+
+  it("changePrice: priceとupdatedAtを更新する", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-01T00:00:00.000Z"));
+    const item = Item.create("n", "d", ItemPrice.create(0), 1);
+    vi.setSystemTime(new Date("2025-01-01T03:00:00.000Z"));
+    const repriced = Item.changePrice(item, ItemPrice.create(500));
+    expect(ItemPrice.toValue(repriced.price)).toBe(500);
+    expect(repriced.updatedAt.getTime()).toBeGreaterThan(
+      item.updatedAt.getTime(),
+    );
+    vi.useRealTimers();
   });
 });

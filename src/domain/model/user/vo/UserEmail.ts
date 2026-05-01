@@ -14,7 +14,7 @@ const emailSchema = z
 
 export type UserEmail = z.infer<typeof emailSchema>;
 
-// --- Value Object(コンパニオンオブジェクト) ---
+// --- Value Object ---
 
 export const UserEmail = {
   create(value: string): UserEmail {

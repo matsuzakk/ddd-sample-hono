@@ -82,7 +82,7 @@ const recordTransition = (
   );
 };
 
-// --- エンティティ(コンパニオンオブジェクト) ---
+// --- エンティティ ---
 
 export const OrderHistory = {
   create,
