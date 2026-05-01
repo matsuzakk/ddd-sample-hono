@@ -13,10 +13,8 @@ const itemPriceSchema = z
 
 export type ItemPrice = z.infer<typeof itemPriceSchema>;
 
-/**
- * 商品の価格（0円以上999,999円以下の整数）
- * 検証は Zod
- */
+// --- Value Object(コンパニオンオブジェクト) ---
+
 export const ItemPrice = {
   create(price: number): ItemPrice {
     const r = itemPriceSchema.safeParse(price);
@@ -25,10 +23,6 @@ export const ItemPrice = {
       throw new ValidationError(message, { cause: r.error });
     }
     return r.data;
-  },
-
-  isValid(price: number): boolean {
-    return itemPriceSchema.safeParse(price).success;
   },
 
   toValue(price: ItemPrice): number {

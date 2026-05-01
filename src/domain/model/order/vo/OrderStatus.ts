@@ -8,9 +8,6 @@ export const OrderStatusMap = {
   CANCELED: 3,
 } as const;
 
-export type OrderStatusType =
-  (typeof OrderStatusMap)[keyof typeof OrderStatusMap];
-
 // --- Zod ブランド（注文ステータス）---
 
 const orderStatusSym = Symbol();
@@ -31,7 +28,7 @@ export type OrderStatus = z.infer<typeof orderStatusSchema>;
 // --- Value Object ---
 
 export const OrderStatus = {
-  create(value: OrderStatusType): OrderStatus {
+  create(value: number): OrderStatus {
     const r = orderStatusSchema.safeParse(value);
     if (!r.success) {
       const message = r.error.issues[0]?.message;

@@ -1,10 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { IOrderRepository } from "../../domain/model/order/IOrderRepository.js";
 import { Order } from "../../domain/model/order/Order.js";
-import {
-  OrderStatus,
-  type OrderStatusType,
-} from "../../domain/model/order/vo/OrderStatus.js";
+import { OrderStatus } from "../../domain/model/order/vo/OrderStatus.js";
 import type { DbClient } from "../database/db.js";
 import { orders } from "../database/schema.js";
 
@@ -41,7 +38,7 @@ export const createOrderRepository = (db: DbClient): IOrderRepository => ({
       row.id,
       row.userId,
       row.itemId,
-      OrderStatus.create(row.status as OrderStatusType),
+      OrderStatus.create(row.status),
       row.createdAt,
       row.updatedAt,
     );

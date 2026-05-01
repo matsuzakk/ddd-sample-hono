@@ -1,14 +1,12 @@
 import { z } from "zod";
 import { ValidationError } from "../../shared/error.js";
 
+// --- Zod ブランド（商品ステータス）---
+
 export const ItemStatusMap = {
   SELLABLE: 0,
   PURCHASED: 1,
 } as const;
-
-export type ItemStatusType = (typeof ItemStatusMap)[keyof typeof ItemStatusMap];
-
-// --- Zod ブランド（商品ステータス）---
 
 const itemStatusSym = Symbol();
 const itemStatusSchema = z
