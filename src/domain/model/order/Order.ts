@@ -23,16 +23,19 @@ export type Order = Readonly<{
  * @returns 作成された注文
  */
 const create = (userId: number, item: Item): Order => {
+  // 出品者が自分の商品を購入しようとしている場合
   if (!Item.isPurchasableByUser(item, userId)) {
     throw new ValidationError("Seller cannot purchase their own item");
   }
 
+  // 既に購入済みの商品は注文できない
   if (Item.isPurchased(item)) {
     throw new ValidationError(
       "Item is already purchased and cannot be ordered",
     );
   }
 
+  // DBに保存されていない商品は注文できない
   if (item.id === null) {
     throw new ValidationError("Item must be persisted before ordering");
   }
