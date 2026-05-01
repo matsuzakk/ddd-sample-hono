@@ -116,7 +116,7 @@ curl -sS "http://localhost:3000/items/ITEM_ID_HERE" \
 curl -sS -X POST "http://localhost:3000/orders" \
   -H "Content-Type: application/json" \
   -b cookies.txt \
-  -d '{"itemId":"ITEM_ID_HERE"}' | jq
+  -d '{"itemId": ITEM_ID_HERE }' | jq
 ```
 
 ### 注文をキャンセルする

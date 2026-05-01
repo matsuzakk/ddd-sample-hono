@@ -1,11 +1,15 @@
 import { eq } from "drizzle-orm";
 import type { AppDatabase } from "../../infrastructure/database/db.js";
-import { orderHistories, orders } from "../../infrastructure/database/schema.js";
+import {
+  orderHistories,
+  orders,
+} from "../../infrastructure/database/schema.js";
 import { orderDtoSchema, type OrderDto } from "../dto/orderDto.js";
 import {
   orderHistoryDtoSchema,
   type OrderHistoryDto,
 } from "../dto/orderHistoryDto.js";
+import { NotFoundError } from "../../domain/model/shared/error.js";
 
 export type Deps = {
   readonly db: AppDatabase;
@@ -27,7 +31,7 @@ export const getOrderDetailUsecase = (
     .all()[0];
 
   if (!orderRow) {
-    return { order: null, histories: [] };
+    throw new NotFoundError("Order not found");
   }
 
   const orderResult = orderDtoSchema.parse({

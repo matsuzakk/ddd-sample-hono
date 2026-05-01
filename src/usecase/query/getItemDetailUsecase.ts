@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import type { AppDatabase } from "../../infrastructure/database/db.js";
 import { items } from "../../infrastructure/database/schema.js";
 import { itemDtoSchema, type ItemDto } from "../dto/itemDto.js";
+import { NotFoundError } from "../../domain/model/shared/error.js";
 
 type Deps = {
   readonly db: AppDatabase;
@@ -11,7 +12,10 @@ type Input = {
   readonly itemId: number;
 };
 
-export const getItemDetailUsecase = (deps: Deps, input: Input): ItemDto | null => {
+export const getItemDetailUsecase = (
+  deps: Deps,
+  input: Input,
+): ItemDto | null => {
   const row = deps.db
     .select()
     .from(items)
@@ -20,7 +24,7 @@ export const getItemDetailUsecase = (deps: Deps, input: Input): ItemDto | null =
     .all()[0];
 
   if (!row) {
-    return null;
+    throw new NotFoundError("Item not found");
   }
   return itemDtoSchema.parse({
     id: row.id,
