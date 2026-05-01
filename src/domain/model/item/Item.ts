@@ -4,31 +4,15 @@ import { ItemName } from "./vo/ItemName.js";
 import { ItemStatus, ItemStatusMap } from "./vo/ItemStatus.js";
 import { ItemPrice } from "./vo/ItemPrice.js";
 
-// --- Zod ブランド（ID）---
-
-const itemRecordIdSym = Symbol();
-export const ItemRecordId = z
-  .union([z.number().int().positive(), z.null()])
-  .brand(typeof itemRecordIdSym);
-export type ItemRecordId = z.infer<typeof ItemRecordId>;
-
-const itemSellerIdSym = Symbol();
-export const ItemSellerId = z
-  .number()
-  .int()
-  .positive()
-  .brand(typeof itemSellerIdSym);
-export type ItemSellerId = z.infer<typeof ItemSellerId>;
-
 // --- データ（状態）---
 
 export type Item = Readonly<{
-  id: ItemRecordId;
+  id: number | null;
   name: ItemName;
   description: ItemDescription;
   price: ItemPrice;
   status: ItemStatus;
-  sellerId: ItemSellerId;
+  sellerId: number;
   createdAt: Date;
   updatedAt: Date;
 }>;
@@ -51,12 +35,12 @@ const create = (
 ): Item => {
   const now = new Date();
   return {
-    id: ItemRecordId.parse(null),
+    id: null,
     name: ItemName.create(name),
     description: ItemDescription.create(description),
     price,
     status: ItemStatus.create(ItemStatusMap.SELLABLE),
-    sellerId: ItemSellerId.parse(sellerId),
+    sellerId,
     createdAt: now,
     updatedAt: now,
   };
@@ -84,12 +68,12 @@ const reconstitute = (
   createdAt: Date,
   updatedAt: Date,
 ): Item => ({
-  id: ItemRecordId.parse(id),
+  id,
   name: ItemName.create(name),
   description: ItemDescription.create(description),
   price,
   status,
-  sellerId: ItemSellerId.parse(sellerId),
+  sellerId,
   createdAt,
   updatedAt,
 });
