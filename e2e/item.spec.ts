@@ -120,15 +120,16 @@ describe("GET /items/:itemId", () => {
     }
   });
 
-  test("存在しない商品IDではnullが返る(200)", async () => {
+  test("存在しない商品IDではNOT_FOUND_ENTITYが返る(404)", async () => {
     const { app, close } = createE2eApp();
     try {
       const res = await app.request("/items/999999999", {
         method: "GET",
       });
 
-      expect(res.status).toBe(200);
-      expect(await res.json()).toBeNull();
+      expect(res.status).toBe(404);
+      const body = (await res.json()) as { code?: string };
+      expect(body.code).toBe("NOT_FOUND_ENTITY");
     } finally {
       close();
     }
