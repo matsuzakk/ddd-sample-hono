@@ -3,27 +3,11 @@ import { ValidationError } from "../shared/error.js";
 import type { Order } from "./Order.js";
 import type { OrderStatus } from "./vo/OrderStatus.js";
 
-// --- Zod ブランド（ID）---
-
-const orderHistoryRecordIdSym = Symbol();
-export const OrderHistoryRecordId = z
-  .union([z.number().int().positive(), z.null()])
-  .brand(typeof orderHistoryRecordIdSym);
-export type OrderHistoryRecordId = z.infer<typeof OrderHistoryRecordId>;
-
-const orderHistoryOrderIdSym = Symbol();
-export const OrderHistoryOrderId = z
-  .number()
-  .int()
-  .positive()
-  .brand(typeof orderHistoryOrderIdSym);
-export type OrderHistoryOrderId = z.infer<typeof OrderHistoryOrderId>;
-
 // --- データ（状態）---
 
 export type OrderHistory = Readonly<{
-  id: OrderHistoryRecordId;
-  orderId: OrderHistoryOrderId;
+  id: number | null;
+  orderId: number;
   fromStatus: OrderStatus | null;
   toStatus: OrderStatus;
   createdAt: Date;
@@ -45,8 +29,8 @@ const create = (
   fromStatus: OrderStatus | null,
   toStatus: OrderStatus,
 ): OrderHistory => ({
-  id: OrderHistoryRecordId.parse(id),
-  orderId: OrderHistoryOrderId.parse(orderId),
+  id,
+  orderId,
   fromStatus,
   toStatus,
   createdAt: new Date(),
@@ -68,8 +52,8 @@ const reconstitute = (
   toStatus: OrderStatus,
   createdAt: Date,
 ): OrderHistory => ({
-  id: OrderHistoryRecordId.parse(id),
-  orderId: OrderHistoryOrderId.parse(orderId),
+  id,
+  orderId,
   fromStatus,
   toStatus,
   createdAt,

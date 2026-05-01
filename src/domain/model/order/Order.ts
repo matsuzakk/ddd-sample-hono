@@ -1,43 +1,15 @@
 import { z } from "zod";
 import { Item } from "../item/Item.js";
 import { ValidationError } from "../shared/error.js";
-import {
-  OrderStatus,
-  OrderStatusMap,
-  type OrderStatus as OrderStatusVO,
-} from "./vo/OrderStatus.js";
-
-// --- Zod ブランド（ID）---
-
-const orderUserIdSym = Symbol();
-export const OrderUserId = z
-  .number()
-  .int()
-  .positive()
-  .brand(typeof orderUserIdSym);
-export type OrderUserId = z.infer<typeof OrderUserId>;
-
-const orderItemIdSym = Symbol();
-export const OrderItemId = z
-  .number()
-  .int()
-  .positive()
-  .brand(typeof orderItemIdSym);
-export type OrderItemId = z.infer<typeof OrderItemId>;
-
-const orderRecordIdSym = Symbol();
-export const OrderRecordId = z
-  .union([z.number().int().positive(), z.null()])
-  .brand(typeof orderRecordIdSym);
-export type OrderRecordId = z.infer<typeof OrderRecordId>;
+import { OrderStatus, OrderStatusMap } from "./vo/OrderStatus.js";
 
 // --- データ（状態）---
 
 export type Order = Readonly<{
-  id: OrderRecordId;
-  userId: OrderUserId;
-  itemId: OrderItemId;
-  status: OrderStatusVO;
+  id: number | null;
+  userId: number;
+  itemId: number;
+  status: OrderStatus;
   createdAt: Date;
   updatedAt: Date;
 }>;
@@ -67,9 +39,9 @@ const create = (userId: number, item: Item): Order => {
 
   const now = new Date();
   return {
-    id: OrderRecordId.parse(null),
-    userId: OrderUserId.parse(userId),
-    itemId: OrderItemId.parse(item.id),
+    id: null,
+    userId,
+    itemId: item.id,
     status: OrderStatus.create(OrderStatusMap.PURCHASED),
     createdAt: now,
     updatedAt: now,
@@ -90,13 +62,13 @@ const reconstitute = (
   id: number,
   userId: number,
   itemId: number,
-  status: OrderStatusVO,
+  status: OrderStatus,
   createdAt: Date,
   updatedAt: Date,
 ): Order => ({
-  id: OrderRecordId.parse(id),
-  userId: OrderUserId.parse(userId),
-  itemId: OrderItemId.parse(itemId),
+  id,
+  userId,
+  itemId,
   status,
   createdAt,
   updatedAt,
@@ -117,7 +89,7 @@ const isPurchaser = (order: Order, actorUserId: number): boolean =>
  * @param status - 注文の状態
  * @returns 更新後の注文
  */
-const withStatus = (order: Order, status: OrderStatusVO): Order => ({
+const withStatus = (order: Order, status: OrderStatus): Order => ({
   ...order,
   status,
   updatedAt: new Date(),

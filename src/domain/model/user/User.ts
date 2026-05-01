@@ -2,18 +2,10 @@ import { z } from "zod";
 import { UserEmail } from "./vo/UserEmail.js";
 import { UserName } from "./vo/UserName.js";
 
-// --- Zod ブランド（ID）---
-
-const userRecordIdSym = Symbol();
-export const UserRecordId = z
-  .union([z.number().int().positive(), z.null()])
-  .brand(typeof userRecordIdSym);
-export type UserRecordId = z.infer<typeof UserRecordId>;
-
 // --- データ（状態）---
 
 export type User = Readonly<{
-  id: UserRecordId;
+  id: number | null;
   name: UserName;
   email: UserEmail;
 }>;
@@ -27,7 +19,7 @@ export type User = Readonly<{
  * @returns 作成されたユーザー
  */
 const create = (name: string, email: string): User => ({
-  id: UserRecordId.parse(null),
+  id: null,
   name: UserName.create(name),
   email: UserEmail.create(email),
 });
@@ -40,7 +32,7 @@ const create = (name: string, email: string): User => ({
  * @returns 復元されたユーザー
  */
 const reconstitute = (id: number, name: string, email: string): User => ({
-  id: UserRecordId.parse(id),
+  id,
   name: UserName.create(name),
   email: UserEmail.create(email),
 });

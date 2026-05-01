@@ -1,15 +1,8 @@
 import { z } from "zod";
-import {
-  ItemDescription,
-  type ItemDescription as ItemDescriptionVO,
-} from "./vo/ItemDescription.js";
-import { ItemName, type ItemName as ItemNameVO } from "./vo/ItemName.js";
-import {
-  ItemStatus,
-  ItemStatusMap,
-  type ItemStatus as ItemStatusVO,
-} from "./vo/ItemStatus.js";
-import type { ItemPrice as ItemPriceVO } from "./vo/ItemPrice.js";
+import { ItemDescription } from "./vo/ItemDescription.js";
+import { ItemName } from "./vo/ItemName.js";
+import { ItemStatus, ItemStatusMap } from "./vo/ItemStatus.js";
+import { ItemPrice } from "./vo/ItemPrice.js";
 
 // --- Zod ブランド（ID）---
 
@@ -31,10 +24,10 @@ export type ItemSellerId = z.infer<typeof ItemSellerId>;
 
 export type Item = Readonly<{
   id: ItemRecordId;
-  name: ItemNameVO;
-  description: ItemDescriptionVO;
-  price: ItemPriceVO;
-  status: ItemStatusVO;
+  name: ItemName;
+  description: ItemDescription;
+  price: ItemPrice;
+  status: ItemStatus;
   sellerId: ItemSellerId;
   createdAt: Date;
   updatedAt: Date;
@@ -53,7 +46,7 @@ export type Item = Readonly<{
 const create = (
   name: string,
   description: string,
-  price: ItemPriceVO,
+  price: ItemPrice,
   sellerId: number,
 ): Item => {
   const now = new Date();
@@ -85,8 +78,8 @@ const reconstitute = (
   id: number,
   name: string,
   description: string,
-  price: ItemPriceVO,
-  status: ItemStatusVO,
+  price: ItemPrice,
+  status: ItemStatus,
   sellerId: number,
   createdAt: Date,
   updatedAt: Date,
@@ -107,7 +100,7 @@ const reconstitute = (
  * @param status - 新しいステータス
  * @returns ステータスが変更された商品
  */
-const changeStatus = (item: Item, status: ItemStatusVO): Item => ({
+const changeStatus = (item: Item, status: ItemStatus): Item => ({
   ...item,
   status,
   updatedAt: new Date(),
@@ -143,7 +136,7 @@ const changeDescription = (item: Item, description: string): Item => ({
  * @param price - 新しい価格
  * @returns 価格が変更された商品
  */
-const changePrice = (item: Item, price: ItemPriceVO): Item => ({
+const changePrice = (item: Item, price: ItemPrice): Item => ({
   ...item,
   price,
   updatedAt: new Date(),
