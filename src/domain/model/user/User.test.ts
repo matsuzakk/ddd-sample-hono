@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { ValidationError } from "../shared/error.js";
 import { User } from "./User.js";
-import { UserEmail } from "./UserEmail.js";
-import { UserName } from "./UserName.js";
+import { UserEmail } from "./vo/UserEmail.js";
+import { UserName } from "./vo/UserName.js";
 
 describe("User", () => {
   it("create は有効な名前とメールでユーザーを返す", () => {

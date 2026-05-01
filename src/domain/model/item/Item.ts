@@ -92,8 +92,8 @@ const reconstitute = (
   updatedAt: Date,
 ): Item => ({
   id: ItemRecordId.parse(id),
-  name: ItemName.reconstitute(name),
-  description: ItemDescription.reconstitute(description),
+  name: ItemName.create(name),
+  description: ItemDescription.create(description),
   price,
   status,
   sellerId: ItemSellerId.parse(sellerId),

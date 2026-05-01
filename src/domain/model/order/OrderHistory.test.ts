@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ValidationError } from "../shared/error.js";
 import { Order } from "./Order.js";
 import { OrderHistory } from "./OrderHistory.js";
-import { OrderStatus, OrderStatusMap } from "./OrderStatus.js";
+import { OrderStatus, OrderStatusMap } from "./vo/OrderStatus.js";
 
 describe("OrderHistory", () => {
   it("create は遷移情報を保持する", () => {

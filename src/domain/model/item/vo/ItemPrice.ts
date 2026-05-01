@@ -27,15 +27,6 @@ export const ItemPrice = {
     return r.data;
   },
 
-  reconstitute(value: number): ItemPrice {
-    const r = itemPriceSchema.safeParse(value);
-    if (!r.success) {
-      const message = r.error.issues[0]?.message;
-      throw new ValidationError(message, { cause: r.error });
-    }
-    return r.data;
-  },
-
   isValid(price: number): boolean {
     return itemPriceSchema.safeParse(price).success;
   },

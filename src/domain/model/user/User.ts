@@ -41,7 +41,7 @@ const create = (name: string, email: string): User => ({
  */
 const reconstitute = (id: number, name: string, email: string): User => ({
   id: UserRecordId.parse(id),
-  name: UserName.reconstitute(name),
+  name: UserName.create(name),
   email: UserEmail.create(email),
 });
 

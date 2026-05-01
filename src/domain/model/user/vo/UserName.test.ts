@@ -8,23 +8,13 @@ describe("UserName", () => {
     expect(UserName.toValue(name)).toBe("Alice");
   });
 
-  it("create は空文字で ValidationError を投げる", () => {
-    expect(() => UserName.create("")).toThrow(ValidationError);
+  it("create は空文字を受け入れる（1 文字以上は User エンティティの create で検証）", () => {
+    const name = UserName.create("");
+    expect(UserName.toValue(name)).toBe("");
   });
 
   it("create は 21 文字以上で ValidationError を投げる", () => {
     expect(() => UserName.create("a".repeat(21))).toThrow(ValidationError);
-  });
-
-  it("reconstitute は空文字を受け入れる", () => {
-    const name = UserName.reconstitute("");
-    expect(UserName.toValue(name)).toBe("");
-  });
-
-  it("reconstitute は 20 文字を超えると ValidationError を投げる", () => {
-    expect(() => UserName.reconstitute("a".repeat(21))).toThrow(
-      ValidationError,
-    );
   });
 
   it("equals は文字列としての同一性を返す", () => {

@@ -40,15 +40,6 @@ export const OrderStatus = {
     return r.data;
   },
 
-  reconstitute(value: number): OrderStatus {
-    const r = orderStatusSchema.safeParse(value);
-    if (!r.success) {
-      const message = r.error.issues[0]?.message;
-      throw new ValidationError(message, { cause: r.error });
-    }
-    return r.data;
-  },
-
   toValue(status: OrderStatus): number {
     return status as number;
   },

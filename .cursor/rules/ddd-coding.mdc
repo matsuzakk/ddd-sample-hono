@@ -10,17 +10,13 @@ alwaysApply: true
 - プリミティブをそのまま渡さず、ブランド型や列挙で意味を付ける。
 - 永続化・API 向けの素の値は `toValue(vo)` メソッドで取り出す（必須）。
 - 新規生成は `create` メソッドを実装。
-- DB から読み込んだ値は不変条件を満たすか検証したうえで `reconstitute` メソッドを実装で復元する。
+- DB から読み込んだ値も `create` で検証・復元する（新規入力と異なる不変条件が必要なときはエンティティの `reconstitute` 側で補う）。
 
 ```typescript
 export type Money = Brand<number, "Money">;
 
 export const Money = {
   create(amount: number): Money {
-    if (amount < 0) throw new ValidationError("...");
-    return amount as Money;
-  },
-  reconstitute(amount: number): Money {
     if (amount < 0) throw new ValidationError("...");
     return amount as Money;
   },
@@ -93,7 +89,7 @@ export interface IItemRepository {
 ## リポジトリ(create\*Repository)
 
 - `createItemRepository(db: DbClient): IItemRepository` のように、ファクトリ関数で返す（本リポの約束）。
-- 保存時は `Xxx.toValue(...)`、読込時は `Xxx.reconstitute(...)` と `Entity.reconstitute` でドメインオブジェクトに戻す。
+- 保存時は `Xxx.toValue(...)`、読込時は `Xxx.create(...)` と `Entity.reconstitute` でドメインオブジェクトに戻す。
 
 ```typescript
 export const createItemRepository = (db: DbClient): IItemRepository => ({
@@ -107,7 +103,7 @@ export const createItemRepository = (db: DbClient): IItemRepository => ({
           row.id,
           row.name,
           row.description,
-          ItemPrice.reconstitute(row.price),
+          ItemPrice.create(row.price),
           /* ... */
         )
       : null;
@@ -200,7 +196,7 @@ export const itemController = {
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | リポジトリ IF    | ドメイン（`domain/model/<feature>/I*Repository.ts`）にのみ定義                                                                             |
 | VO               | `toValue` を持たせ、永続化・DTO 組み立てで使う                                                                                             |
-| Entity / VO      | DB 復元用に `reconstitute` を用意（`create` とは分ける）                                                                                   |
+| Entity / VO      | エンティティは DB 復元用に `reconstitute`。VO は `create` のみ（DB 由来も `create` で検証）                                               |
 | ドメインサービス | `domain/service/`。複数 model をまたぐドメインルール。インフラは import せず、データは引数で渡す                                           |
 | リポジトリ実装   | `create~Repository(db)` 形式のファクトリで `I*Repository` を返す                                                                           |
 | ユースケース     | `Deps` + `Input`。DB + リポジトリファクトリ、または `ITransactionManager` + ファクトリ（複数永続化を原子化）、`Input` にリクエスト由来の値 |

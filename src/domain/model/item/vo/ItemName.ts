@@ -24,15 +24,6 @@ export const ItemName = {
     return r.data;
   },
 
-  reconstitute(value: string): ItemName {
-    const r = itemNameSchema.safeParse(value);
-    if (!r.success) {
-      const message = r.error.issues[0]?.message;
-      throw new ValidationError(message, { cause: r.error });
-    }
-    return r.data;
-  },
-
   toValue(name: ItemName): string {
     return name as string;
   },

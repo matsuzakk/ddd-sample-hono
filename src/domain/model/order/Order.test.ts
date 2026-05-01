@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { Item } from "../item/Item.js";
-import { ItemPrice } from "../item/ItemPrice.js";
-import { ItemStatus, ItemStatusMap } from "../item/ItemStatus.js";
+import { ItemPrice } from "../item/vo/ItemPrice.js";
+import { ItemStatus, ItemStatusMap } from "../item/vo/ItemStatus.js";
 import { ValidationError } from "../shared/error.js";
 import { Order } from "./Order.js";
-import { OrderStatus, OrderStatusMap } from "./OrderStatus.js";
+import { OrderStatus, OrderStatusMap } from "./vo/OrderStatus.js";
 
 const sellableItem = (sellerId: number) =>
   Item.reconstitute(
