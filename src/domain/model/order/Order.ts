@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { Item } from "../item/Item.js";
 import { ValidationError } from "../shared/error.js";
 import { OrderStatus, OrderStatusMap } from "./vo/OrderStatus.js";

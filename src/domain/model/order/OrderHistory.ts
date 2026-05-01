@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { ValidationError } from "../shared/error.js";
 import type { Order } from "./Order.js";
 import type { OrderStatus } from "./vo/OrderStatus.js";

@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { ItemDescription } from "./vo/ItemDescription.js";
 import { ItemName } from "./vo/ItemName.js";
 import { ItemStatus, ItemStatusMap } from "./vo/ItemStatus.js";
