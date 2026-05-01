@@ -10,6 +10,10 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "type:check": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "E2E=true vitest run --config e2e/config/vitest.e2e.config.ts"
@@ -24,11 +28,16 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^20.11.17",
     "drizzle-kit": "^0.31.4",
+    "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.3",
     "tsx": "^4.7.1",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.59.1",
     "vitest": "^3.2.4"
   }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { ItemStatusMap } from "../src/domain/model/item/ItemStatus.js";
+import { ItemStatusMap } from "../src/domain/model/item/vo/ItemStatus.js";
 import { createE2eApp, seedData, signUpEmailViaHttp } from "./config/setup.js";
 import { MOCK_ITEM } from "./mock/item.js";
 import { MOCK_USER, MOCK_USER_PASSWORD } from "./mock/user.js";

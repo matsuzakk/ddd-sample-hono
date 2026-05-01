@@ -116,9 +116,9 @@ describe("cancelOrder", () => {
       ),
     );
 
-    expect(() =>
-      cancelOrderUsecase(deps, { userId: 99, orderId: 1 }),
-    ).toThrow(NotFoundError);
+    expect(() => cancelOrderUsecase(deps, { userId: 99, orderId: 1 })).toThrow(
+      NotFoundError,
+    );
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockItemRepository.findById).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
@@ -128,9 +128,9 @@ describe("cancelOrder", () => {
   it("注文が無いとき NotFoundError とし副作用がない", () => {
     mockOrderRepository.findById.mockReturnValue(null);
 
-    expect(() =>
-      cancelOrderUsecase(deps, { userId: 2, orderId: 999 }),
-    ).toThrow(NotFoundError);
+    expect(() => cancelOrderUsecase(deps, { userId: 2, orderId: 999 })).toThrow(
+      NotFoundError,
+    );
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockItemRepository.findById).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
@@ -149,9 +149,9 @@ describe("cancelOrder", () => {
     );
     mockItemRepository.findById.mockReturnValue(null);
 
-    expect(() =>
-      cancelOrderUsecase(deps, { userId: 2, orderId: 1 }),
-    ).toThrow(NotFoundError);
+    expect(() => cancelOrderUsecase(deps, { userId: 2, orderId: 1 })).toThrow(
+      NotFoundError,
+    );
     expect(mockOrderRepository.update).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
     expect(mockItemRepository.update).not.toHaveBeenCalled();
@@ -181,8 +181,8 @@ describe("cancelOrder", () => {
       ),
     );
 
-    expect(() =>
-      cancelOrderUsecase(deps, { userId: 2, orderId: 1 }),
-    ).toThrow(ValidationError);
+    expect(() => cancelOrderUsecase(deps, { userId: 2, orderId: 1 })).toThrow(
+      ValidationError,
+    );
   });
 });

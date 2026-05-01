@@ -100,9 +100,9 @@ describe("purchaseItemUsecase", () => {
   it("商品が無いとき NotFoundError とし永続化しない", () => {
     mockItemRepository.findById.mockReturnValue(null);
 
-    expect(() =>
-      purchaseItemUsecase(deps, { userId: 1, itemId: 999 }),
-    ).toThrow(NotFoundError);
+    expect(() => purchaseItemUsecase(deps, { userId: 1, itemId: 999 })).toThrow(
+      NotFoundError,
+    );
     expect(mockItemRepository.update).not.toHaveBeenCalled();
     expect(mockOrderRepository.create).not.toHaveBeenCalled();
     expect(mockOrderHistoryRepository.create).not.toHaveBeenCalled();
@@ -122,9 +122,9 @@ describe("purchaseItemUsecase", () => {
       ),
     );
 
-    expect(() =>
-      purchaseItemUsecase(deps, { userId: 1, itemId: 1 }),
-    ).toThrow(NotFoundError);
+    expect(() => purchaseItemUsecase(deps, { userId: 1, itemId: 1 })).toThrow(
+      NotFoundError,
+    );
   });
 
   it("販売者と購入者が同一のとき ValidationError とし永続化しない", () => {

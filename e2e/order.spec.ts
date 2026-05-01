@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { OrderStatusMap } from "../src/domain/model/order/OrderStatus.js";
+import { OrderStatusMap } from "../src/domain/model/order/vo/OrderStatus.js";
 import { createE2eApp, seedData, signUpEmailViaHttp } from "./config/setup.js";
 import { MOCK_USER_PASSWORD } from "./mock/user.js";
 

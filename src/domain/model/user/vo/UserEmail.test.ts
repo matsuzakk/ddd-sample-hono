@@ -17,7 +17,10 @@ describe("UserEmail", () => {
     const a = UserEmail.create("a@b.co");
     expect(UserEmail.equals(a, UserEmail.create("a@b.co"))).toBe(true);
     expect(
-      UserEmail.equals(UserEmail.create("x@yz.com"), UserEmail.create("a@b.co")),
+      UserEmail.equals(
+        UserEmail.create("x@yz.com"),
+        UserEmail.create("a@b.co"),
+      ),
     ).toBe(false);
   });
 });

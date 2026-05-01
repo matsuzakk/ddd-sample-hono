@@ -24,9 +24,7 @@ describe("OrderStatus", () => {
 
   it("各フラグ関数が状態と一致する", () => {
     expect(
-      OrderStatus.isPurchased(
-        OrderStatus.create(OrderStatusMap.PURCHASED),
-      ),
+      OrderStatus.isPurchased(OrderStatus.create(OrderStatusMap.PURCHASED)),
     ).toBe(true);
     expect(
       OrderStatus.isShipped(OrderStatus.create(OrderStatusMap.SHIPPED)),

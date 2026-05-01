@@ -1,8 +1,7 @@
 import { defineConfig } from "vitest/config";
 
 const e2eBetterAuthSecret =
-  process.env.BETTER_AUTH_SECRET ??
-  "e2e-test-better-auth-secret-32chars-min";
+  process.env.BETTER_AUTH_SECRET ?? "e2e-test-better-auth-secret-32chars-min";
 
 export default defineConfig({
   test: {

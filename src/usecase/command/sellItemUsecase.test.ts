@@ -27,9 +27,9 @@ describe("sellItem", () => {
     }));
     mockUserRepository = {
       create: vi.fn(),
-      findById: vi.fn().mockReturnValue(
-        User.reconstitute(1, "Seller", "seller@example.com"),
-      ),
+      findById: vi
+        .fn()
+        .mockReturnValue(User.reconstitute(1, "Seller", "seller@example.com")),
     };
     createUserRepository = vi.fn(() => mockUserRepository);
     appDb = {} as AppDatabase;

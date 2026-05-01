@@ -7,9 +7,9 @@ import { getItemDetailUsecase } from "./getItemDetailUsecase.js";
 describe("getItemDetail", () => {
   it("該当行がないとき NotFoundError を投げる", () => {
     withMemoryAppDatabase((db) => {
-      expect(() =>
-        getItemDetailUsecase({ db }, { itemId: 9_999_999 }),
-      ).toThrow(NotFoundError);
+      expect(() => getItemDetailUsecase({ db }, { itemId: 9_999_999 })).toThrow(
+        NotFoundError,
+      );
     });
   });
 
