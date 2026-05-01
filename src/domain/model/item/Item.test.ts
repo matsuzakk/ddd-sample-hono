@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { ValidationError } from "../shared/error.js";
-import { ItemDescription } from "./ItemDescription.js";
+import { ItemDescription } from "./vo/ItemDescription.js";
 import { Item } from "./Item.js";
-import { ItemName } from "./ItemName.js";
-import { ItemPrice } from "./ItemPrice.js";
-import { ItemStatus, ItemStatusMap } from "./ItemStatus.js";
+import { ItemName } from "./vo/ItemName.js";
+import { ItemPrice } from "./vo/ItemPrice.js";
+import { ItemStatus, ItemStatusMap } from "./vo/ItemStatus.js";
 
 const baseDates = () => {
   const createdAt = new Date("2024-01-01T00:00:00.000Z");
@@ -123,7 +123,9 @@ describe("Item", () => {
     const renamed = Item.changeName(item, "New");
     expect(ItemName.toValue(renamed.name)).toBe("New");
     const redescribed = Item.changeDescription(renamed, "Longer text");
-    expect(ItemDescription.toValue(redescribed.description)).toBe("Longer text");
+    expect(ItemDescription.toValue(redescribed.description)).toBe(
+      "Longer text",
+    );
     const repriced = Item.changePrice(redescribed, ItemPrice.create(999));
     expect(ItemPrice.toValue(repriced.price)).toBe(999);
   });
